@@ -3,17 +3,17 @@ import type {
 } from "../common/types";
 
 
-export const caMauTimetables: TimetableItem[] = [
+export const canThoTimetables: TimetableItem[] = [
     // ========================================
     // THCS AN XUYÊN - CƠ SỞ CHÍNH
     // ========================================
 
     {
-        id: "ca-mau-timetable-001",
+        id: "can-tho-timetable-001",
 
-        campusId: "ca-mau-campus-001",
-        classId: "ca-mau-class-001",
-        teacherId: "ca-mau-teacher-001",
+        campusId: "can-tho-campus-001",
+        classId: "can-tho-class-001",
+        teacherId: "can-tho-teacher-001",
         subjectId: "math",
 
         day: "monday",
@@ -26,11 +26,11 @@ export const caMauTimetables: TimetableItem[] = [
     },
 
     {
-        id: "ca-mau-timetable-002",
+        id: "can-tho-timetable-002",
 
-        campusId: "ca-mau-campus-001",
-        classId: "ca-mau-class-001",
-        teacherId: "ca-mau-teacher-002",
+        campusId: "can-tho-campus-001",
+        classId: "can-tho-class-001",
+        teacherId: "can-tho-teacher-002",
         subjectId: "literature",
 
         day: "monday",
@@ -43,11 +43,11 @@ export const caMauTimetables: TimetableItem[] = [
     },
 
     {
-        id: "ca-mau-timetable-003",
+        id: "can-tho-timetable-003",
 
-        campusId: "ca-mau-campus-001",
-        classId: "ca-mau-class-001",
-        teacherId: "ca-mau-teacher-003",
+        campusId: "can-tho-campus-001",
+        classId: "can-tho-class-001",
+        teacherId: "can-tho-teacher-003",
         subjectId: "english",
 
         day: "monday",
@@ -60,11 +60,11 @@ export const caMauTimetables: TimetableItem[] = [
     },
 
     {
-        id: "ca-mau-timetable-004",
+        id: "can-tho-timetable-004",
 
-        campusId: "ca-mau-campus-001",
-        classId: "ca-mau-class-002",
-        teacherId: "ca-mau-teacher-001",
+        campusId: "can-tho-campus-001",
+        classId: "can-tho-class-002",
+        teacherId: "can-tho-teacher-001",
         subjectId: "math",
 
         day: "tuesday",
@@ -77,11 +77,11 @@ export const caMauTimetables: TimetableItem[] = [
     },
 
     {
-        id: "ca-mau-timetable-005",
+        id: "can-tho-timetable-005",
 
-        campusId: "ca-mau-campus-001",
-        classId: "ca-mau-class-002",
-        teacherId: "ca-mau-teacher-002",
+        campusId: "can-tho-campus-001",
+        classId: "can-tho-class-002",
+        teacherId: "can-tho-teacher-002",
         subjectId: "literature",
 
         day: "tuesday",
@@ -99,11 +99,11 @@ export const caMauTimetables: TimetableItem[] = [
     // ========================================
 
     {
-        id: "ca-mau-timetable-006",
+        id: "can-tho-timetable-006",
 
-        campusId: "ca-mau-campus-002",
-        classId: "ca-mau-class-003",
-        teacherId: "ca-mau-teacher-003",
+        campusId: "can-tho-campus-002",
+        classId: "can-tho-class-003",
+        teacherId: "can-tho-teacher-003",
         subjectId: "english",
 
         day: "monday",
@@ -116,11 +116,11 @@ export const caMauTimetables: TimetableItem[] = [
     },
 
     {
-        id: "ca-mau-timetable-007",
+        id: "can-tho-timetable-007",
 
-        campusId: "ca-mau-campus-002",
-        classId: "ca-mau-class-003",
-        teacherId: "ca-mau-teacher-002",
+        campusId: "can-tho-campus-002",
+        classId: "can-tho-class-003",
+        teacherId: "can-tho-teacher-002",
         subjectId: "literature",
 
         day: "wednesday",
@@ -138,11 +138,11 @@ export const caMauTimetables: TimetableItem[] = [
     // ========================================
 
     {
-        id: "ca-mau-timetable-008",
+        id: "can-tho-timetable-008",
 
-        campusId: "ca-mau-campus-003",
-        classId: "ca-mau-class-004",
-        teacherId: "ca-mau-teacher-002",
+        campusId: "can-tho-campus-003",
+        classId: "can-tho-class-004",
+        teacherId: "can-tho-teacher-002",
         subjectId: "literature",
 
         day: "monday",
@@ -160,11 +160,11 @@ export const caMauTimetables: TimetableItem[] = [
     // ========================================
 
     {
-        id: "ca-mau-timetable-009",
+        id: "can-tho-timetable-009",
 
-        campusId: "ca-mau-campus-004",
-        classId: "ca-mau-class-005",
-        teacherId: "ca-mau-teacher-004",
+        campusId: "can-tho-campus-004",
+        classId: "can-tho-class-005",
+        teacherId: "can-tho-teacher-004",
         subjectId: "math",
 
         day: "monday",
@@ -177,11 +177,11 @@ export const caMauTimetables: TimetableItem[] = [
     },
 
     {
-        id: "ca-mau-timetable-010",
+        id: "can-tho-timetable-010",
 
-        campusId: "ca-mau-campus-004",
-        classId: "ca-mau-class-005",
-        teacherId: "ca-mau-teacher-005",
+        campusId: "can-tho-campus-004",
+        classId: "can-tho-class-005",
+        teacherId: "can-tho-teacher-005",
         subjectId: "english",
 
         day: "monday",
@@ -194,11 +194,11 @@ export const caMauTimetables: TimetableItem[] = [
     },
 
     {
-        id: "ca-mau-timetable-011",
+        id: "can-tho-timetable-011",
 
-        campusId: "ca-mau-campus-005",
-        classId: "ca-mau-class-006",
-        teacherId: "ca-mau-teacher-004",
+        campusId: "can-tho-campus-005",
+        classId: "can-tho-class-006",
+        teacherId: "can-tho-teacher-004",
         subjectId: "math",
 
         day: "tuesday",
@@ -216,11 +216,11 @@ export const caMauTimetables: TimetableItem[] = [
     // ========================================
 
     {
-        id: "ca-mau-timetable-012",
+        id: "can-tho-timetable-012",
 
-        campusId: "ca-mau-campus-006",
-        classId: "ca-mau-class-007",
-        teacherId: "ca-mau-teacher-006",
+        campusId: "can-tho-campus-006",
+        classId: "can-tho-class-007",
+        teacherId: "can-tho-teacher-006",
         subjectId: "physics",
 
         day: "monday",
@@ -233,11 +233,11 @@ export const caMauTimetables: TimetableItem[] = [
     },
 
     {
-        id: "ca-mau-timetable-013",
+        id: "can-tho-timetable-013",
 
-        campusId: "ca-mau-campus-006",
-        classId: "ca-mau-class-008",
-        teacherId: "ca-mau-teacher-007",
+        campusId: "can-tho-campus-006",
+        classId: "can-tho-class-008",
+        teacherId: "can-tho-teacher-007",
         subjectId: "chemistry",
 
         day: "monday",
@@ -250,11 +250,11 @@ export const caMauTimetables: TimetableItem[] = [
     },
 
     {
-        id: "ca-mau-timetable-014",
+        id: "can-tho-timetable-014",
 
-        campusId: "ca-mau-campus-007",
-        classId: "ca-mau-class-009",
-        teacherId: "ca-mau-teacher-006",
+        campusId: "can-tho-campus-007",
+        classId: "can-tho-class-009",
+        teacherId: "can-tho-teacher-006",
         subjectId: "physics",
 
         day: "tuesday",

@@ -6,12 +6,18 @@ import {
     caMauMockData,
 } from "./caMau";
 
+import {
+    canThoMockData,
+} from "./canTho";
+
 
 export const regionMockDataMap: Record<
     string,
     RegionMockData
 > = {
     "ca-mau": caMauMockData,
+
+    "can-tho": canThoMockData,
 };
 
 
@@ -24,6 +30,7 @@ export const getRegionMockData = (
 
 export {
     caMauMockData,
+    canThoMockData,
 };
 
 export {

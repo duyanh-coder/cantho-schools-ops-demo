@@ -1,108 +1,39 @@
+
+
 import type {
     RegionMockData,
 } from "../common/types";
 
-import {
-    caMauRegions,
-} from "./regions";
-
-import {
-    caMauWards,
-} from "./wards";
-
-import {
-    caMauSchools,
-} from "./schools";
-
-import {
-    caMauCampuses,
-} from "./campuses";
-
-import {
-    caMauUsers,
-} from "./users";
-
-import {
-    caMauTeachers,
-} from "./teachers";
-
-import {
-    caMauClasses,
-} from "./classes";
-
-import {
-    caMauTimetables,
-} from "./timetables";
-
-import {
-    caMauTeachingAttendance,
-} from "./teachingAttendance";
-
-import {
-    caMauDocuments,
-} from "./documents";
-
-import {
-    caMauAlerts,
-} from "./alerts";
-
-import {
-    caMauTasks,
-} from "./tasks";
-
-import {
-    caMauReports,
-} from "./reports";
-
-import {
-    caMauGis,
-} from "./gis";
-
-
 export const caMauMockData: RegionMockData = {
-    regions: caMauRegions,
+    regions: [],
 
-    wards: caMauWards,
+    wards: [],
 
-    schools: caMauSchools,
+    schools: [],
 
-    campuses: caMauCampuses,
+    campuses: [],
 
-    gis: caMauGis,
+    gis: {
+        wards: [],
 
-    users: caMauUsers,
+        campuses: [],
+    },
 
-    teachers: caMauTeachers,
+    classes: [],
 
-    classes: caMauClasses,
+    teachers: [],
 
-    timetables: caMauTimetables,
+    timetables: [],
 
-    teachingAttendance: caMauTeachingAttendance,
+    documents: [],
 
-    documents: caMauDocuments,
+    alerts: [],
 
-    alerts: caMauAlerts,
+    tasks: [],
 
-    tasks: caMauTasks,
+    reports: [],
 
-    reports: caMauReports,
-};
+    teachingAttendance: [],
 
-
-export {
-    caMauRegions,
-    caMauWards,
-    caMauSchools,
-    caMauCampuses,
-    caMauGis,
-    caMauUsers,
-    caMauTeachers,
-    caMauClasses,
-    caMauTimetables,
-    caMauTeachingAttendance,
-    caMauDocuments,
-    caMauAlerts,
-    caMauTasks,
-    caMauReports,
+    users: [],
 };

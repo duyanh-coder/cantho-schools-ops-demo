@@ -3,11 +3,11 @@ import type {
 } from "../common/types";
 
 
-export const caMauDocuments: DocumentItem[] = [
+export const canThoDocuments: DocumentItem[] = [
     {
-        id: "ca-mau-document-001",
+        id: "can-tho-document-001",
 
-        campusId: "ca-mau-campus-001",
+        campusId: "can-tho-campus-001",
 
         code: "CV-001/2026",
 
@@ -21,9 +21,9 @@ export const caMauDocuments: DocumentItem[] = [
     },
 
     {
-        id: "ca-mau-document-002",
+        id: "can-tho-document-002",
 
-        campusId: "ca-mau-campus-001",
+        campusId: "can-tho-campus-001",
 
         code: "KH-002/2026",
 
@@ -37,9 +37,9 @@ export const caMauDocuments: DocumentItem[] = [
     },
 
     {
-        id: "ca-mau-document-003",
+        id: "can-tho-document-003",
 
-        campusId: "ca-mau-campus-002",
+        campusId: "can-tho-campus-002",
 
         code: "TB-003/2026",
 
@@ -53,9 +53,9 @@ export const caMauDocuments: DocumentItem[] = [
     },
 
     {
-        id: "ca-mau-document-004",
+        id: "can-tho-document-004",
 
-        campusId: "ca-mau-campus-003",
+        campusId: "can-tho-campus-003",
 
         code: "CV-004/2026",
 
@@ -69,9 +69,9 @@ export const caMauDocuments: DocumentItem[] = [
     },
 
     {
-        id: "ca-mau-document-005",
+        id: "can-tho-document-005",
 
-        campusId: "ca-mau-campus-004",
+        campusId: "can-tho-campus-004",
 
         code: "KH-005/2026",
 
@@ -85,9 +85,9 @@ export const caMauDocuments: DocumentItem[] = [
     },
 
     {
-        id: "ca-mau-document-006",
+        id: "can-tho-document-006",
 
-        campusId: "ca-mau-campus-005",
+        campusId: "can-tho-campus-005",
 
         code: "TB-006/2026",
 
@@ -101,9 +101,9 @@ export const caMauDocuments: DocumentItem[] = [
     },
 
     {
-        id: "ca-mau-document-007",
+        id: "can-tho-document-007",
 
-        campusId: "ca-mau-campus-006",
+        campusId: "can-tho-campus-006",
 
         code: "CV-007/2026",
 
@@ -117,9 +117,9 @@ export const caMauDocuments: DocumentItem[] = [
     },
 
     {
-        id: "ca-mau-document-008",
+        id: "can-tho-document-008",
 
-        campusId: "ca-mau-campus-007",
+        campusId: "can-tho-campus-007",
 
         code: "KH-008/2026",
 

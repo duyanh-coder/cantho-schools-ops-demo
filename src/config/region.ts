@@ -1,26 +1,53 @@
+// export const REGION_CONFIG = {
+//     id: "ca-mau",
+
+//     code: "CA_MAU",
+
+//     name: "Tỉnh Cà Mau",
+
+//     shortName: "Cà Mau",
+
+//     fullName: "Hệ thống điều hành Giáo dục Công lập tỉnh Cà Mau",
+
+//     displayName: "Hệ thống điều hành Giáo dục Công lập",
+
+//     bannerTitle: "School Operation Center",
+
+//     bannerSubtitle:
+//         "Hệ thống điều hành Giáo dục Công lập tỉnh Cà Mau",
+
+//     heroImage: "/images/ca-mau/hero.jpg",
+
+//     mapCenter: {
+//         lat: 9.1768,
+//         lng: 105.1524,
+//     },
+
+//     mapZoom: 13,
+// } as const;
 export const REGION_CONFIG = {
-    id: "ca-mau",
+    id: "can-tho",
 
-    code: "CA_MAU",
+    code: "CT",
 
-    name: "Tỉnh Cà Mau",
+    name: "Thành phố Cần Thơ",
 
-    shortName: "Cà Mau",
+    shortName: "Cần Thơ",
 
-    fullName: "Hệ thống điều hành Giáo dục Công lập tỉnh Cà Mau",
+    fullName: "Hệ thống điều hành Giáo dục Công lập thành phố Cần Thơ",
 
     displayName: "Hệ thống điều hành Giáo dục Công lập",
 
     bannerTitle: "School Operation Center",
 
     bannerSubtitle:
-        "Hệ thống điều hành Giáo dục Công lập tỉnh Cà Mau",
+        "Hệ thống điều hành Giáo dục Công lập thành phố Cần Thơ",
 
-    heroImage: "/images/ca-mau/hero.jpg",
+    heroImage: "/images/can-tho/hero.jpg",
 
     mapCenter: {
-        lat: 9.1768,
-        lng: 105.1524,
+        lat: 10.0452,
+        lng: 105.7469,
     },
 
     mapZoom: 13,

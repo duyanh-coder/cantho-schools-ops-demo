@@ -3,11 +3,11 @@ import type {
 } from "../common/types";
 
 
-export const caMauAlerts: AlertItem[] = [
+export const canThoAlerts: AlertItem[] = [
     {
-        id: "ca-mau-alert-001",
+        id: "can-tho-alert-001",
 
-        campusId: "ca-mau-campus-001",
+        campusId: "can-tho-campus-001",
 
         title: "Chưa hoàn thành điểm danh giảng dạy",
 
@@ -22,9 +22,9 @@ export const caMauAlerts: AlertItem[] = [
     },
 
     {
-        id: "ca-mau-alert-002",
+        id: "can-tho-alert-002",
 
-        campusId: "ca-mau-campus-001",
+        campusId: "can-tho-campus-001",
 
         title: "Giáo viên đi trễ",
 
@@ -39,9 +39,9 @@ export const caMauAlerts: AlertItem[] = [
     },
 
     {
-        id: "ca-mau-alert-003",
+        id: "can-tho-alert-003",
 
-        campusId: "ca-mau-campus-002",
+        campusId: "can-tho-campus-002",
 
         title: "Cần cập nhật thời khóa biểu",
 
@@ -56,9 +56,9 @@ export const caMauAlerts: AlertItem[] = [
     },
 
     {
-        id: "ca-mau-alert-004",
+        id: "can-tho-alert-004",
 
-        campusId: "ca-mau-campus-003",
+        campusId: "can-tho-campus-003",
 
         title: "Văn bản mới cần xử lý",
 
@@ -73,9 +73,9 @@ export const caMauAlerts: AlertItem[] = [
     },
 
     {
-        id: "ca-mau-alert-005",
+        id: "can-tho-alert-005",
 
-        campusId: "ca-mau-campus-004",
+        campusId: "can-tho-campus-004",
 
         title: "Giáo viên vắng giảng dạy",
 
@@ -90,9 +90,9 @@ export const caMauAlerts: AlertItem[] = [
     },
 
     {
-        id: "ca-mau-alert-006",
+        id: "can-tho-alert-006",
 
-        campusId: "ca-mau-campus-005",
+        campusId: "can-tho-campus-005",
 
         title: "Cập nhật cơ sở vật chất",
 
@@ -107,9 +107,9 @@ export const caMauAlerts: AlertItem[] = [
     },
 
     {
-        id: "ca-mau-alert-007",
+        id: "can-tho-alert-007",
 
-        campusId: "ca-mau-campus-006",
+        campusId: "can-tho-campus-006",
 
         title: "Hoàn thành báo cáo định kỳ",
 
@@ -124,9 +124,9 @@ export const caMauAlerts: AlertItem[] = [
     },
 
     {
-        id: "ca-mau-alert-008",
+        id: "can-tho-alert-008",
 
-        campusId: "ca-mau-campus-007",
+        campusId: "can-tho-campus-007",
 
         title: "Cần xử lý văn bản quá hạn",
 

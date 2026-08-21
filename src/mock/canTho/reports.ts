@@ -3,11 +3,11 @@ import type {
 } from "../common/types";
 
 
-export const caMauReports: ReportItem[] = [
+export const canThoReports: ReportItem[] = [
     {
-        id: "ca-mau-report-001",
+        id: "can-tho-report-001",
 
-        campusId: "ca-mau-campus-001",
+        campusId: "can-tho-campus-001",
 
         title: "Báo cáo tình hình hoạt động đầu năm học",
 
@@ -17,9 +17,9 @@ export const caMauReports: ReportItem[] = [
     },
 
     {
-        id: "ca-mau-report-002",
+        id: "can-tho-report-002",
 
-        campusId: "ca-mau-campus-002",
+        campusId: "can-tho-campus-002",
 
         title: "Báo cáo tình hình cơ sở vật chất",
 
@@ -29,9 +29,9 @@ export const caMauReports: ReportItem[] = [
     },
 
     {
-        id: "ca-mau-report-003",
+        id: "can-tho-report-003",
 
-        campusId: "ca-mau-campus-003",
+        campusId: "can-tho-campus-003",
 
         title: "Báo cáo tình hình giảng dạy",
 
@@ -41,9 +41,9 @@ export const caMauReports: ReportItem[] = [
     },
 
     {
-        id: "ca-mau-report-004",
+        id: "can-tho-report-004",
 
-        campusId: "ca-mau-campus-004",
+        campusId: "can-tho-campus-004",
 
         title: "Báo cáo hoạt động chuyên môn",
 
@@ -53,9 +53,9 @@ export const caMauReports: ReportItem[] = [
     },
 
     {
-        id: "ca-mau-report-005",
+        id: "can-tho-report-005",
 
-        campusId: "ca-mau-campus-005",
+        campusId: "can-tho-campus-005",
 
         title: "Báo cáo tiến độ nhiệm vụ",
 
@@ -65,9 +65,9 @@ export const caMauReports: ReportItem[] = [
     },
 
     {
-        id: "ca-mau-report-006",
+        id: "can-tho-report-006",
 
-        campusId: "ca-mau-campus-006",
+        campusId: "can-tho-campus-006",
 
         title: "Báo cáo tình hình thực hiện chương trình",
 
@@ -77,9 +77,9 @@ export const caMauReports: ReportItem[] = [
     },
 
     {
-        id: "ca-mau-report-007",
+        id: "can-tho-report-007",
 
-        campusId: "ca-mau-campus-007",
+        campusId: "can-tho-campus-007",
 
         title: "Báo cáo cơ sở vật chất và thiết bị",
 
