@@ -1,0 +1,291 @@
+.teaching-page {
+    padding-bottom: 32px;
+}
+
+
+/* =========================
+   STATISTICS
+========================= */
+
+.teaching-page__statistics {
+    margin-bottom: 20px;
+}
+
+
+.teaching-page__statistics {
+    .ant-card {
+        height: 100%;
+        border-radius: 18px;
+        border: 1px solid rgba(15, 23, 42, 0.06);
+        box-shadow:
+            0 8px 24px rgba(15, 23, 42, 0.06);
+
+        overflow: hidden;
+
+        transition:
+            transform 0.2s ease,
+            box-shadow 0.2s ease;
+
+        &:hover {
+            transform: translateY(-2px);
+
+            box-shadow:
+                0 14px 32px rgba(15, 23, 42, 0.1);
+        }
+
+        .ant-card-body {
+            padding: 20px;
+        }
+    }
+
+    .ant-statistic-title {
+        margin-bottom: 8px;
+
+        color: rgba(15, 23, 42, 0.6);
+
+        font-size: 13px;
+        font-weight: 500;
+    }
+
+    .ant-statistic-content {
+        font-size: 28px;
+        font-weight: 700;
+    }
+}
+
+
+/* =========================
+   FILTER
+========================= */
+
+.teaching-page__filters {
+    margin-bottom: 20px;
+
+    border-radius: 18px;
+
+    border: 1px solid
+        rgba(15, 23, 42, 0.07);
+
+    box-shadow:
+        0 8px 24px
+        rgba(15, 23, 42, 0.05);
+
+    .ant-card-body {
+        padding: 20px;
+    }
+}
+
+
+.teaching-page__filter-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    margin-bottom: 16px;
+
+    color: rgba(15, 23, 42, 0.75);
+
+    font-size: 14px;
+    font-weight: 600;
+
+    .anticon {
+        color: #1677ff;
+    }
+}
+
+
+.teaching-page__select {
+    width: 100%;
+
+    .ant-select-selector {
+        border-radius: 10px !important;
+    }
+}
+
+
+/* =========================
+   ATTENDANCE LIST
+========================= */
+
+.teaching-page__list {
+    min-height: 240px;
+}
+
+
+.teaching-item {
+    height: 100%;
+
+    border-radius: 18px;
+
+    border: 1px solid
+        rgba(15, 23, 42, 0.07);
+
+    box-shadow:
+        0 8px 24px
+        rgba(15, 23, 42, 0.06);
+
+    transition:
+        transform 0.2s ease,
+        box-shadow 0.2s ease;
+
+    &:hover {
+        transform: translateY(-3px);
+
+        box-shadow:
+            0 16px 36px
+            rgba(15, 23, 42, 0.1);
+    }
+
+    .ant-card-body {
+        padding: 20px;
+    }
+}
+
+
+/* =========================
+   CARD HEADER
+========================= */
+
+.teaching-item__header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+
+    padding-bottom: 16px;
+
+    border-bottom:
+        1px solid
+        rgba(15, 23, 42, 0.06);
+
+    h3 {
+        margin: 0 0 4px;
+
+        color: rgba(15, 23, 42, 0.9);
+
+        font-size: 16px;
+        font-weight: 700;
+    }
+
+    > div > span {
+        color: rgba(15, 23, 42, 0.5);
+
+        font-size: 13px;
+    }
+}
+
+
+/* =========================
+   CARD CONTENT
+========================= */
+
+.teaching-item__content {
+    display: grid;
+
+    grid-template-columns:
+        repeat(2, minmax(0, 1fr));
+
+    gap: 16px;
+
+    padding-top: 18px;
+
+
+    > div {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+
+        padding: 10px 12px;
+
+        border-radius: 12px;
+
+        background:
+            rgba(15, 23, 42, 0.025);
+
+        border:
+            1px solid
+            rgba(15, 23, 42, 0.04);
+
+        span {
+            color:
+                rgba(15, 23, 42, 0.5);
+
+            font-size: 12px;
+        }
+
+        strong {
+            color:
+                rgba(15, 23, 42, 0.85);
+
+            font-size: 13px;
+            font-weight: 600;
+
+            overflow: hidden;
+
+            text-overflow: ellipsis;
+
+            white-space: nowrap;
+        }
+    }
+}
+
+
+/* =========================
+   MOBILE
+========================= */
+
+@media (
+    max-width: 767px
+) {
+    .teaching-page {
+        padding-bottom: 96px;
+    }
+
+
+    .teaching-page__statistics {
+        margin-bottom: 14px;
+
+        .ant-card {
+            border-radius: 14px;
+
+            .ant-card-body {
+                padding: 14px;
+            }
+        }
+
+        .ant-statistic-content {
+            font-size: 24px;
+        }
+    }
+
+
+    .teaching-page__filters {
+        margin-bottom: 14px;
+
+        border-radius: 14px;
+
+        .ant-card-body {
+            padding: 14px;
+        }
+    }
+
+
+    .teaching-item {
+        border-radius: 14px;
+
+        .ant-card-body {
+            padding: 16px;
+        }
+    }
+
+
+    .teaching-item__content {
+        gap: 10px;
+
+        padding-top: 14px;
+
+        > div {
+            padding: 9px 10px;
+        }
+    }
+}

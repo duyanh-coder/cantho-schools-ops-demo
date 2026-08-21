@@ -1,0 +1,30 @@
+.app-layout {
+    min-height: 100vh;
+
+    background: var(--color-background);
+}
+
+.app-layout__main {
+    min-width: 0;
+
+    background: transparent;
+}
+
+.app-layout__content {
+    min-height: calc(100vh - 64px);
+
+    padding: 24px;
+
+    background:
+        radial-gradient(
+            circle at top right,
+            rgba(22, 119, 255, 0.06),
+            transparent 35%
+        );
+}
+
+@media (max-width: 768px) {
+    .app-layout__content {
+        padding: 16px;
+    }
+}

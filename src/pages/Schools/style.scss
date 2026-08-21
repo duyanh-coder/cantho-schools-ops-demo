@@ -1,0 +1,414 @@
+.schools-page {
+    padding-bottom: 32px;
+}
+
+
+/* =========================
+   STATISTICS
+========================= */
+
+.schools-page__statistics {
+    margin-bottom: 20px;
+}
+
+
+.schools-stat-card {
+    height: 100%;
+
+    border: 1px solid
+        rgba(15, 23, 42, 0.06);
+
+    border-radius: 18px;
+
+    box-shadow:
+        0 8px 24px
+        rgba(15, 23, 42, 0.05);
+
+    transition:
+        transform 0.2s ease,
+        box-shadow 0.2s ease;
+
+    &:hover {
+        transform: translateY(-2px);
+
+        box-shadow:
+            0 14px 32px
+            rgba(15, 23, 42, 0.09);
+    }
+
+    .ant-card-body {
+        padding: 20px;
+    }
+
+    .ant-statistic-title {
+        color:
+            rgba(15, 23, 42, 0.55);
+
+        font-size: 13px;
+        font-weight: 500;
+    }
+
+    .ant-statistic-content {
+        font-size: 28px;
+        font-weight: 700;
+    }
+}
+
+
+/* =========================
+   FILTERS
+========================= */
+
+.schools-page__filters {
+    margin-bottom: 20px;
+
+    border: 1px solid
+        rgba(15, 23, 42, 0.07);
+
+    border-radius: 18px;
+
+    box-shadow:
+        0 8px 24px
+        rgba(15, 23, 42, 0.05);
+
+    .ant-card-body {
+        padding: 20px;
+    }
+}
+
+
+.schools-page__filter-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    margin-bottom: 16px;
+
+    color:
+        rgba(15, 23, 42, 0.75);
+
+    font-size: 14px;
+    font-weight: 600;
+
+    .anticon {
+        color: #1677ff;
+    }
+}
+
+
+.schools-page__search,
+.schools-page__select {
+    width: 100%;
+
+    .ant-input,
+    .ant-select-selector {
+        border-radius: 10px !important;
+    }
+}
+
+
+/* =========================
+   SCHOOL CARD
+========================= */
+
+.school-item {
+    height: 100%;
+
+    border: 1px solid
+        rgba(15, 23, 42, 0.07);
+
+    border-radius: 18px;
+
+    overflow: hidden;
+
+    box-shadow:
+        0 8px 24px
+        rgba(15, 23, 42, 0.06);
+
+    transition:
+        transform 0.2s ease,
+        box-shadow 0.2s ease;
+
+    &:hover {
+        transform: translateY(-3px);
+
+        box-shadow:
+            0 16px 36px
+            rgba(15, 23, 42, 0.1);
+    }
+
+    .ant-card-body {
+        padding: 20px;
+    }
+}
+
+
+.school-item__header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+
+.school-item__icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 48px;
+    height: 48px;
+
+    flex: 0 0 48px;
+
+    border-radius: 14px;
+
+    background:
+        linear-gradient(
+            135deg,
+            rgba(22, 119, 255, 0.14),
+            rgba(22, 119, 255, 0.04)
+        );
+
+    color: #1677ff;
+
+    font-size: 22px;
+}
+
+
+.school-item__title {
+    min-width: 0;
+
+    span {
+        display: block;
+
+        margin-bottom: 4px;
+
+        color:
+            rgba(15, 23, 42, 0.45);
+
+        font-size: 12px;
+    }
+
+    h3 {
+        margin: 0;
+
+        color:
+            rgba(15, 23, 42, 0.9);
+
+        font-size: 16px;
+        font-weight: 700;
+        line-height: 1.4;
+    }
+}
+
+
+.school-item__tags {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    flex-wrap: wrap;
+
+    margin-top: 18px;
+}
+
+
+.school-item__info {
+    display: grid;
+
+    grid-template-columns:
+        repeat(2, minmax(0, 1fr));
+
+    gap: 12px;
+
+    margin-top: 18px;
+
+
+    > div {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+
+        padding: 12px;
+
+        border: 1px solid
+            rgba(15, 23, 42, 0.04);
+
+        border-radius: 12px;
+
+        background:
+            rgba(15, 23, 42, 0.025);
+
+        min-width: 0;
+
+        span {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+
+            color:
+                rgba(15, 23, 42, 0.5);
+
+            font-size: 12px;
+        }
+
+        strong {
+            overflow: hidden;
+
+            color:
+                rgba(15, 23, 42, 0.85);
+
+            font-size: 14px;
+
+            text-overflow: ellipsis;
+
+            white-space: nowrap;
+        }
+    }
+}
+
+
+.school-item__address {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+
+    margin-top: 16px;
+
+    padding: 12px;
+
+    border-radius: 12px;
+
+    background:
+        rgba(22, 119, 255, 0.035);
+
+    color:
+        rgba(15, 23, 42, 0.65);
+
+    font-size: 13px;
+
+    line-height: 1.5;
+
+    .anticon {
+        margin-top: 3px;
+
+        color: #1677ff;
+    }
+}
+
+
+/* =========================
+   CAMPUSES
+========================= */
+
+.school-item__campuses {
+    margin-top: 18px;
+
+    padding-top: 16px;
+
+    border-top:
+        1px solid
+        rgba(15, 23, 42, 0.06);
+}
+
+
+.school-item__campuses-label {
+    display: block;
+
+    margin-bottom: 10px;
+
+    color:
+        rgba(15, 23, 42, 0.5);
+
+    font-size: 12px;
+    font-weight: 600;
+}
+
+
+.school-campus {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+
+    padding: 9px 0;
+
+
+    > div {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+
+        min-width: 0;
+
+        strong {
+            color:
+                rgba(15, 23, 42, 0.8);
+
+            font-size: 13px;
+        }
+
+        span {
+            color:
+                rgba(15, 23, 42, 0.42);
+
+            font-size: 11px;
+        }
+    }
+}
+
+
+/* =========================
+   MOBILE
+========================= */
+
+@media (
+    max-width: 767px
+) {
+    .schools-page {
+        padding-bottom: 96px;
+    }
+
+
+    .schools-page__statistics {
+        margin-bottom: 14px;
+    }
+
+
+    .schools-stat-card {
+        border-radius: 14px;
+
+        .ant-card-body {
+            padding: 14px;
+        }
+
+        .ant-statistic-content {
+            font-size: 23px;
+        }
+    }
+
+
+    .schools-page__filters {
+        margin-bottom: 14px;
+
+        border-radius: 14px;
+
+        .ant-card-body {
+            padding: 14px;
+        }
+    }
+
+
+    .school-item {
+        border-radius: 14px;
+
+        .ant-card-body {
+            padding: 16px;
+        }
+    }
+
+
+    .school-item__info {
+        gap: 10px;
+    }
+}

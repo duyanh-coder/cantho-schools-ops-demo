@@ -1,0 +1,321 @@
+.alerts-page {
+    display: flex;
+    flex-direction: column;
+
+    gap: 20px;
+}
+
+
+/* ========================================
+   STATISTICS
+======================================== */
+
+.alerts-page__statistics {
+    margin-bottom: 4px;
+}
+
+
+.alerts-stat-card {
+    height: 100%;
+
+    .ant-statistic-title {
+        margin-bottom: 8px;
+
+        color: #64748b;
+    }
+
+    .ant-statistic-content-prefix {
+        margin-right: 10px;
+
+        color: #1677ff;
+    }
+}
+
+
+/* ========================================
+   FILTER
+======================================== */
+
+.alerts-filter-card {
+    border-radius: 16px;
+}
+
+
+.alerts-toolbar {
+    display: flex;
+    align-items: center;
+
+    gap: 12px;
+}
+
+
+.alerts-toolbar__search {
+    flex: 1;
+
+    min-width: 220px;
+}
+
+
+.alerts-toolbar__select {
+    width: 200px;
+}
+
+
+/* ========================================
+   ALERT LIST
+======================================== */
+
+.alerts-list {
+    display: flex;
+    flex-direction: column;
+
+    gap: 16px;
+}
+
+
+.alert-item {
+    border-radius: 16px;
+
+    transition:
+        transform 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+
+.alert-item:hover {
+    transform: translateY(-2px);
+
+    box-shadow:
+        0 8px 24px
+        rgba(15, 23, 42, 0.08);
+}
+
+
+/* ========================================
+   LEVEL BORDER
+======================================== */
+
+.alert-item--danger {
+    border-left: 4px solid #ff4d4f;
+}
+
+
+.alert-item--warning {
+    border-left: 4px solid #faad14;
+}
+
+
+.alert-item--info {
+    border-left: 4px solid #1677ff;
+}
+
+
+/* ========================================
+   HEADER
+======================================== */
+
+.alert-item__header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+
+    gap: 20px;
+}
+
+
+.alert-item__title {
+    display: flex;
+    align-items: flex-start;
+
+    gap: 14px;
+
+    min-width: 0;
+}
+
+
+.alert-item__title h3 {
+    margin: 0 0 8px;
+
+    font-size: 16px;
+    font-weight: 600;
+
+    color: #1e293b;
+}
+
+
+.alert-item__icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    flex: 0 0 auto;
+
+    width: 42px;
+    height: 42px;
+
+    border-radius: 12px;
+
+    font-size: 20px;
+}
+
+
+.alert-item__icon--danger {
+    background: #fff1f0;
+
+    color: #ff4d4f;
+}
+
+
+.alert-item__icon--warning {
+    background: #fffbe6;
+
+    color: #faad14;
+}
+
+
+.alert-item__icon--info {
+    background: #e6f4ff;
+
+    color: #1677ff;
+}
+
+
+/* ========================================
+   META
+======================================== */
+
+.alert-item__meta {
+    display: flex;
+    flex-wrap: wrap;
+
+    gap: 6px;
+}
+
+
+.alert-item__time {
+    display: inline-flex;
+    align-items: center;
+
+    flex: 0 0 auto;
+
+    gap: 8px;
+
+    color: #64748b;
+
+    font-size: 13px;
+
+    white-space: nowrap;
+}
+
+
+/* ========================================
+   DESCRIPTION
+======================================== */
+
+.alert-item__description {
+    margin:
+        18px
+        0;
+
+    padding-left: 56px;
+
+    color: #475569;
+
+    line-height: 1.7;
+}
+
+
+/* ========================================
+   FOOTER
+======================================== */
+
+.alert-item__footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 16px;
+
+    padding-top: 14px;
+
+    border-top:
+        1px solid #f1f5f9;
+
+    color: #64748b;
+
+    font-size: 13px;
+}
+
+
+.alert-item__footer span {
+    display: inline-flex;
+    align-items: center;
+
+    gap: 8px;
+}
+
+
+/* ========================================
+   TABLET
+======================================== */
+
+@media (
+    max-width: 991px
+) {
+    .alerts-toolbar {
+        flex-wrap: wrap;
+    }
+
+
+    .alerts-toolbar__search {
+        flex-basis: 100%;
+    }
+
+
+    .alerts-toolbar__select {
+        flex: 1;
+
+        min-width: 180px;
+    }
+}
+
+
+/* ========================================
+   MOBILE
+======================================== */
+
+@media (
+    max-width: 575px
+) {
+    .alerts-toolbar {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+
+    .alerts-toolbar__search,
+    .alerts-toolbar__select {
+        width: 100%;
+    }
+
+
+    .alert-item__header {
+        flex-direction: column;
+    }
+
+
+    .alert-item__time {
+        padding-left: 56px;
+    }
+
+
+    .alert-item__description {
+        padding-left: 0;
+    }
+
+
+    .alert-item__footer {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+}
