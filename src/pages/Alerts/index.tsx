@@ -20,7 +20,6 @@ import {
 } from "antd";
 
 import {
-    useMemo,
     useState,
 } from "react";
 
@@ -128,14 +127,14 @@ function AlertsPage() {
        FILTER
     ======================================== */
 
-    const filteredAlerts = useMemo(() => {
-        const normalizedKeyword =
-            keyword
-                .trim()
-                .toLowerCase();
+    const normalizedKeyword =
+        keyword
+            .trim()
+            .toLowerCase();
 
 
-        return alerts.filter(
+    const filteredAlerts =
+        alerts.filter(
             (alert) => {
                 const matchKeyword =
                     !normalizedKeyword ||
@@ -177,13 +176,6 @@ function AlertsPage() {
                 );
             },
         );
-    }, [
-        alerts,
-        keyword,
-        levelFilter,
-        statusFilter,
-        campusFilter,
-    ]);
 
 
     /* ========================================

@@ -22,7 +22,7 @@ export const canThoCampuses: Campus[] = [
     {
         id: "can-tho-campus-004", schoolId: "can-tho-school-002", wardId: "can-tho-ward-001", code: "CT-CS-004",
         name: "Cơ sở phụ", address: "Phường Ninh Kiều, thành phố Cần Thơ",
-        location: { lat: 10.051, lng: 105.7818 }, managerId: "can-tho-user-003", isMainCampus: false, status: "active",
+        location: { lat: 10.0355, lng: 105.7825 }, managerId: "can-tho-user-003", isMainCampus: false, status: "active",
     },
 
     {
@@ -40,7 +40,7 @@ export const canThoCampuses: Campus[] = [
     {
         id: "can-tho-campus-007", schoolId: "can-tho-school-004", wardId: "can-tho-ward-004", code: "CT-CS-007",
         name: "Cơ sở chính", address: "Phường Bình Thủy, thành phố Cần Thơ",
-        location: { lat: 10.0285, lng: 105.7695 }, managerId: "can-tho-user-007", isMainCampus: true, status: "active",
+        location: { lat: 10.0715, lng: 105.757 }, managerId: "can-tho-user-007", isMainCampus: true, status: "active",
     },
 
     {
@@ -52,7 +52,7 @@ export const canThoCampuses: Campus[] = [
     {
         id: "can-tho-campus-009", schoolId: "can-tho-school-006", wardId: "can-tho-ward-002", code: "CT-CS-009",
         name: "Cơ sở chính", address: "Phường Cái Khế, thành phố Cần Thơ",
-        location: { lat: 10.079, lng: 105.759 }, managerId: "can-tho-user-011", isMainCampus: true, status: "active",
+        location: { lat: 10.0522, lng: 105.779 }, managerId: "can-tho-user-011", isMainCampus: true, status: "active",
     },
 
 ];

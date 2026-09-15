@@ -19,6 +19,8 @@ import { useNavigate } from "react-router-dom";
 import { APP_CONFIG } from "@/config/app";
 import { REGION_CONFIG } from "@/config/region";
 
+import heroImage from "@/assets/images/cantho/hero.jpg";
+
 import "./style.scss";
 
 const { Title, Paragraph, Text } = Typography;
@@ -160,7 +162,7 @@ function HomePage() {
                 rgba(15, 80, 130, 0.35) 70%,
                 rgba(15, 23, 42, 0.18) 100%
             ),
-            url(${REGION_CONFIG.heroImage})
+            url(${heroImage})
         `,
         }}
       >

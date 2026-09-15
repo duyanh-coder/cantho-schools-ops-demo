@@ -17,7 +17,6 @@ import {
 } from "antd";
 
 import {
-    useMemo,
     useState,
 } from "react";
 
@@ -115,51 +114,41 @@ function TeachingPage() {
     >("all");
 
 
-    const availableClasses = useMemo(() => {
-        if (selectedCampus === "all") {
-            return classes;
-        }
-
-        return classes.filter(
-            (item) =>
-                item.campusId === selectedCampus,
-        );
-    }, [
-        classes,
-        selectedCampus,
-    ]);
+    const availableClasses =
+        selectedCampus === "all"
+            ? classes
+            : classes.filter(
+                (item) =>
+                    item.campusId === selectedCampus,
+            );
 
 
-    const availableTeachers = useMemo(() => {
-        if (selectedCampus === "all") {
-            return teachers;
-        }
+    const teachingTeacherIds =
+        selectedCampus === "all"
+            ? null
+            : new Set(
+                teachingAttendance
+                    .filter(
+                        (item) =>
+                            item.campusId === selectedCampus,
+                    )
+                    .map(
+                        (item) =>
+                            item.teacherId,
+                    ),
+            );
 
-        const teacherIds = new Set(
-            teachingAttendance
-                .filter(
-                    (item) =>
-                        item.campusId === selectedCampus,
-                )
-                .map(
-                    (item) =>
-                        item.teacherId,
-                ),
-        );
-
-        return teachers.filter(
-            (item) =>
-                teacherIds.has(item.id),
-        );
-    }, [
-        teachers,
-        teachingAttendance,
-        selectedCampus,
-    ]);
+    const availableTeachers =
+        teachingTeacherIds === null
+            ? teachers
+            : teachers.filter(
+                (item) =>
+                    teachingTeacherIds.has(item.id),
+            );
 
 
-    const filteredAttendance = useMemo(() => {
-        return teachingAttendance.filter(
+    const filteredAttendance =
+        teachingAttendance.filter(
             (item) => {
                 const matchCampus =
                     selectedCampus === "all" ||
@@ -185,37 +174,26 @@ function TeachingPage() {
                 );
             },
         );
-    }, [
-        teachingAttendance,
-        selectedCampus,
-        selectedClass,
-        selectedTeacher,
-        selectedStatus,
-    ]);
 
 
-    const statistics = useMemo(() => {
-        return {
-            total: teachingAttendance.length,
+    const statistics = {
+        total: teachingAttendance.length,
 
-            present: teachingAttendance.filter(
-                (item) =>
-                    item.status === "present",
-            ).length,
+        present: teachingAttendance.filter(
+            (item) =>
+                item.status === "present",
+        ).length,
 
-            late: teachingAttendance.filter(
-                (item) =>
-                    item.status === "late",
-            ).length,
+        late: teachingAttendance.filter(
+            (item) =>
+                item.status === "late",
+        ).length,
 
-            absent: teachingAttendance.filter(
-                (item) =>
-                    item.status === "absent",
-            ).length,
-        };
-    }, [
-        teachingAttendance,
-    ]);
+        absent: teachingAttendance.filter(
+            (item) =>
+                item.status === "absent",
+        ).length,
+    };
 
 
     return (

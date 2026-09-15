@@ -280,20 +280,20 @@
     padding: 24px;
 
     background:
-        rgba(255, 255, 255, 0.12);
+        rgba(255, 255, 255, 0.04);
 
     border:
-        1px solid rgba(255, 255, 255, 0.22);
+        1px solid rgba(255, 255, 255, 0.12);
 
     border-radius:
         var(--radius-xl);
 
     box-shadow:
         0 24px 80px
-        rgba(15, 23, 42, 0.28);
+        rgba(15, 23, 42, 0.18);
 
     backdrop-filter:
-        blur(20px);
+        blur(3px);
 }
 
 .hero-dashboard-preview__header {
@@ -366,7 +366,9 @@
     padding: 14px;
 
     background:
-        rgba(255, 255, 255, 0.08);
+        rgba(255, 255, 255, 0.04);
+
+    border: 1px solid rgba(255, 255, 255, 0.1);
 
     border-radius:
         var(--radius-md);
@@ -396,7 +398,9 @@
     padding: 18px;
 
     background:
-        rgba(255, 255, 255, 0.07);
+        rgba(255, 255, 255, 0.04);
+
+    border: 1px solid rgba(255, 255, 255, 0.1);
 
     border-radius:
         var(--radius-lg);

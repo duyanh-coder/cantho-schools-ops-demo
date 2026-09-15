@@ -1,5 +1,5 @@
 export const APP_CONFIG = {
-    name: "camau-schools-ops-demo",
+    name: "cantho-schools-ops-demo",
 
     title: "Hệ thống điều hành Giáo dục Công lập",
 

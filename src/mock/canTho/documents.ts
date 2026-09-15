@@ -131,4 +131,36 @@ export const canThoDocuments: DocumentItem[] = [
 
         status: "processing",
     },
+
+    {
+        id: "can-tho-document-009",
+
+        campusId: "can-tho-campus-008",
+
+        code: "TB-009/2026",
+
+        title: "Thông báo lịch họp phụ huynh đầu năm học",
+
+        type: "internal",
+
+        issuedDate: "2026-08-19",
+
+        status: "new",
+    },
+
+    {
+        id: "can-tho-document-010",
+
+        campusId: "can-tho-campus-009",
+
+        code: "KH-010/2026",
+
+        title: "Kế hoạch tổ chức hoạt động ngoại khóa tháng 9",
+
+        type: "outgoing",
+
+        issuedDate: "2026-08-20",
+
+        status: "processing",
+    },
 ];

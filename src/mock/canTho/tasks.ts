@@ -116,7 +116,7 @@ export const canThoTasks: TaskItem[] = [
         description:
             "Tổng hợp số liệu và hoàn thành báo cáo chuyên môn định kỳ.",
 
-        assigneeId: "can-tho-user-007",
+        assigneeId: "can-tho-user-006",
 
         dueDate: "2026-08-20",
 
@@ -136,6 +136,40 @@ export const canThoTasks: TaskItem[] = [
         assigneeId: "can-tho-user-008",
 
         dueDate: "2026-08-24",
+
+        status: "todo",
+    },
+
+    {
+        id: "can-tho-task-009",
+
+        campusId: "can-tho-campus-008",
+
+        title: "Kiểm tra cơ sở vật chất phòng học",
+
+        description:
+            "Rà soát phòng học và thiết bị dạy học trước khi vào năm học mới.",
+
+        assigneeId: "can-tho-user-010",
+
+        dueDate: "2026-08-22",
+
+        status: "in_progress",
+    },
+
+    {
+        id: "can-tho-task-010",
+
+        campusId: "can-tho-campus-009",
+
+        title: "Cập nhật hồ sơ lớp học đầu năm",
+
+        description:
+            "Rà soát sĩ số và thông tin học sinh các lớp đầu năm học.",
+
+        assigneeId: "can-tho-user-012",
+
+        dueDate: "2026-08-23",
 
         status: "todo",
     },

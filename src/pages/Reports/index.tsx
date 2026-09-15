@@ -23,7 +23,6 @@ import type {
 } from "antd/es/table";
 
 import {
-    useMemo,
     useState,
 } from "react";
 
@@ -70,32 +69,28 @@ function ReportsPage() {
        REPORT TYPES
     ======================================== */
 
-    const reportTypes = useMemo(() => {
-        return [
-            ...new Set(
-                reports.map(
-                    (report) =>
-                        report.type,
-                ),
+    const reportTypes = [
+        ...new Set(
+            reports.map(
+                (report) =>
+                    report.type,
             ),
-        ];
-    }, [
-        reports,
-    ]);
+        ),
+    ];
 
 
     /* ========================================
        FILTERED REPORTS
     ======================================== */
 
-    const filteredReports = useMemo(() => {
-        const normalizedKeyword =
-            keyword
-                .trim()
-                .toLowerCase();
+    const normalizedKeyword =
+        keyword
+            .trim()
+            .toLowerCase();
 
 
-        return reports.filter(
+    const filteredReports =
+        reports.filter(
             (report) => {
                 const matchKeyword =
                     !normalizedKeyword ||
@@ -125,12 +120,6 @@ function ReportsPage() {
                 );
             },
         );
-    }, [
-        reports,
-        keyword,
-        typeFilter,
-        campusFilter,
-    ]);
 
 
     /* ========================================

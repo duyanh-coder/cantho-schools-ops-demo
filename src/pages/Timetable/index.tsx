@@ -6,7 +6,7 @@ import {
   SwapOutlined,
 } from "@ant-design/icons";
 import { Button, Col, Empty, Row, Select } from "antd";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 
 import MobileActionBar from "@/components/MobileActionBar";
 import OperationPageHeader from "@/components/OperationPageHeader";
@@ -99,50 +99,39 @@ const TimetablePage = () => {
   //   });
   // }, [timetables, selectedFacility, selectedClass, selectedTeacher]);
 
-  const timetableItems = useMemo(() => {
-    return timetables.filter((item) => {
-      const matchDay = item.day === selectedDay;
+  const timetableItems = timetables.filter((item) => {
+    const matchDay = item.day === selectedDay;
 
-      const matchFacility =
-        selectedFacility === "all" || item.campusId === selectedFacility;
+    const matchFacility =
+      selectedFacility === "all" || item.campusId === selectedFacility;
 
-      const matchClass =
-        selectedClass === "all" || item.classId === selectedClass;
+    const matchClass =
+      selectedClass === "all" || item.classId === selectedClass;
 
-      const matchTeacher =
-        selectedTeacher === "all" || item.teacherId === selectedTeacher;
+    const matchTeacher =
+      selectedTeacher === "all" || item.teacherId === selectedTeacher;
 
-      return matchDay && matchFacility && matchClass && matchTeacher;
-    });
-  }, [
-    timetables,
-    selectedDay,
-    selectedFacility,
-    selectedClass,
-    selectedTeacher,
-  ]);
+    return matchDay && matchFacility && matchClass && matchTeacher;
+  });
 
-  const availableClasses = useMemo(() => {
-    if (selectedFacility === "all") {
-      return classes;
-    }
+  const availableClasses =
+    selectedFacility === "all"
+      ? classes
+      : classes.filter((item) => item.campusId === selectedFacility);
 
-    return classes.filter((item) => item.campusId === selectedFacility);
-  }, [classes, selectedFacility]);
+  const teacherIds =
+    selectedFacility === "all"
+      ? null
+      : new Set(
+          timetables
+            .filter((item) => item.campusId === selectedFacility)
+            .map((item) => item.teacherId),
+        );
 
-  const availableTeachers = useMemo(() => {
-    if (selectedFacility === "all") {
-      return teachers;
-    }
-
-    const teacherIds = new Set(
-      timetables
-        .filter((item) => item.campusId === selectedFacility)
-        .map((item) => item.teacherId),
-    );
-
-    return teachers.filter((teacher) => teacherIds.has(teacher.id));
-  }, [teachers, timetables, selectedFacility]);
+  const availableTeachers =
+    teacherIds === null
+      ? teachers
+      : teachers.filter((teacher) => teacherIds.has(teacher.id));
 
   const handlePreviousDay = () => {
     if (currentDayIndex <= 0) {

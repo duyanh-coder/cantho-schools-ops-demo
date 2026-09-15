@@ -139,4 +139,38 @@ export const canThoAlerts: AlertItem[] = [
 
         status: "processing",
     },
+
+    {
+        id: "can-tho-alert-009",
+
+        campusId: "can-tho-campus-008",
+
+        title: "Cần duyệt kế hoạch giảng dạy",
+
+        description:
+            "Kế hoạch giảng dạy đầu năm học đang chờ phê duyệt.",
+
+        level: "info",
+
+        createdAt: "2026-08-20T08:30:00",
+
+        status: "new",
+    },
+
+    {
+        id: "can-tho-alert-010",
+
+        campusId: "can-tho-campus-009",
+
+        title: "Rà soát danh sách lớp đầu năm",
+
+        description:
+            "Danh sách học sinh các lớp cần được rà soát và cập nhật.",
+
+        level: "warning",
+
+        createdAt: "2026-08-20T10:00:00",
+
+        status: "new",
+    },
 ];

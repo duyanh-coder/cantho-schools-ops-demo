@@ -9,8 +9,8 @@ export const canThoWards: Ward[] = [
         center: { lat: 10.0338, lng: 105.783 },
         polygon: [
             { lat: 10.0258, lng: 105.775 },
-            { lat: 10.041799999999999, lng: 105.775 },
-            { lat: 10.041799999999999, lng: 105.791 },
+            { lat: 10.0418, lng: 105.775 },
+            { lat: 10.0418, lng: 105.791 },
             { lat: 10.0258, lng: 105.791 },
         ],
     },
@@ -22,10 +22,10 @@ export const canThoWards: Ward[] = [
         name: "Phường Cái Khế",
         center: { lat: 10.0502, lng: 105.781 },
         polygon: [
-            { lat: 10.042200000000001, lng: 105.77300000000001 },
-            { lat: 10.0582, lng: 105.77300000000001 },
+            { lat: 10.0422, lng: 105.773 },
+            { lat: 10.0582, lng: 105.773 },
             { lat: 10.0582, lng: 105.789 },
-            { lat: 10.042200000000001, lng: 105.789 },
+            { lat: 10.0422, lng: 105.789 },
         ],
     },
 
@@ -36,10 +36,10 @@ export const canThoWards: Ward[] = [
         name: "Phường Tân An",
         center: { lat: 10.0128, lng: 105.768 },
         polygon: [
-            { lat: 10.004800000000001, lng: 105.76 },
+            { lat: 10.0048, lng: 105.76 },
             { lat: 10.0208, lng: 105.76 },
             { lat: 10.0208, lng: 105.776 },
-            { lat: 10.004800000000001, lng: 105.776 },
+            { lat: 10.0048, lng: 105.776 },
         ],
     },
 
@@ -51,8 +51,8 @@ export const canThoWards: Ward[] = [
         center: { lat: 10.0725, lng: 105.7565 },
         polygon: [
             { lat: 10.0645, lng: 105.7485 },
-            { lat: 10.080499999999999, lng: 105.7485 },
-            { lat: 10.080499999999999, lng: 105.7645 },
+            { lat: 10.0805, lng: 105.7485 },
+            { lat: 10.0805, lng: 105.7645 },
             { lat: 10.0645, lng: 105.7645 },
         ],
     },
@@ -64,10 +64,10 @@ export const canThoWards: Ward[] = [
         name: "Phường Cái Răng",
         center: { lat: 10.0005, lng: 105.792 },
         polygon: [
-            { lat: 9.992500000000001, lng: 105.784 },
+            { lat: 9.9925, lng: 105.784 },
             { lat: 10.0085, lng: 105.784 },
             { lat: 10.0085, lng: 105.8 },
-            { lat: 9.992500000000001, lng: 105.8 },
+            { lat: 9.9925, lng: 105.8 },
         ],
     },
 
@@ -78,9 +78,9 @@ export const canThoWards: Ward[] = [
         name: "Phường Hưng Phú",
         center: { lat: 9.991, lng: 105.79 },
         polygon: [
-            { lat: 9.983, lng: 105.78200000000001 },
-            { lat: 9.998999999999999, lng: 105.78200000000001 },
-            { lat: 9.998999999999999, lng: 105.798 },
+            { lat: 9.983, lng: 105.782 },
+            { lat: 9.999, lng: 105.782 },
+            { lat: 9.999, lng: 105.798 },
             { lat: 9.983, lng: 105.798 },
         ],
     },

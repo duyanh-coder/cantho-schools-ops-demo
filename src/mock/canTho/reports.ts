@@ -87,4 +87,28 @@ export const canThoReports: ReportItem[] = [
 
         createdAt: "2026-08-20T10:30:00",
     },
+
+    {
+        id: "can-tho-report-008",
+
+        campusId: "can-tho-campus-008",
+
+        title: "Báo cáo kiểm kê thiết bị dạy học",
+
+        type: "facility",
+
+        createdAt: "2026-08-21T08:30:00",
+    },
+
+    {
+        id: "can-tho-report-009",
+
+        campusId: "can-tho-campus-009",
+
+        title: "Báo cáo tình hình đầu năm học",
+
+        type: "operation",
+
+        createdAt: "2026-08-21T10:30:00",
+    },
 ];

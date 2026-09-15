@@ -18,7 +18,6 @@ import {
 } from "antd";
 
 import {
-    useMemo,
     useState,
 } from "react";
 
@@ -97,19 +96,13 @@ const DocumentsPage = () => {
     >("all");
 
 
-    const filteredDocuments = useMemo(() => {
-        if (statusFilter === "all") {
-            return documents;
-        }
-
-        return documents.filter(
-            (document) =>
-                document.status === statusFilter,
-        );
-    }, [
-        documents,
-        statusFilter,
-    ]);
+    const filteredDocuments =
+        statusFilter === "all"
+            ? documents
+            : documents.filter(
+                (document) =>
+                    document.status === statusFilter,
+            );
 
 
     const statistics = [
