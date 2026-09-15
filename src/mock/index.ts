@@ -2,6 +2,14 @@ import type {
     RegionMockData,
 } from "./common/types";
 
+export type {
+    GisCampus,
+    GisMockData,
+    GisPosition,
+    GisProvince,
+    GisWard,
+} from "./common/types";
+
 import {
     canThoMockData,
 } from "./canTho";

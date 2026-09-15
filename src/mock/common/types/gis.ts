@@ -4,6 +4,12 @@ export type GisPosition = [
 ];
 
 
+export type GisRing = GisPosition[];
+
+
+export type GisMultiPolygon = GisRing[][];
+
+
 export interface GisWard {
     id: string;
 
@@ -11,9 +17,26 @@ export interface GisWard {
 
     name: string;
 
+    areaKm2: number;
+
+    population: number;
+
     center: GisPosition;
 
-    polygon: GisPosition[];
+    polygon: GisMultiPolygon;
+}
+
+
+export interface GisProvince {
+    id: string;
+
+    code: string;
+
+    name: string;
+
+    areaKm2: number;
+
+    polygons: GisMultiPolygon;
 }
 
 
@@ -41,6 +64,8 @@ export interface GisCampus {
 
 
 export interface GisMockData {
+    province: GisProvince;
+
     wards: GisWard[];
 
     campuses: GisCampus[];

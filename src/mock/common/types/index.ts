@@ -61,6 +61,9 @@ export type {
 export type {
     GisCampus,
     GisMockData,
+    GisMultiPolygon,
     GisPosition,
+    GisProvince,
+    GisRing,
     GisWard,
 } from "./gis";

@@ -1,9 +1,12 @@
 import {
+  AimOutlined,
   BankOutlined,
   EnvironmentOutlined,
+  EyeOutlined,
   FilterOutlined,
   GlobalOutlined,
   HomeOutlined,
+  LineChartOutlined,
   ReloadOutlined,
 } from "@ant-design/icons";
 
@@ -11,18 +14,20 @@ import { Button, Card, Col, Empty, Row, Select, Statistic, Tag } from "antd";
 
 import { useEffect, useMemo, useState } from "react";
 
+import type { LatLngBoundsExpression } from "leaflet";
+
+import L from "leaflet";
+
 import {
   CircleMarker,
   MapContainer,
   Polygon,
   Popup,
+  ScaleControl,
   TileLayer,
+  Tooltip,
   useMap,
 } from "react-leaflet";
-
-import type { LatLngBoundsExpression } from "leaflet";
-
-import L from "leaflet";
 
 import "leaflet/dist/leaflet.css";
 
@@ -30,36 +35,19 @@ import OperationPageHeader from "@/components/OperationPageHeader";
 
 import { getCurrentRegionMockData } from "@/mock";
 
+import type { GisWard } from "@/mock";
+
 import "./style.scss";
 
 /* ========================================
-   FIX LEAFLET MARKER
+   AUTO FIT MAP
 ======================================== */
 
-delete (
-  L.Icon.Default.prototype as unknown as {
-    _getIconUrl?: unknown;
-  }
-)._getIconUrl;
-
-L.Icon.Default.mergeOptions({
-  iconRetinaUrl:
-    "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
-
-  iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
-
-  shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
-});
-
-/* ========================================
-   AUTO FIT MAP TO MOCK DATA
-======================================== */
-
-interface MapBoundsProps {
+interface FocusMapProps {
   bounds: LatLngBoundsExpression | null;
 }
 
-function MapBounds({ bounds }: MapBoundsProps) {
+function FocusMap({ bounds }: FocusMapProps) {
   const map = useMap();
 
   useEffect(() => {
@@ -68,9 +56,8 @@ function MapBounds({ bounds }: MapBoundsProps) {
     }
 
     map.fitBounds(bounds, {
-      padding: [40, 40],
-
-      maxZoom: 15,
+      padding: [30, 30],
+      maxZoom: 16,
     });
   }, [map, bounds]);
 
@@ -82,14 +69,29 @@ function MapBounds({ bounds }: MapBoundsProps) {
 ======================================== */
 
 function GisPage() {
-
   const { gis } = getCurrentRegionMockData();
 
-  const { wards, campuses } = gis;
+  const { province, wards, campuses } = gis;
 
   const [selectedWardId, setSelectedWardId] = useState("all");
 
   const [selectedCampusId, setSelectedCampusId] = useState("all");
+
+  const [mapBounds, setMapBounds] = useState<LatLngBoundsExpression | null>(
+    () => L.latLngBounds(province.polygons.flat(2)),
+  );
+
+  /* ========================================
+       SELECTED WARD
+    ======================================== */
+
+  const selectedWard = useMemo<GisWard | null>(() => {
+    if (selectedWardId === "all") {
+      return null;
+    }
+
+    return wards.find((ward) => ward.id === selectedWardId) ?? null;
+  }, [wards, selectedWardId]);
 
   /* ========================================
        FILTER CAMPUSES
@@ -107,10 +109,6 @@ function GisPage() {
     });
   }, [campuses, selectedWardId, selectedCampusId]);
 
-  /* ========================================
-       SELECTED CAMPUS
-    ======================================== */
-
   const selectedCampus = useMemo(() => {
     if (selectedCampusId === "all") {
       return null;
@@ -118,45 +116,54 @@ function GisPage() {
 
     return campuses.find((campus) => campus.id === selectedCampusId) ?? null;
   }, [campuses, selectedCampusId]);
-  
+
+  const campusesInWard = useMemo(() => {
+    if (!selectedWard) {
+      return [];
+    }
+
+    return campuses.filter((campus) => campus.wardId === selectedWard.id);
+  }, [campuses, selectedWard]);
+
   const filteredSchoolCount = useMemo(() => {
     return new Set(filteredCampuses.map((campus) => campus.schoolId)).size;
   }, [filteredCampuses]);
 
   /* ========================================
-       MAP BOUNDS
-
-       LẤY TRỰC TIẾP TỪ MOCK:
-
-       1. wards[].polygon
-       2. campuses[].location
-    ======================================== */
-
-  const mapBounds = useMemo(() => {
-    const points = [
-      ...wards.flatMap((ward) => ward.polygon),
-
-      ...filteredCampuses.map((campus) => campus.position),
-    ];
-
-    if (points.length === 0) {
-      return null;
-    }
-
-    return L.latLngBounds(points);
-  }, [wards, filteredCampuses]);
-
-  /* ========================================
        HANDLERS
     ======================================== */
 
-  const handleWardChange = (wardId: string) => {
+  const handleWardSelect = (wardId: string) => {
     setSelectedWardId(wardId);
 
     setSelectedCampusId("all");
+
+    if (wardId === "all") {
+      setMapBounds(L.latLngBounds(province.polygons.flat(2)));
+
+      return;
+    }
+
+    const ward = wards.find((item) => item.id === wardId);
+
+    if (ward) {
+      setMapBounds(L.latLngBounds(ward.polygon.flat(2)));
+    }
   };
 
-  const handleCampusChange = (campusId: string) => {
+  const handleWardClick = (wardId: string) => {
+    setSelectedWardId(wardId);
+
+    setSelectedCampusId("all");
+
+    const ward = wards.find((item) => item.id === wardId);
+
+    if (ward) {
+      setMapBounds(L.latLngBounds(ward.polygon.flat(2)));
+    }
+  };
+
+  const handleCampusSelect = (campusId: string) => {
     setSelectedCampusId(campusId);
 
     if (campusId === "all") {
@@ -174,6 +181,8 @@ function GisPage() {
     setSelectedWardId("all");
 
     setSelectedCampusId("all");
+
+    setMapBounds(L.latLngBounds(province.polygons.flat(2)));
   };
 
   return (
@@ -193,9 +202,9 @@ function GisPage() {
         <Col xs={12} lg={6}>
           <Card className="gis-stat-card">
             <Statistic
-              title="Địa bàn"
+              title="Đơn vị hành chính"
               value={wards.length}
-              prefix={<EnvironmentOutlined />}
+              prefix={<AimOutlined />}
             />
           </Card>
         </Col>
@@ -203,12 +212,11 @@ function GisPage() {
         <Col xs={12} lg={6}>
           <Card className="gis-stat-card">
             <Statistic
-              title="Trường học"
-              // value={
-              //     schools.length
-              // }
-              value={new Set(campuses.map((campus) => campus.schoolId)).size}
-              prefix={<BankOutlined />}
+              title="Diện tích (km²)"
+              value={province.areaKm2.toLocaleString("vi-VN", {
+                maximumFractionDigits: 2,
+              })}
+              prefix={<LineChartOutlined />}
             />
           </Card>
         </Col>
@@ -216,7 +224,7 @@ function GisPage() {
         <Col xs={12} lg={6}>
           <Card className="gis-stat-card">
             <Statistic
-              title="Cơ sở"
+              title="Cơ sở giáo dục"
               value={campuses.length}
               prefix={<HomeOutlined />}
             />
@@ -228,7 +236,7 @@ function GisPage() {
             <Statistic
               title="Đang hiển thị"
               value={filteredCampuses.length}
-              prefix={<EnvironmentOutlined />}
+              prefix={<EyeOutlined />}
             />
           </Card>
         </Col>
@@ -257,50 +265,123 @@ function GisPage() {
 
             <div className="gis-map">
               <MapContainer
-                center={[9.176, 105.15]}
-                zoom={13}
+                center={[9.9, 105.6]}
+                zoom={10}
                 className="gis-map__leaflet"
                 style={{
                   width: "100%",
-                  height: "750px",
-                  background: "#e5e7eb",
+                  height: "100%",
                 }}
               >
-                <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+                <TileLayer
+                  attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                  url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                  maxZoom={18}
+                />
 
-                <MapBounds bounds={mapBounds} />
+                <ScaleControl imperial={false} />
+
+                <FocusMap bounds={mapBounds} />
+
+                {/* ========================================
+                    PROVINCE OUTLINE
+                ======================================== */}
+
+                <Polygon
+                  positions={province.polygons}
+                  interactive={false}
+                  pathOptions={{
+                    color:
+                      selectedWardId === "all" ? "#64748b" : "transparent",
+
+                    weight: selectedWardId === "all" ? 2 : 0.5,
+
+                    fillColor: "#e2e8f0",
+
+                    fillOpacity: 0.06,
+                  }}
+                >
+                  {selectedWardId === "all" && (
+                    <Tooltip
+                      permanent
+                      interactive={false}
+                      direction="center"
+                      className="gis-province-tooltip"
+                    >
+                      TP. Cần Thơ
+                    </Tooltip>
+                  )}
+                </Polygon>
 
                 {/* ========================================
                     WARD POLYGONS
                 ======================================== */}
 
-                {wards.map((ward) => (
-                  <Polygon
-                    key={ward.id}
-                    positions={ward.polygon}
-                    pathOptions={{
-                      color: selectedWardId === ward.id ? "#1677ff" : "#0f766e",
+                {wards.map((ward) => {
+                  const isSelected = selectedWardId === ward.id;
 
-                      weight: 3,
+                  return (
+                    <Polygon
+                      key={ward.id}
+                      positions={ward.polygon}
+                      pathOptions={{
+                        color: isSelected ? "#3b82f6" : "#0e7490",
 
-                      fillColor:
-                        selectedWardId === ward.id ? "#60a5fa" : "#5eead4",
+                        weight: isSelected ? 2.6 : 1.4,
 
-                      fillOpacity: selectedWardId === ward.id ? 0.35 : 0.18,
-                    }}
-                    eventHandlers={{
-                      click: () => {
-                        setSelectedWardId(ward.id);
+                        fillColor: isSelected ? "#60a5fa" : "#22d3ee",
 
-                        setSelectedCampusId("all");
-                      },
-                    }}
-                  >
-                    <Popup>
-                      <strong>{ward.name}</strong>
-                    </Popup>
-                  </Polygon>
-                ))}
+                        fillOpacity: isSelected ? 0.34 : 0.16,
+                      }}
+                      eventHandlers={{
+                        click: () => handleWardClick(ward.id),
+
+                        mouseover: (event) => {
+                          if (isSelected) {
+                            return;
+                          }
+
+                          (event.target as L.Polygon).setStyle({
+                            color: "#155e75",
+
+                            weight: 2,
+
+                            fillOpacity: 0.3,
+                          });
+                        },
+
+                        mouseout: (event) => {
+                          if (isSelected) {
+                            return;
+                          }
+
+                          (event.target as L.Polygon).setStyle({
+                            color: "#0e7490",
+
+                            weight: 1.4,
+
+                            fillOpacity: 0.16,
+                          });
+                        },
+                      }}
+                    >
+                      <Tooltip className="gis-ward-tooltip">
+                        {ward.name}
+                      </Tooltip>
+
+                      <Popup>
+                        <div className="gis-popup">
+                          <strong>{ward.name}</strong>
+
+                          <span>
+                            Diện tích:{" "}
+                            {ward.areaKm2.toLocaleString("vi-VN")} km²
+                          </span>
+                        </div>
+                      </Popup>
+                    </Polygon>
+                  );
+                })}
 
                 {/* ========================================
                     CAMPUS MARKERS
@@ -321,11 +402,7 @@ function GisPage() {
                       fillOpacity: 1,
                     }}
                     eventHandlers={{
-                      click: () => {
-                        setSelectedCampusId(campus.id);
-
-                        setSelectedWardId(campus.wardId);
-                      },
+                      click: () => handleCampusSelect(campus.id),
                     }}
                   >
                     <Popup>
@@ -346,14 +423,35 @@ function GisPage() {
               <div className="gis-map__legend">
                 <div>
                   <span className="gis-map__legend-ward" />
-                  Ranh giới phường
+                  Ranh giới xã / phường
                 </div>
 
                 <div>
-                  <span className="gis-map__legend-campus" />
-                  Cơ sở giáo dục
+                  <span className="gis-map__legend-campus gis-map__legend-campus--main" />
+                  Cơ sở chính
+                </div>
+
+                <div>
+                  <span className="gis-map__legend-campus gis-map__legend-campus--sub" />
+                  Cơ sở phụ
                 </div>
               </div>
+
+              {/* CONTEXT BANNER (overview only) */}
+
+              {!selectedWard && (
+                <div className="gis-map__context">
+                  <AimOutlined />
+
+                  <span>
+                    TP. Cần Thơ · {wards.length} xã/phường ·{" "}
+                    {province.areaKm2.toLocaleString("vi-VN", {
+                      maximumFractionDigits: 2,
+                    })}{" "}
+                    km²
+                  </span>
+                </div>
+              )}
             </div>
           </Card>
         </Col>
@@ -372,12 +470,14 @@ function GisPage() {
               </div>
 
               <div className="gis-filter-card__field">
-                <label>Địa bàn</label>
+                <label>Xã / Phường</label>
 
                 <Select
                   value={selectedWardId}
-                  onChange={handleWardChange}
+                  onChange={handleWardSelect}
                   className="gis-select"
+                  showSearch
+                  optionFilterProp="label"
                   options={[
                     {
                       value: "all",
@@ -398,8 +498,10 @@ function GisPage() {
 
                 <Select
                   value={selectedCampusId}
-                  onChange={handleCampusChange}
+                  onChange={handleCampusSelect}
                   className="gis-select"
+                  showSearch
+                  optionFilterProp="label"
                   options={[
                     {
                       value: "all",
@@ -448,6 +550,71 @@ function GisPage() {
                     <span>Lat: {selectedCampus.position[0]}</span>
 
                     <span>Lng: {selectedCampus.position[1]}</span>
+                  </div>
+                </div>
+              )}
+            </Card>
+
+            {/* SELECTED UNIT */}
+
+            <Card className="gis-location-card">
+              <div className="gis-sidebar__title">
+                <AimOutlined />
+
+                <span>Thông tin đơn vị</span>
+              </div>
+
+              {selectedWard ? (
+                <div className="gis-unit-info">
+                  <Tag color="geekblue">{selectedWard.code}</Tag>
+
+                  <h3>{selectedWard.name}</h3>
+
+                  <div className="gis-unit-info__grid">
+                    <span>Mã hành chính</span>
+
+                    <strong>{selectedWard.code}</strong>
+
+                    <span>Diện tích</span>
+
+                    <strong>
+                      {selectedWard.areaKm2.toLocaleString("vi-VN")} km²
+                    </strong>
+
+                    <span>Dân số (ước tính)</span>
+
+                    <strong>
+                      {selectedWard.population.toLocaleString("vi-VN")}
+                    </strong>
+
+                    <span>Cơ sở trong địa bàn</span>
+
+                    <strong>{campusesInWard.length}</strong>
+                  </div>
+                </div>
+              ) : (
+                <div className="gis-unit-info">
+                  <Tag color="cyan">{province.code}</Tag>
+
+                  <h3>{province.name}</h3>
+
+                  <div className="gis-unit-info__grid">
+                    <span>Diện tích</span>
+
+                    <strong>
+                      {province.areaKm2.toLocaleString("vi-VN", {
+                        maximumFractionDigits: 2,
+                      })}{" "}
+                      km²
+                    </strong>
+
+                    <span>Đơn vị hành chính</span>
+
+                    <strong>{wards.length}</strong>
+
+                    <span>Cơ sở toàn TP.</span>
+
+                    <strong>{campuses.length}</strong>
                   </div>
                 </div>
               )}
