@@ -75,7 +75,7 @@ export const canThoAlerts: AlertItem[] = [
     {
         id: "can-tho-alert-005",
 
-        campusId: "can-tho-campus-004",
+        campusId: "can-tho-campus-003",
 
         title: "Giáo viên vắng giảng dạy",
 

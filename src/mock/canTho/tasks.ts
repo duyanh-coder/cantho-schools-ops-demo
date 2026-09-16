@@ -75,7 +75,7 @@ export const canThoTasks: TaskItem[] = [
     {
         id: "can-tho-task-005",
 
-        campusId: "can-tho-campus-004",
+        campusId: "can-tho-campus-003",
 
         title: "Xử lý văn bản đến",
 

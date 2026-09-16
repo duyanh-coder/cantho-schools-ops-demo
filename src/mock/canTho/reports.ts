@@ -43,7 +43,7 @@ export const canThoReports: ReportItem[] = [
     {
         id: "can-tho-report-004",
 
-        campusId: "can-tho-campus-004",
+        campusId: "can-tho-campus-003",
 
         title: "Báo cáo hoạt động chuyên môn",
 

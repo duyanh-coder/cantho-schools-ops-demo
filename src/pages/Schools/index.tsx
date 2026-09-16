@@ -294,7 +294,7 @@ function SchoolsPage() {
 
                 <StatsCard
                     tone="purple"
-                    title="Cơ sở chính"
+                    title="Trụ sở chính"
                     value={statistics.mainCampuses}
                     icon={<BankOutlined />}
                 />

@@ -155,7 +155,7 @@ export const canThoTeachingAttendance: TeachingAttendance[] = [
     {
         id: "can-tho-attendance-011",
 
-        campusId: "can-tho-campus-004",
+        campusId: "can-tho-campus-003",
         classId: "can-tho-class-004",
         teacherId: "can-tho-teacher-004",
 
@@ -169,7 +169,7 @@ export const canThoTeachingAttendance: TeachingAttendance[] = [
     {
         id: "can-tho-attendance-012",
 
-        campusId: "can-tho-campus-004",
+        campusId: "can-tho-campus-003",
         classId: "can-tho-class-004",
         teacherId: "can-tho-teacher-003",
 
@@ -183,7 +183,7 @@ export const canThoTeachingAttendance: TeachingAttendance[] = [
     {
         id: "can-tho-attendance-013",
 
-        campusId: "can-tho-campus-004",
+        campusId: "can-tho-campus-003",
         classId: "can-tho-class-004",
         teacherId: "can-tho-teacher-004",
 

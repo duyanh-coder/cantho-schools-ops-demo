@@ -71,7 +71,7 @@ export const canThoDocuments: DocumentItem[] = [
     {
         id: "can-tho-document-005",
 
-        campusId: "can-tho-campus-004",
+        campusId: "can-tho-campus-003",
 
         code: "KH-005/2026",
 

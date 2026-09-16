@@ -87,7 +87,10 @@ const DashboardSidebar = ({
       onBreakpoint={onBreakpoint}
       className="dashboard-sidebar"
     >
-      <div className="dashboard-sidebar__brand">
+      <div
+        className="dashboard-sidebar__brand"
+        onClick={() => navigate("/")}
+      >
         <div className="dashboard-sidebar__logo">SOC</div>
 
         <div className="dashboard-sidebar__brand-text">

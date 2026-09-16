@@ -117,6 +117,71 @@
 
 
 /* =========================
+   CAMPUS MARKER
+========================= */
+
+.gis-campus-marker {
+    cursor: pointer;
+}
+
+.gis-campus-marker__pin {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    position: relative;
+
+    width: 30px;
+    height: 30px;
+
+    border: 2px solid #ffffff;
+
+    border-radius: 9px;
+
+    background: #1677ff;
+
+    color: #ffffff;
+
+    filter:
+        drop-shadow(0 3px 6px rgba(15, 23, 42, 0.35));
+
+    transition:
+        transform 0.15s ease;
+
+    .anticon {
+        font-size: 16px;
+    }
+
+    &::after {
+        content: "";
+
+        position: absolute;
+
+        left: 50%;
+        bottom: -7px;
+
+        transform: translateX(-50%);
+
+        border: 7px solid transparent;
+
+        border-top-color: #ffffff;
+        border-bottom: 0;
+    }
+}
+
+
+.gis-campus-marker__pin--sub {
+    background: #f97316;
+}
+
+
+.gis-campus-marker:hover
+.gis-campus-marker__pin {
+    transform: scale(1.12);
+}
+
+
+/* =========================
    LEGEND
 ========================= */
 

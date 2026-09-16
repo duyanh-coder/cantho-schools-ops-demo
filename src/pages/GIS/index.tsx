@@ -19,7 +19,7 @@ import type { LatLngBoundsExpression } from "leaflet";
 import L from "leaflet";
 
 import {
-  CircleMarker,
+  Marker,
   MapContainer,
   Polygon,
   Popup,
@@ -28,6 +28,8 @@ import {
   Tooltip,
   useMap,
 } from "react-leaflet";
+
+import { renderToStaticMarkup } from "react-dom/server";
 
 import "leaflet/dist/leaflet.css";
 
@@ -63,6 +65,30 @@ function FocusMap({ bounds }: FocusMapProps) {
 
   return null;
 }
+
+/* ========================================
+   CAMPUS MARKER ICON
+======================================== */
+
+function createCampusIcon(isMainCampus: boolean) {
+  const glyph = renderToStaticMarkup(<BankOutlined />);
+
+  return L.divIcon({
+    className: "gis-campus-marker",
+    html: `
+      <div class="gis-campus-marker__pin gis-campus-marker__pin--${isMainCampus ? "main" : "sub"}">
+        ${glyph}
+      </div>
+    `,
+    iconSize: [30, 37],
+    iconAnchor: [15, 37],
+    popupAnchor: [0, -34],
+  });
+}
+
+const campusMainMarkerIcon = createCampusIcon(true);
+
+const campusSubMarkerIcon = createCampusIcon(false);
 
 /* ========================================
    PAGE
@@ -388,19 +414,14 @@ function GisPage() {
                 ======================================== */}
 
                 {filteredCampuses.map((campus) => (
-                  <CircleMarker
+                  <Marker
                     key={campus.id}
-                    center={campus.position}
-                    radius={campus.isMainCampus ? 10 : 7}
-                    pathOptions={{
-                      color: "#ffffff",
-
-                      weight: 2,
-
-                      fillColor: campus.isMainCampus ? "#1677ff" : "#f97316",
-
-                      fillOpacity: 1,
-                    }}
+                    position={campus.position}
+                    icon={
+                      campus.isMainCampus
+                        ? campusMainMarkerIcon
+                        : campusSubMarkerIcon
+                    }
                     eventHandlers={{
                       click: () => handleCampusSelect(campus.id),
                     }}
@@ -414,7 +435,7 @@ function GisPage() {
                         <p>{campus.address}</p>
                       </div>
                     </Popup>
-                  </CircleMarker>
+                  </Marker>
                 ))}
               </MapContainer>
 
@@ -428,12 +449,12 @@ function GisPage() {
 
                 <div>
                   <span className="gis-map__legend-campus gis-map__legend-campus--main" />
-                  Cơ sở chính
+                  Trụ sở chính
                 </div>
 
                 <div>
                   <span className="gis-map__legend-campus gis-map__legend-campus--sub" />
-                  Cơ sở phụ
+                  Phân hiệu
                 </div>
               </div>
 

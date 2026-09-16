@@ -193,7 +193,7 @@ export const canThoTimetables: TimetableItem[] = [
     {
         id: "can-tho-timetable-011",
 
-        campusId: "can-tho-campus-004",
+        campusId: "can-tho-campus-003",
         classId: "can-tho-class-004",
         teacherId: "can-tho-teacher-004",
         subjectId: "physics",
@@ -210,7 +210,7 @@ export const canThoTimetables: TimetableItem[] = [
     {
         id: "can-tho-timetable-012",
 
-        campusId: "can-tho-campus-004",
+        campusId: "can-tho-campus-003",
         classId: "can-tho-class-004",
         teacherId: "can-tho-teacher-003",
         subjectId: "english",
@@ -227,7 +227,7 @@ export const canThoTimetables: TimetableItem[] = [
     {
         id: "can-tho-timetable-013",
 
-        campusId: "can-tho-campus-004",
+        campusId: "can-tho-campus-003",
         classId: "can-tho-class-004",
         teacherId: "can-tho-teacher-004",
         subjectId: "physics",
