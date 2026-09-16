@@ -4,57 +4,19 @@
 
 
 /* =========================
-   STATISTICS
-========================= */
-
-.gis-page__statistics {
-    margin-bottom: 20px;
-}
-
-
-.gis-stat-card {
-    height: 100%;
-
-    border:
-        1px solid rgba(15, 23, 42, 0.06);
-
-    border-radius: 18px;
-
-    box-shadow:
-        0 8px 24px rgba(15, 23, 42, 0.05);
-
-    .ant-card-body {
-        padding: 20px;
-    }
-
-    .ant-statistic-title {
-        color:
-            rgba(15, 23, 42, 0.55);
-
-        font-size: 13px;
-    }
-
-    .ant-statistic-content {
-        font-size: 28px;
-        font-weight: 700;
-    }
-}
-
-
-/* =========================
    MAP
 ========================= */
 
 .gis-map-card {
     border:
-        1px solid rgba(15, 23, 42, 0.06);
+        1px solid rgba(100, 116, 139, 0.45);
 
     border-radius: 18px;
 
     overflow: hidden;
 
     box-shadow:
-        0 12px 32px rgba(15, 23, 42, 0.07);
+        0 12px 32px rgba(15, 23, 42, 0.1);
 
     .ant-card-body {
         padding: 0;
@@ -124,110 +86,6 @@
 }
 
 
-// .gis-map__canvas {
-//     display: block;
-
-//     width: 100%;
-//     height: 620px;
-// }
-
-
-/* =========================
-   WARD
-========================= */
-
-// .gis-map__ward {
-//     fill:
-//         rgba(8, 145, 178, 0.12);
-
-//     stroke:
-//         rgba(8, 145, 178, 0.55);
-
-//     stroke-width: 2;
-
-//     cursor: pointer;
-
-//     transition:
-//         fill 0.2s ease,
-//         opacity 0.2s ease;
-
-//     &:hover {
-//         fill:
-//             rgba(8, 145, 178, 0.24);
-//     }
-// }
-
-
-// .gis-map__ward--selected {
-//     fill:
-//         rgba(22, 119, 255, 0.28);
-
-//     stroke:
-//         #1677ff;
-
-//     stroke-width: 3;
-// }
-
-
-// .gis-map__ward--dimmed {
-//     opacity: 0.3;
-// }
-
-
-// .gis-map__ward-label {
-//     fill:
-//         rgba(15, 23, 42, 0.65);
-
-//     font-size: 18px;
-//     font-weight: 700;
-
-//     pointer-events: none;
-// }
-
-
-/* =========================
-   MARKER
-========================= */
-
-// .gis-map__marker {
-//     cursor: pointer;
-
-//     circle:first-child {
-//         fill: #0891b2;
-
-//         stroke: #ffffff;
-
-//         stroke-width: 4;
-
-//         filter:
-//             drop-shadow(
-//                 0 4px 6px
-//                 rgba(15, 23, 42, 0.25)
-//             );
-//     }
-
-//     &:hover {
-//         circle:first-child {
-//             fill: #1677ff;
-//         }
-//     }
-// }
-
-
-// .gis-map__marker--selected {
-//     circle:first-child {
-//         fill: #1677ff;
-
-//         stroke-width: 6;
-//     }
-// }
-
-
-// .gis-map__marker-dot {
-//     fill: #ffffff;
-// }
-
-
 /* =========================
    LEGEND
 ========================= */
@@ -277,15 +135,6 @@
 
         border-radius: 4px;
     }
-}
-
-
-.gis-map__legend-ward {
-    background:
-        rgba(8, 145, 178, 0.28);
-
-    border:
-        1px solid #0891b2;
 }
 
 
@@ -483,16 +332,15 @@
 
 
 .gis-filter-card,
-.gis-layer-card,
 .gis-location-card,
 .gis-result-card {
     border:
-        1px solid rgba(15, 23, 42, 0.07);
+        1px solid rgba(100, 116, 139, 0.42);
 
     border-radius: 18px;
 
     box-shadow:
-        0 8px 24px rgba(15, 23, 42, 0.05);
+        0 8px 22px rgba(15, 23, 42, 0.06);
 
     .ant-card-body {
         padding: 18px;
@@ -541,77 +389,8 @@
 }
 
 
-.gis-filter-card__select {
-    width: 100%;
-
-    .ant-select-selector {
-        border-radius: 10px !important;
-    }
-}
-
-
 .gis-select {
     width: 100%;
-}
-
-
-/* =========================
-   LAYER
-========================= */
-
-.gis-layer-item {
-    display: flex;
-    align-items: center;
-
-    width: 100%;
-
-    gap: 10px;
-
-    margin-bottom: 8px;
-
-    padding: 11px 12px;
-
-    border:
-        1px solid rgba(15, 23, 42, 0.06);
-
-    border-radius: 12px;
-
-    background:
-        rgba(15, 23, 42, 0.025);
-
-    color:
-        rgba(15, 23, 42, 0.6);
-
-    cursor: pointer;
-
-    transition:
-        0.2s ease;
-
-    &:last-child {
-        margin-bottom: 0;
-    }
-
-    &:hover {
-        background:
-            rgba(8, 145, 178, 0.07);
-    }
-
-    >span:not(.ant-badge) {
-        flex: 1;
-
-        text-align: left;
-    }
-}
-
-
-.gis-layer-item--active {
-    border-color:
-        rgba(8, 145, 178, 0.25);
-
-    background:
-        rgba(8, 145, 178, 0.08);
-
-    color: #0891b2;
 }
 
 
@@ -789,25 +568,7 @@
 
 @media (max-width: 767px) {
     .gis-page {
-        padding-bottom: 96px;
-    }
-
-
-    .gis-page__statistics {
-        margin-bottom: 14px;
-    }
-
-
-    .gis-stat-card {
-        border-radius: 14px;
-
-        .ant-card-body {
-            padding: 14px;
-        }
-
-        .ant-statistic-content {
-            font-size: 23px;
-        }
+        padding-bottom: 100px;
     }
 
 
@@ -826,16 +587,6 @@
     }
 
 
-    // .gis-map__canvas {
-    //     height: 420px;
-    // }
-
-
-    .gis-map__ward-label {
-        font-size: 15px;
-    }
-
-
     .gis-map__legend {
         left: 10px;
         bottom: 10px;
@@ -845,7 +596,6 @@
 
 
     .gis-filter-card,
-    .gis-layer-card,
     .gis-location-card,
     .gis-result-card {
         border-radius: 14px;

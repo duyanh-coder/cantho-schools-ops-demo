@@ -3,13 +3,22 @@
     flex-direction: column;
 
     gap: 20px;
+
+    padding-bottom: 32px;
 }
 
 
 .ai-chat {
     min-height: 650px;
 
-    border-radius: 16px;
+    border: 1px solid
+        rgba(100, 116, 139, 0.45);
+
+    border-radius: 18px;
+
+    box-shadow:
+        0 12px 32px
+        rgba(15, 23, 42, 0.1);
 
     .ant-card-body {
         display: flex;
@@ -193,8 +202,10 @@
 
 
 .ai-chat__input
-.ant-input-textarea {
+.ant-input {
     flex: 1;
+
+    border-radius: 12px;
 }
 
 
@@ -211,6 +222,10 @@
 @media (
     max-width: 575px
 ) {
+    .ai-chat-page {
+        padding-bottom: 100px;
+    }
+
     .ai-chat {
         min-height: calc(
             100vh - 160px

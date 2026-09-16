@@ -13,7 +13,6 @@ import {
     Empty,
     Row,
     Select,
-    Statistic,
 } from "antd";
 
 import {
@@ -22,11 +21,11 @@ import {
 
 import "./style.scss";
 
+import StatsCard from "@/components/dashboard/StatCard";
+
 import {
     getCurrentRegionMockData,
 } from "@/mock";
-
-import OperationPageHeader from "@/components/OperationPageHeader";
 
 
 type AttendanceStatus =
@@ -199,82 +198,21 @@ function TeachingPage() {
     return (
         <div className="teaching-page">
 
-            <OperationPageHeader
-                eyebrow="TEACHING"
-                title="Điểm danh giảng dạy"
-                description="Theo dõi tình hình thực hiện giảng dạy và trạng thái điểm danh của giáo viên."
-                icon={
-                    <SafetyCertificateOutlined />
-                }
-            />
+            <div className="page-sticky">
+                <header className="page-head">
+                    <div className="page-head__title">
+                        <span className="page-head__eyebrow">
+                            TEACHING
+                        </span>
 
+                        <h2>Điểm danh giảng dạy</h2>
 
-            <Row
-                gutter={[16, 16]}
-                className="teaching-page__statistics"
-            >
-                <Col
-                    xs={24}
-                    sm={12}
-                    lg={6}
-                >
-                    <Card>
-                        <Statistic
-                            title="Tổng lượt"
-                            value={statistics.total}
-                        />
-                    </Card>
-                </Col>
-
-                <Col
-                    xs={24}
-                    sm={12}
-                    lg={6}
-                >
-                    <Card>
-                        <Statistic
-                            title="Có mặt"
-                            value={statistics.present}
-                            prefix={
-                                <CheckCircleOutlined />
-                            }
-                        />
-                    </Card>
-                </Col>
-
-                <Col
-                    xs={24}
-                    sm={12}
-                    lg={6}
-                >
-                    <Card>
-                        <Statistic
-                            title="Đi trễ"
-                            value={statistics.late}
-                            prefix={
-                                <ClockCircleOutlined />
-                            }
-                        />
-                    </Card>
-                </Col>
-
-                <Col
-                    xs={24}
-                    sm={12}
-                    lg={6}
-                >
-                    <Card>
-                        <Statistic
-                            title="Vắng"
-                            value={statistics.absent}
-                            prefix={
-                                <CloseCircleOutlined />
-                            }
-                        />
-                    </Card>
-                </Col>
-            </Row>
-
+                        <p>
+                            Theo dõi tình hình thực hiện giảng dạy và trạng thái
+                            điểm danh của giáo viên.
+                        </p>
+                    </div>
+                </header>
 
             <Card className="teaching-page__filters">
 
@@ -408,7 +346,38 @@ function TeachingPage() {
                 </Row>
 
             </Card>
+            </div>
 
+            <div className="page-kpi">
+                <StatsCard
+                    tone="blue"
+                    title="Tổng lượt"
+                    value={statistics.total}
+                    note="Phiếu điểm danh trong ngày"
+                    icon={<SafetyCertificateOutlined />}
+                />
+
+                <StatsCard
+                    tone="green"
+                    title="Có mặt"
+                    value={statistics.present}
+                    icon={<CheckCircleOutlined />}
+                />
+
+                <StatsCard
+                    tone="orange"
+                    title="Đi trễ"
+                    value={statistics.late}
+                    icon={<ClockCircleOutlined />}
+                />
+
+                <StatsCard
+                    tone="purple"
+                    title="Vắng"
+                    value={statistics.absent}
+                    icon={<CloseCircleOutlined />}
+                />
+            </div>
 
             <div className="teaching-page__list">
 

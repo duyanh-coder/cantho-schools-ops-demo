@@ -10,7 +10,7 @@ import {
   ReloadOutlined,
 } from "@ant-design/icons";
 
-import { Button, Card, Col, Empty, Row, Select, Statistic, Tag } from "antd";
+import { Button, Card, Col, Empty, Row, Select, Tag } from "antd";
 
 import { useEffect, useMemo, useState } from "react";
 
@@ -31,7 +31,7 @@ import {
 
 import "leaflet/dist/leaflet.css";
 
-import OperationPageHeader from "@/components/OperationPageHeader";
+import StatsCard from "@/components/dashboard/StatCard";
 
 import { getCurrentRegionMockData } from "@/mock";
 
@@ -186,61 +186,51 @@ function GisPage() {
   };
 
   return (
-    <div className="gis-page">
-      <OperationPageHeader
-        eyebrow="GIS"
-        title="Bản đồ GIS"
-        description="Trực quan hóa địa bàn, trường học và các cơ sở giáo dục."
-        icon={<GlobalOutlined />}
-      />
+<div className="gis-page">
+      <div className="page-sticky">
+        <header className="page-head">
+          <div className="page-head__title">
+            <span className="page-head__eyebrow">GIS</span>
 
-      {/* ========================================
-               STATISTICS
-            ======================================== */}
+            <h2>Bản đồ GIS</h2>
 
-      <Row gutter={[16, 16]} className="gis-page__statistics">
-        <Col xs={12} lg={6}>
-          <Card className="gis-stat-card">
-            <Statistic
-              title="Đơn vị hành chính"
-              value={wards.length}
-              prefix={<AimOutlined />}
-            />
-          </Card>
-        </Col>
+            <p>Trực quan hóa địa bàn, trường học và các cơ sở giáo dục.</p>
+          </div>
+        </header>
+      </div>
 
-        <Col xs={12} lg={6}>
-          <Card className="gis-stat-card">
-            <Statistic
-              title="Diện tích (km²)"
-              value={province.areaKm2.toLocaleString("vi-VN", {
-                maximumFractionDigits: 2,
-              })}
-              prefix={<LineChartOutlined />}
-            />
-          </Card>
-        </Col>
+      <div className="page-kpi">
+        <StatsCard
+          tone="blue"
+          title="Đơn vị hành chính"
+          value={wards.length}
+          icon={<AimOutlined />}
+        />
 
-        <Col xs={12} lg={6}>
-          <Card className="gis-stat-card">
-            <Statistic
-              title="Cơ sở giáo dục"
-              value={campuses.length}
-              prefix={<HomeOutlined />}
-            />
-          </Card>
-        </Col>
+        <StatsCard
+          tone="green"
+          title="Diện tích (km²)"
+          value={province.areaKm2.toLocaleString("vi-VN", {
+            maximumFractionDigits: 2,
+          })}
+          icon={<LineChartOutlined />}
+        />
 
-        <Col xs={12} lg={6}>
-          <Card className="gis-stat-card">
-            <Statistic
-              title="Đang hiển thị"
-              value={filteredCampuses.length}
-              prefix={<EyeOutlined />}
-            />
-          </Card>
-        </Col>
-      </Row>
+        <StatsCard
+          tone="orange"
+          title="Cơ sở giáo dục"
+          value={campuses.length}
+          icon={<HomeOutlined />}
+        />
+
+        <StatsCard
+          tone="purple"
+          title="Đang hiển thị"
+          value={filteredCampuses.length}
+          note="Cơ sở khớp bộ lọc"
+          icon={<EyeOutlined />}
+        />
+      </div>
 
       {/* ========================================
                MAIN CONTENT

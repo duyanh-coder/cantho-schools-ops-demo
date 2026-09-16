@@ -11,9 +11,7 @@ import {
 import {
     Badge,
     Button,
-    Col,
     Empty,
-    Row,
     Select,
 } from "antd";
 
@@ -26,7 +24,7 @@ import {
 } from "react-router-dom";
 
 import MobileActionBar from "@/components/MobileActionBar";
-import OperationPageHeader from "@/components/OperationPageHeader";
+import StatsCard from "@/components/dashboard/StatCard";
 
 import {
     getCurrentRegionMockData,
@@ -176,48 +174,52 @@ const DocumentsPage = () => {
     return (
         <div className="documents-page">
 
-            <OperationPageHeader
-                eyebrow="E-OFFICE"
-                title="Văn bản điện tử"
-                description="Theo dõi, quản lý và xử lý công văn, văn bản, hồ sơ và các thông tin điều hành."
-                icon={<FileTextOutlined />}
-            />
+            <div className="page-sticky">
+                <header className="page-head">
+                    <div className="page-head__title">
+                        <span className="page-head__eyebrow">
+                            E-OFFICE
+                        </span>
 
+                        <h2>Văn bản điện tử</h2>
 
-            <Row
-                gutter={[20, 20]}
-                className="documents-page__statistics"
-            >
-                {statistics.map((item) => (
-                    <Col
-                        key={item.title}
-                        xs={24}
-                        sm={12}
-                        lg={6}
-                    >
-                        <div
-                            className={[
-                                "documents-stat-card",
-                                item.className,
-                            ].join(" ")}
-                        >
-                            <div className="documents-stat-card__icon">
-                                {item.icon}
-                            </div>
+                        <p>
+                            Theo dõi, quản lý và xử lý công văn, văn bản, hồ sơ
+                            và các thông tin điều hành.
+                        </p>
+                    </div>
+                </header>
+            </div>
 
-                            <div className="documents-stat-card__content">
-                                <span>
-                                    {item.title}
-                                </span>
+            <div className="page-kpi">
+                <StatsCard
+                    tone="blue"
+                    title="Văn bản mới"
+                    value={statistics[0].value}
+                    icon={<FileTextOutlined />}
+                />
 
-                                <strong>
-                                    {item.value}
-                                </strong>
-                            </div>
-                        </div>
-                    </Col>
-                ))}
-            </Row>
+                <StatsCard
+                    tone="orange"
+                    title="Đang xử lý"
+                    value={statistics[1].value}
+                    icon={<ClockCircleOutlined />}
+                />
+
+                <StatsCard
+                    tone="green"
+                    title="Đã xử lý"
+                    value={statistics[2].value}
+                    icon={<FileDoneOutlined />}
+                />
+
+                <StatsCard
+                    tone="purple"
+                    title="Tổng văn bản"
+                    value={statistics[3].value}
+                    icon={<ExclamationCircleOutlined />}
+                />
+            </div>
 
 
             <section className="documents-panel">

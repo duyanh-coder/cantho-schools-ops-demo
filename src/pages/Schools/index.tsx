@@ -14,7 +14,6 @@ import {
     Input,
     Row,
     Select,
-    Statistic,
     Tag,
 } from "antd";
 
@@ -23,8 +22,7 @@ import {
     useState,
 } from "react";
 
-import OperationPageHeader
-    from "@/components/OperationPageHeader";
+import StatsCard from "@/components/dashboard/StatCard";
 
 import {
     getCurrentRegionMockData,
@@ -156,114 +154,23 @@ function SchoolsPage() {
     return (
         <div className="schools-page">
 
-            <OperationPageHeader
-                eyebrow="SCHOOLS"
-                title="Trường & Cơ sở"
-                description="Theo dõi thông tin trường học và các cơ sở trực thuộc trên địa bàn."
-                icon={
-                    <SolutionOutlined />
-                }
-            />
+            <div className="page-sticky">
+                <header className="page-head">
+                    <div className="page-head__title">
+                        <span className="page-head__eyebrow">
+                            SCHOOLS
+                        </span>
 
+                        <h2>Trường & Cơ sở</h2>
 
-            {/* =========================
-                STATISTICS
-            ========================= */}
+                        <p>
+                            Theo dõi thông tin trường học và các cơ sở trực
+                            thuộc trên địa bàn.
+                        </p>
+                    </div>
+                </header>
 
-            <Row
-                gutter={[16, 16]}
-                className="schools-page__statistics"
-            >
-
-                <Col
-                    xs={12}
-                    lg={6}
-                >
-                    <Card className="schools-stat-card">
-
-                        <Statistic
-                            title="Trường học"
-                            value={
-                                statistics.schools
-                            }
-                            prefix={
-                                <BankOutlined />
-                            }
-                        />
-
-                    </Card>
-                </Col>
-
-
-                <Col
-                    xs={12}
-                    lg={6}
-                >
-                    <Card className="schools-stat-card">
-
-                        <Statistic
-                            title="Tổng cơ sở"
-                            value={
-                                statistics.campuses
-                            }
-                            prefix={
-                                <EnvironmentOutlined />
-                            }
-                        />
-
-                    </Card>
-                </Col>
-
-
-                <Col
-                    xs={12}
-                    lg={6}
-                >
-                    <Card className="schools-stat-card">
-
-                        <Statistic
-                            title="Đang hoạt động"
-                            value={
-                                statistics.activeSchools
-                            }
-                            prefix={
-                                <SolutionOutlined />
-                            }
-                        />
-
-                    </Card>
-                </Col>
-
-
-                <Col
-                    xs={12}
-                    lg={6}
-                >
-                    <Card className="schools-stat-card">
-
-                        <Statistic
-                            title="Cơ sở chính"
-                            value={
-                                statistics.mainCampuses
-                            }
-                            prefix={
-                                <BankOutlined />
-                            }
-                        />
-
-                    </Card>
-                </Col>
-
-            </Row>
-
-
-            {/* =========================
-                FILTERS
-            ========================= */}
-
-            <Card
-                className="schools-page__filters"
-            >
+            <Card className="schools-page__filters">
 
                 <div className="schools-page__filter-header">
 
@@ -360,6 +267,38 @@ function SchoolsPage() {
                 </Row>
 
             </Card>
+            </div>
+
+            <div className="page-kpi">
+                <StatsCard
+                    tone="blue"
+                    title="Trường học"
+                    value={statistics.schools}
+                    icon={<BankOutlined />}
+                />
+
+                <StatsCard
+                    tone="green"
+                    title="Tổng cơ sở"
+                    value={statistics.campuses}
+                    note="Cơ sở trực thuộc"
+                    icon={<EnvironmentOutlined />}
+                />
+
+                <StatsCard
+                    tone="orange"
+                    title="Đang hoạt động"
+                    value={statistics.activeSchools}
+                    icon={<SolutionOutlined />}
+                />
+
+                <StatsCard
+                    tone="purple"
+                    title="Cơ sở chính"
+                    value={statistics.mainCampuses}
+                    icon={<BankOutlined />}
+                />
+            </div>
 
 
             {/* =========================

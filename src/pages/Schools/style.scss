@@ -4,72 +4,18 @@
 
 
 /* =========================
-   STATISTICS
-========================= */
-
-.schools-page__statistics {
-    margin-bottom: 20px;
-}
-
-
-.schools-stat-card {
-    height: 100%;
-
-    border: 1px solid
-        rgba(15, 23, 42, 0.06);
-
-    border-radius: 18px;
-
-    box-shadow:
-        0 8px 24px
-        rgba(15, 23, 42, 0.05);
-
-    transition:
-        transform 0.2s ease,
-        box-shadow 0.2s ease;
-
-    &:hover {
-        transform: translateY(-2px);
-
-        box-shadow:
-            0 14px 32px
-            rgba(15, 23, 42, 0.09);
-    }
-
-    .ant-card-body {
-        padding: 20px;
-    }
-
-    .ant-statistic-title {
-        color:
-            rgba(15, 23, 42, 0.55);
-
-        font-size: 13px;
-        font-weight: 500;
-    }
-
-    .ant-statistic-content {
-        font-size: 28px;
-        font-weight: 700;
-    }
-}
-
-
-/* =========================
    FILTERS
 ========================= */
 
 .schools-page__filters {
-    margin-bottom: 20px;
-
     border: 1px solid
-        rgba(15, 23, 42, 0.07);
+        rgba(100, 116, 139, 0.45);
 
     border-radius: 18px;
 
     box-shadow:
-        0 8px 24px
-        rgba(15, 23, 42, 0.05);
+        0 12px 32px
+        rgba(15, 23, 42, 0.1);
 
     .ant-card-body {
         padding: 20px;
@@ -111,30 +57,37 @@
    SCHOOL CARD
 ========================= */
 
+.schools-page__list {
+    min-height: 240px;
+}
+
 .school-item {
     height: 100%;
 
     border: 1px solid
-        rgba(15, 23, 42, 0.07);
+        rgba(100, 116, 139, 0.42);
 
     border-radius: 18px;
 
     overflow: hidden;
 
     box-shadow:
-        0 8px 24px
-        rgba(15, 23, 42, 0.06);
+        0 8px 22px
+        rgba(15, 23, 42, 0.08);
 
     transition:
         transform 0.2s ease,
-        box-shadow 0.2s ease;
+        box-shadow 0.2s ease,
+        border-color 0.2s ease;
 
     &:hover {
         transform: translateY(-3px);
 
+        border-color: rgba(37, 99, 235, 0.4);
+
         box-shadow:
-            0 16px 36px
-            rgba(15, 23, 42, 0.1);
+            0 14px 30px
+            rgba(37, 99, 235, 0.14);
     }
 
     .ant-card-body {
@@ -366,31 +319,11 @@
     max-width: 767px
 ) {
     .schools-page {
-        padding-bottom: 96px;
-    }
-
-
-    .schools-page__statistics {
-        margin-bottom: 14px;
-    }
-
-
-    .schools-stat-card {
-        border-radius: 14px;
-
-        .ant-card-body {
-            padding: 14px;
-        }
-
-        .ant-statistic-content {
-            font-size: 23px;
-        }
+        padding-bottom: 100px;
     }
 
 
     .schools-page__filters {
-        margin-bottom: 14px;
-
         border-radius: 14px;
 
         .ant-card-body {

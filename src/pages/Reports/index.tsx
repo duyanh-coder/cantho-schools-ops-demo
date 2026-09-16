@@ -8,12 +8,9 @@ import {
 
 import {
     Card,
-    Col,
     Empty,
     Input,
-    Row,
     Select,
-    Statistic,
     Table,
     Tag,
 } from "antd";
@@ -34,8 +31,7 @@ import type {
     ReportItem,
 } from "@/mock/common/types";
 
-import OperationPageHeader
-    from "@/components/OperationPageHeader";
+import StatsCard from "@/components/dashboard/StatCard";
 
 import "./style.scss";
 
@@ -256,97 +252,46 @@ function ReportsPage() {
     return (
         <div className="reports-page">
 
-            <OperationPageHeader
-                eyebrow="REPORTS"
-                title="Báo cáo"
-                description="Theo dõi và khai thác các báo cáo phục vụ công tác quản lý, điều hành."
-                icon={
-                    <BarChartOutlined />
-                }
-            />
+            <div className="page-sticky">
+                <header className="page-head">
+                    <div className="page-head__title">
+                        <span className="page-head__eyebrow">
+                            REPORTS
+                        </span>
 
+                        <h2>Báo cáo</h2>
 
-            {/* ========================================
-               STATISTICS
-            ======================================== */}
+                        <p>
+                            Theo dõi và khai thác các báo cáo phục vụ công tác
+                            quản lý, điều hành.
+                        </p>
+                    </div>
+                </header>
+            </div>
 
-            <Row
-                gutter={[
-                    16,
-                    16,
-                ]}
-                className="reports-page__statistics"
-            >
+            <div className="page-kpi">
+                <StatsCard
+                    tone="blue"
+                    title="Tổng số báo cáo"
+                    value={reports.length}
+                    icon={<FileTextOutlined />}
+                />
 
-                <Col
-                    xs={24}
-                    sm={12}
-                    lg={8}
-                >
+                <StatsCard
+                    tone="green"
+                    title="Loại báo cáo"
+                    value={reportTypes.length}
+                    icon={<FilterOutlined />}
+                />
 
-                    <Card className="reports-stat-card">
-
-                        <Statistic
-                            title="Tổng số báo cáo"
-                            value={
-                                reports.length
-                            }
-                            prefix={
-                                <FileTextOutlined />
-                            }
-                        />
-
-                    </Card>
-
-                </Col>
-
-
-                <Col
-                    xs={24}
-                    sm={12}
-                    lg={8}
-                >
-
-                    <Card className="reports-stat-card">
-
-                        <Statistic
-                            title="Loại báo cáo"
-                            value={
-                                reportTypes.length
-                            }
-                            prefix={
-                                <FilterOutlined />
-                            }
-                        />
-
-                    </Card>
-
-                </Col>
-
-
-                <Col
-                    xs={24}
-                    sm={12}
-                    lg={8}
-                >
-
-                    <Card className="reports-stat-card">
-
-                        <Statistic
-                            title="Cơ sở có báo cáo"
-                            value={
-                                campusReportCount
-                            }
-                            prefix={
-                                <BarChartOutlined />
-                            }
-                        />
-
-                    </Card>
-
-                </Col>
-
-            </Row>
+                <StatsCard
+                    tone="orange"
+                    title="Cơ sở có báo cáo"
+                    value={campusReportCount}
+                    note="Cơ sở phát sinh báo cáo"
+                    icon={<BarChartOutlined />}
+                />
+            </div>
 
 
             {/* ========================================

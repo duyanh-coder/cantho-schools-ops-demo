@@ -1,0 +1,67 @@
+.tt-attendance-chart {
+    height: 100%;
+}
+
+.tt-attendance-chart__wrap {
+    position: relative;
+
+    flex: 1;
+
+    min-height: 180px;
+
+    padding: 6px 10px 0;
+}
+
+.tt-attendance-chart__svg {
+    width: 100%;
+
+    height: 156px;
+}
+
+.tt-attendance-chart__grid {
+    stroke: rgba(148, 163, 184, 0.22);
+
+    stroke-dasharray: 3 4;
+}
+
+.tt-attendance-chart__tick {
+    fill: #94a3b8;
+
+    font-size: 9px;
+}
+
+.tt-attendance-chart__line {
+    fill: none;
+
+    stroke: #22c55e;
+
+    stroke-linecap: round;
+
+    stroke-linejoin: round;
+
+    stroke-width: 3;
+}
+
+.tt-attendance-chart__dot {
+    fill: #fff;
+
+    stroke: #22c55e;
+
+    stroke-width: 2.5;
+}
+
+.tt-attendance-chart__labels {
+    display: flex;
+
+    justify-content: space-between;
+
+    padding: 0 6px;
+
+    span {
+        color: #64748b;
+
+        font-size: 11px;
+
+        font-weight: 600;
+    }
+}

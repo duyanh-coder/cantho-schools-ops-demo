@@ -10,12 +10,9 @@ import {
 
 import {
     Card,
-    Col,
     Empty,
     Input,
-    Row,
     Select,
-    Statistic,
     Tag,
 } from "antd";
 
@@ -31,8 +28,7 @@ import type {
     AlertItem,
 } from "@/mock/common/types";
 
-import OperationPageHeader
-    from "@/components/OperationPageHeader";
+import StatsCard from "@/components/dashboard/StatCard";
 
 import "./style.scss";
 
@@ -209,120 +205,21 @@ function AlertsPage() {
     return (
         <div className="alerts-page">
 
-            <OperationPageHeader
-                eyebrow="ALERTS"
-                title="Cảnh báo"
-                description="Theo dõi các cảnh báo và tình trạng xử lý trong hệ thống."
-                icon={
-                    <WarningOutlined />
-                }
-            />
+            <div className="page-sticky">
+                <header className="page-head">
+                    <div className="page-head__title">
+                        <span className="page-head__eyebrow">
+                            ALERTS
+                        </span>
 
+                        <h2>Cảnh báo</h2>
 
-            {/* ========================================
-                STATISTICS
-            ======================================== */}
-
-            <Row
-                gutter={[
-                    16,
-                    16,
-                ]}
-                className="alerts-page__statistics"
-            >
-
-                <Col
-                    xs={24}
-                    sm={12}
-                    lg={6}
-                >
-
-                    <Card className="alerts-stat-card">
-
-                        <Statistic
-                            title="Tổng cảnh báo"
-                            value={
-                                alerts.length
-                            }
-                            prefix={
-                                <WarningOutlined />
-                            }
-                        />
-
-                    </Card>
-
-                </Col>
-
-
-                <Col
-                    xs={24}
-                    sm={12}
-                    lg={6}
-                >
-
-                    <Card className="alerts-stat-card">
-
-                        <Statistic
-                            title="Mức nguy hiểm"
-                            value={
-                                dangerCount
-                            }
-                            prefix={
-                                <ExclamationCircleOutlined />
-                            }
-                        />
-
-                    </Card>
-
-                </Col>
-
-
-                <Col
-                    xs={24}
-                    sm={12}
-                    lg={6}
-                >
-
-                    <Card className="alerts-stat-card">
-
-                        <Statistic
-                            title="Cần xử lý"
-                            value={
-                                processingCount
-                            }
-                            prefix={
-                                <ClockCircleOutlined />
-                            }
-                        />
-
-                    </Card>
-
-                </Col>
-
-
-                <Col
-                    xs={24}
-                    sm={12}
-                    lg={6}
-                >
-
-                    <Card className="alerts-stat-card">
-
-                        <Statistic
-                            title="Cảnh báo mới"
-                            value={
-                                newCount
-                            }
-                            prefix={
-                                <InfoCircleOutlined />
-                            }
-                        />
-
-                    </Card>
-
-                </Col>
-
-            </Row>
+                        <p>
+                            Theo dõi các cảnh báo và tình trạng xử lý
+                            trong hệ thống.
+                        </p>
+                    </div>
+                </header>
 
 
             {/* ========================================
@@ -440,6 +337,37 @@ function AlertsPage() {
                 </div>
 
             </Card>
+            </div>
+
+            <div className="page-kpi">
+                <StatsCard
+                    tone="blue"
+                    title="Tổng cảnh báo"
+                    value={alerts.length}
+                    icon={<WarningOutlined />}
+                />
+
+                <StatsCard
+                    tone="orange"
+                    title="Mức nguy hiểm"
+                    value={dangerCount}
+                    icon={<ExclamationCircleOutlined />}
+                />
+
+                <StatsCard
+                    tone="green"
+                    title="Cần xử lý"
+                    value={processingCount}
+                    icon={<ClockCircleOutlined />}
+                />
+
+                <StatsCard
+                    tone="purple"
+                    title="Cảnh báo mới"
+                    value={newCount}
+                    icon={<InfoCircleOutlined />}
+                />
+            </div>
 
 
             {/* ========================================

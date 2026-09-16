@@ -18,9 +18,6 @@ import {
     useState,
 } from "react";
 
-import OperationPageHeader
-    from "@/components/OperationPageHeader";
-
 import "./style.scss";
 
 
@@ -166,15 +163,22 @@ function ChatbotPage() {
     return (
         <div className="ai-chat-page">
 
-            <OperationPageHeader
-                eyebrow="AI ASSISTANT"
-                title="Trợ lý AI"
-                description="Hỗ trợ tra cứu, tổng hợp và phân tích thông tin trong hệ thống."
-                icon={
-                    <RobotOutlined />
-                }
-            />
+            <div className="page-sticky">
+                <header className="page-head">
+                    <div className="page-head__title">
+                        <span className="page-head__eyebrow">
+                            AI ASSISTANT
+                        </span>
 
+                        <h2>Trợ lý AI</h2>
+
+                        <p>
+                            Hỗ trợ tra cứu, tổng hợp và phân tích thông tin
+                            trong hệ thống.
+                        </p>
+                    </div>
+                </header>
+            </div>
 
             <Card className="ai-chat">
 
