@@ -78,6 +78,17 @@ const DashboardSidebar = ({
 
   const location = useLocation();
 
+  const handleBrandClick = () => {
+    sessionStorage.removeItem("home-scroll-position");
+
+    navigate("/");
+
+    window.scrollTo({
+      top: 0,
+      behavior: "auto",
+    });
+  };
+
   return (
     <Sider
       width={256}
@@ -89,7 +100,7 @@ const DashboardSidebar = ({
     >
       <div
         className="dashboard-sidebar__brand"
-        onClick={() => navigate("/")}
+        onClick={handleBrandClick}
       >
         <div className="dashboard-sidebar__logo">SOC</div>
 
