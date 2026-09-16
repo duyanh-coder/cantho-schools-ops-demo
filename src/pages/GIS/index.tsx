@@ -187,17 +187,15 @@ function GisPage() {
 
   return (
 <div className="gis-page">
-      <div className="page-sticky">
-        <header className="page-head">
-          <div className="page-head__title">
-            <span className="page-head__eyebrow">GIS</span>
+      <header className="page-head">
+        <div className="page-head__title">
+          <span className="page-head__eyebrow">GIS</span>
 
-            <h2>Bản đồ GIS</h2>
+          <h2>Bản đồ GIS</h2>
 
-            <p>Trực quan hóa địa bàn, trường học và các cơ sở giáo dục.</p>
-          </div>
-        </header>
-      </div>
+          <p>Trực quan hóa địa bàn, trường học và các cơ sở giáo dục.</p>
+        </div>
+      </header>
 
       <div className="page-kpi">
         <StatsCard
@@ -239,7 +237,7 @@ function GisPage() {
       <Row gutter={[16, 16]}>
         {/* MAP */}
 
-        <Col xs={24} xl={17}>
+        <Col xs={24} xl={17} className="gis-map-col">
           <Card className="gis-map-card">
             <div className="gis-map-card__toolbar">
               <div>
@@ -315,7 +313,7 @@ function GisPage() {
                       key={ward.id}
                       positions={ward.polygon}
                       pathOptions={{
-                        color: isSelected ? "#3b82f6" : "#0e7490",
+                        color: isSelected ? "#2563eb" : "#0e7490",
 
                         weight: isSelected ? 2.6 : 1.4,
 
@@ -324,7 +322,19 @@ function GisPage() {
                         fillOpacity: isSelected ? 0.34 : 0.16,
                       }}
                       eventHandlers={{
-                        click: () => handleWardClick(ward.id),
+                        click: (event) => {
+                          (event.target as L.Polygon).setStyle({
+                            color: "#2563eb",
+
+                            weight: 2.6,
+
+                            fillColor: "#60a5fa",
+
+                            fillOpacity: 0.34,
+                          });
+
+                          handleWardClick(ward.id);
+                        },
 
                         mouseover: (event) => {
                           if (isSelected) {
@@ -332,11 +342,11 @@ function GisPage() {
                           }
 
                           (event.target as L.Polygon).setStyle({
-                            color: "#155e75",
+                            color: "#3b82f6",
 
-                            weight: 2,
+                            weight: 1.8,
 
-                            fillOpacity: 0.3,
+                            fillOpacity: 0.24,
                           });
                         },
 
