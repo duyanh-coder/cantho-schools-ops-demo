@@ -202,7 +202,7 @@ function HomePage() {
 
                   <Button
                     size="large"
-                    onClick={() => navigate("/operations/dashboard")}
+                    onClick={() => navigate("/operations/documents")}
                   >
                     Vào trang điều hành
                   </Button>
