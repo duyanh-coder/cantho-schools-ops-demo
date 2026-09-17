@@ -95,12 +95,124 @@
     align-items: center;
 
     overflow: hidden;
+}
 
-    background-repeat: no-repeat;
+/* ========================================
+   HERO BACKGROUND
+======================================== */
+
+.home-hero__bg {
+    position: absolute;
+    inset: 0;
+
+    z-index: 0;
+
+    pointer-events: none;
+
+    transform:
+        translate3d(0, var(--hero-parallax, 0px), 0)
+        scale(1.15);
+
+    transform-origin: 50% 50%;
+
+    transition: transform 0.18s ease-out;
+
+    will-change: transform;
+}
+
+.home-hero__bg::before {
+    content: "";
+
+    position: absolute;
+    inset: -6%;
+
+    background-image: var(--hero-bg, none);
 
     background-position: center;
 
     background-size: cover;
+
+    transform-origin: 50% 45%;
+
+    animation: hero-pan 24s ease-in-out infinite alternate;
+
+    will-change: transform;
+}
+
+.home-hero__bg::after {
+    content: "";
+
+    position: absolute;
+    inset: 0;
+
+    z-index: 1;
+
+    background:
+        linear-gradient(
+            90deg,
+            rgba(8, 30, 60, 0.92) 0%,
+            rgba(12, 58, 105, 0.78) 42%,
+            rgba(15, 80, 130, 0.35) 70%,
+            rgba(15, 23, 42, 0.18) 100%
+        );
+}
+
+@keyframes hero-pan {
+    from {
+        transform: scale(1) translate3d(0, 0, 0);
+    }
+
+    to {
+        transform: scale(1.06) translate3d(0, -1.4%, 0);
+    }
+}
+
+.home-hero:hover .home-hero__bg::before {
+    animation: hero-pan-hover 9s ease-in-out infinite alternate;
+
+    filter: brightness(1.08) saturate(1.06) contrast(1.02);
+}
+
+@keyframes hero-pan-hover {
+    from {
+        transform: scale(1) translate3d(0, 0, 0);
+    }
+
+    to {
+        transform: scale(1.09) translate3d(0, -1.8%, 0);
+    }
+}
+
+.home-hero:active .home-hero__bg::before {
+    animation: hero-click-pulse 0.6s ease;
+}
+
+@keyframes hero-click-pulse {
+    0% {
+        transform: scale(1) translate3d(0, 0, 0);
+    }
+
+    45% {
+        transform: scale(1.07) translate3d(0, 0.6%, 0);
+    }
+
+    100% {
+        transform: scale(1) translate3d(0, 0, 0);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .home-hero__bg {
+        transform: scale(1.15);
+
+        transition: none;
+    }
+
+    .home-hero__bg::before,
+    .home-hero:hover .home-hero__bg::before,
+    .home-hero:active .home-hero__bg::before {
+        animation: none;
+    }
 }
 
 .home-hero__background {
@@ -124,7 +236,7 @@
 
 .home-hero__content {
     position: relative;
-    z-index: 1;
+    z-index: 2;
 
     padding: 80px 0;
 
@@ -266,7 +378,7 @@
 .home-hero__visual {
     position: relative;
 
-    z-index: 1;
+    z-index: 2;
 
     display: flex;
     justify-content: center;

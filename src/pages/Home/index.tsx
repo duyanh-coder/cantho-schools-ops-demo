@@ -1,4 +1,9 @@
-import { useEffect, type ReactNode } from "react";
+import {
+  useEffect,
+  useRef,
+  type CSSProperties,
+  type ReactNode,
+} from "react";
 
 import {
   ArrowRightOutlined,
@@ -104,6 +109,8 @@ const operationFeatures: OperationFeature[] = [
 function HomePage() {
   const navigate = useNavigate();
 
+  const heroRef = useRef<HTMLElement | null>(null);
+
   const handleExploreSystem = () => {
     document.getElementById("operation-features")?.scrollIntoView({
       behavior: "smooth",
@@ -148,25 +155,57 @@ function HomePage() {
     });
   };
 
+  useEffect(() => {
+    let frame = 0;
+
+    const updateParallax = () => {
+      const hero = heroRef.current;
+
+      if (hero) {
+        const rect = hero.getBoundingClientRect();
+
+        const scrolled = Math.min(
+            Math.max(-rect.top, 0),
+            rect.height,
+        );
+
+        hero.style.setProperty(
+            "--hero-parallax",
+            `${scrolled * 0.1}px`,
+        );
+      }
+
+      frame = 0;
+    };
+
+    const handleScroll = () => {
+      if (!frame) {
+        frame = requestAnimationFrame(updateParallax);
+      }
+    };
+
+    updateParallax();
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+
+    return () => {
+      if (frame) {
+        cancelAnimationFrame(frame);
+      }
+
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, []);
+
   return (
     <main className="home-page">
       {/* HERO */}
       <section
+        ref={heroRef}
         className="home-hero"
-        style={{
-          backgroundImage: `
-            linear-gradient(
-                90deg,
-                rgba(8, 30, 60, 0.92) 0%,
-                rgba(12, 58, 105, 0.78) 42%,
-                rgba(15, 80, 130, 0.35) 70%,
-                rgba(15, 23, 42, 0.18) 100%
-            ),
-            url(${heroImage})
-        `,
-        }}
+        style={{ "--hero-bg": `url(${heroImage})` } as CSSProperties}
       >
-        {/* <div className="home-hero__background" /> */}
+        <div className="home-hero__bg" aria-hidden="true" />
 
         <div className="home-container">
           <Row align="middle" gutter={[48, 48]}>
