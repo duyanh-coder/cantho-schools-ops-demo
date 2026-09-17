@@ -1189,3 +1189,753 @@
     --feature-border: rgba(45, 142, 170, 0.28);
     --feature-shadow: rgba(45, 142, 170, 0.18);
 }
+
+
+/* ========================================
+   EDUCATION
+======================================== */
+
+.home-education {
+    padding: 96px 0;
+
+    background:
+        linear-gradient(
+            180deg,
+            rgba(241, 245, 249, 0.9),
+            rgba(255, 255, 255, 0.6)
+        );
+}
+
+.home-education .home-container > .ant-row {
+    margin-bottom: 24px;
+}
+
+/* ---- headline stat strip ---- */
+
+.edu-stat-card {
+    position: relative;
+
+    height: 100%;
+
+    overflow: hidden;
+
+    border:
+        1px solid var(--color-border);
+
+    border-radius:
+        var(--radius-lg);
+
+    box-shadow:
+        var(--shadow-sm);
+
+    transition:
+        transform var(--transition-normal),
+        box-shadow var(--transition-normal);
+}
+
+.edu-stat-card:hover {
+    transform: translateY(-4px);
+
+    box-shadow:
+        var(--shadow-card);
+}
+
+.edu-stat-card::before {
+    content: "";
+
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+
+    height: 4px;
+
+    background: var(--accent-gradient);
+}
+
+.edu-stat-card__icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 46px;
+    height: 46px;
+
+    margin-bottom: 16px;
+
+    color: var(--accent-color);
+
+    background: var(--accent-soft);
+
+    border-radius:
+        var(--radius-md);
+
+    font-size: 21px;
+}
+
+.edu-stat-card .ant-statistic-title {
+    color:
+        var(--color-text-secondary);
+
+    font-size: 13px;
+}
+
+.edu-stat-card .ant-statistic-content {
+    color:
+        var(--color-text-primary);
+
+    font-size: 28px;
+    font-weight: 800;
+}
+
+.edu-stat-card__hint {
+    display: block;
+
+    margin-top: 10px;
+
+    color:
+        var(--color-text-muted);
+
+    font-size: 12px;
+}
+
+.edu-stat-card--schools {
+    --accent-color: #1677ff;
+    --accent-soft: rgba(22, 119, 255, 0.1);
+    --accent-gradient:
+        linear-gradient(
+            90deg,
+            #1677ff,
+            #69b1ff
+        );
+}
+
+.edu-stat-card--students {
+    --accent-color: #0e7490;
+    --accent-soft: rgba(14, 116, 144, 0.1);
+    --accent-gradient:
+        linear-gradient(
+            90deg,
+            #0e7490,
+            #06b6d4
+        );
+}
+
+.edu-stat-card--staff {
+    --accent-color: #4f46e5;
+    --accent-soft: rgba(79, 70, 229, 0.1);
+    --accent-gradient:
+        linear-gradient(
+            90deg,
+            #4f46e5,
+            #818cf8
+        );
+}
+
+.edu-stat-card--standard {
+    --accent-color: #16a34a;
+    --accent-soft: rgba(22, 163, 74, 0.1);
+    --accent-gradient:
+        linear-gradient(
+            90deg,
+            #16a34a,
+            #4ade80
+        );
+}
+
+/* ---- chart cards ---- */
+
+.edu-chart-card {
+    height: 100%;
+
+    border:
+        1px solid var(--color-border);
+
+    border-radius:
+        var(--radius-lg);
+
+    box-shadow:
+        var(--shadow-sm);
+}
+
+.edu-chart-card__heading {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+
+    gap: 12px;
+
+    margin-bottom: 24px;
+}
+
+.edu-chart-card__heading h4 {
+    margin: 0 0 4px;
+
+    color:
+        var(--color-text-primary);
+
+    font-size: 16px;
+    font-weight: 700;
+}
+
+.edu-chart-card__heading .ant-typography {
+    color:
+        var(--color-text-muted);
+
+    font-size: 12px;
+}
+
+.edu-chart-card__dot {
+    width: 12px;
+    height: 12px;
+
+    margin-top: 4px;
+
+    border-radius: 50%;
+
+    background: var(--dot-color);
+
+    box-shadow:
+        0 0 0 5px var(--dot-soft);
+}
+
+.edu-chart-card--schools {
+    --bar-color: #1677ff;
+    --bar-text: #1d4ed8;
+    --dot-color: #1677ff;
+    --dot-soft: rgba(22, 119, 255, 0.14);
+}
+
+.edu-chart-card--students {
+    --bar-color: #0e7490;
+    --bar-text: #155e75;
+    --dot-color: #0e7490;
+    --dot-soft: rgba(14, 116, 144, 0.14);
+}
+
+.edu-chart-card--standard {
+    --dot-color: #16a34a;
+    --dot-soft: rgba(22, 163, 74, 0.14);
+}
+
+.edu-chart-card--teachers {
+    --row-color: #d97706;
+    --dot-color: #d97706;
+    --dot-soft: rgba(217, 119, 6, 0.14);
+}
+
+/* ---- vertical bar chart ---- */
+
+.edu-chart--vertical {
+    display: flex;
+    align-items: stretch;
+
+    gap: 18px;
+
+    height: 240px;
+
+    padding-top: 4px;
+}
+
+.edu-chart__item {
+    flex: 1;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    min-width: 0;
+}
+
+.edu-chart__value {
+    margin-bottom: 8px;
+
+    color:
+        var(--bar-text, var(--color-text-primary));
+    font-size: 15px;
+    font-weight: 700;
+}
+
+.edu-chart__track {
+    flex: 1;
+
+    display: flex;
+    align-items: flex-end;
+
+    width: 100%;
+    max-width: 46px;
+}
+
+.edu-chart__bar {
+    width: 100%;
+
+    border-radius: 8px 8px 4px 4px;
+
+    background:
+        var(--bar-color);
+
+    transition:
+        filter var(--transition-normal);
+}
+
+.edu-chart__item:hover .edu-chart__bar {
+    filter: brightness(1.08);
+}
+
+.edu-chart__label {
+    margin-top: 10px;
+
+    color:
+        var(--color-text-secondary);
+
+    font-size: 12.5px;
+    font-weight: 600;
+
+    text-align: center;
+}
+
+/* ---- horizontal row chart ---- */
+
+.edu-rows {
+    display: flex;
+    flex-direction: column;
+
+    gap: 18px;
+}
+
+.edu-rows__item {
+    display: flex;
+    flex-direction: column;
+
+    gap: 8px;
+}
+
+.edu-rows__head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+}
+
+.edu-rows__head span {
+    color:
+        var(--color-text-secondary);
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.edu-rows__head strong {
+    color:
+        var(--row-color);
+    font-size: 14px;
+    font-weight: 800;
+}
+
+.edu-rows__track {
+    height: 10px;
+
+    overflow: hidden;
+
+    background:
+        rgba(148, 163, 184, 0.18);
+
+    border-radius: 999px;
+}
+
+.edu-rows__track span {
+    display: block;
+
+    height: 100%;
+
+    border-radius: 999px;
+
+    background:
+        var(--row-color);
+}
+
+.edu-rows__note {
+    display: block;
+
+    padding-top: 4px;
+
+    color:
+        var(--color-text-muted);
+
+    font-size: 12px;
+    line-height: 1.6;
+}
+
+/* ---- progress circles ---- */
+
+.edu-progress {
+    margin: 8px 0 4px;
+}
+
+.edu-progress__item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    text-align: center;
+}
+
+.edu-progress__value {
+    color:
+        var(--color-text-primary);
+    font-size: 22px;
+    font-weight: 800;
+}
+
+.edu-progress__caption {
+    display: flex;
+    flex-direction: column;
+
+    gap: 2px;
+
+    margin-top: 12px;
+}
+
+.edu-progress__caption strong {
+    color:
+        var(--color-text-primary);
+    font-size: 14px;
+}
+
+.edu-progress__caption span {
+    color:
+        var(--color-text-muted);
+    font-size: 12px;
+}
+
+/* ---- restructure outlook ---- */
+
+.edu-restructure {
+    position: relative;
+
+    overflow: hidden;
+
+    margin-bottom: 24px;
+
+    border:
+        1px solid var(--color-border);
+
+    border-radius:
+        var(--radius-lg);
+
+    box-shadow:
+        var(--shadow-card);
+}
+
+.edu-restructure .ant-card-body {
+    display: flex;
+    align-items: center;
+
+    gap: 40px;
+
+    padding: 28px 32px;
+}
+
+.edu-restructure__brief {
+    flex: 1 1 45%;
+
+    min-width: 0;
+}
+
+.edu-restructure__badge {
+    display: inline-flex;
+    align-items: center;
+
+    gap: 8px;
+
+    padding: 6px 12px;
+
+    margin-bottom: 12px;
+
+    color: #2f6ec4;
+
+    background:
+        rgba(47, 110, 196, 0.1);
+
+    border:
+        1px solid rgba(47, 110, 196, 0.24);
+
+    border-radius: 999px;
+
+    font-size: 11px;
+    font-weight: 700;
+
+    letter-spacing: 0.08em;
+}
+
+.edu-restructure__brief h4 {
+    margin: 0 0 8px;
+
+    color:
+        var(--color-text-primary);
+
+    font-size: 20px;
+    font-weight: 750;
+}
+
+.edu-restructure__brief .ant-typography {
+    margin: 0;
+
+    color:
+        var(--color-text-secondary);
+
+    font-size: 14px;
+    line-height: 1.7;
+}
+
+.edu-restructure__tiles {
+    flex: 1 1 55%;
+
+    min-width: 0;
+
+    display: grid;
+    grid-template-columns: repeat(
+        3,
+        1fr
+    );
+
+    gap: 14px;
+}
+
+.edu-restructure__tile {
+    padding: 16px 14px;
+
+    background:
+        var(--color-surface-soft);
+
+    border:
+        1px solid var(--color-border-light);
+
+    border-radius:
+        var(--radius-md);
+}
+
+.edu-restructure__tile-label {
+    display: block;
+
+    margin-bottom: 10px;
+
+    color:
+        var(--color-text-secondary);
+    font-size: 12px;
+    font-weight: 600;
+
+    line-height: 1.35;
+}
+
+.edu-restructure__tile-values {
+    display: flex;
+    align-items: center;
+
+    gap: 10px;
+}
+
+.edu-restructure__tile-values strong {
+    font-size: 24px;
+    font-weight: 800;
+}
+
+.edu-restructure__tile-values .edu-restructure__to {
+    color: #1677ff;
+}
+
+.edu-restructure__arrow {
+    display: flex;
+    align-items: center;
+
+    color:
+        var(--color-text-muted);
+    font-size: 13px;
+}
+
+@media (max-width: 991px) {
+    .edu-restructure .ant-card-body {
+        flex-direction: column;
+        align-items: stretch;
+
+        gap: 24px;
+    }
+}
+
+@media (max-width: 575px) {
+    .edu-restructure__tiles {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* ---- news card ---- */
+
+.edu-news {
+    margin-bottom: 24px;
+
+    border:
+        1px solid var(--color-border);
+
+    border-radius:
+        var(--radius-lg);
+
+    box-shadow:
+        var(--shadow-card);
+}
+
+.edu-news__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 16px;
+
+    padding-bottom: 16px;
+    margin-bottom: 8px;
+
+    border-bottom:
+        1px solid var(--color-border-light);
+}
+
+.edu-news__title {
+    display: flex;
+    align-items: center;
+
+    gap: 12px;
+
+    min-width: 0;
+}
+
+.edu-news__title > .anticon {
+    flex-shrink: 0;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 40px;
+    height: 40px;
+
+    color:
+        var(--color-primary);
+
+    background:
+        var(--color-primary-soft);
+
+    border-radius:
+        var(--radius-md);
+
+    font-size: 17px;
+}
+
+.edu-news__title h4 {
+    margin: 0 0 2px;
+
+    color:
+        var(--color-text-primary);
+    font-size: 17px;
+    font-weight: 750;
+}
+
+.edu-news__title span {
+    color:
+        var(--color-text-muted);
+    font-size: 12.5px;
+}
+
+.edu-news__count {
+    flex-shrink: 0;
+
+    color:
+        var(--color-text-muted);
+    font-size: 12px;
+}
+
+@media (max-width: 575px) {
+    .edu-news__count {
+        display: none;
+    }
+}
+
+.edu-news__list {
+    display: flex;
+    flex-direction: column;
+}
+
+.edu-news__item {
+    display: flex;
+    flex-direction: column;
+
+    gap: 6px;
+
+    padding: 14px 16px;
+    margin: 0 -16px;
+
+    border-radius:
+        var(--radius-md);
+
+    text-decoration: none;
+
+    transition:
+        background var(--transition-fast);
+}
+
+.edu-news__item + .edu-news__item {
+    border-top:
+        1px dashed var(--color-border-light);
+}
+
+.edu-news__item:hover {
+    background:
+        var(--color-surface-hover);
+}
+
+.edu-news__item-meta {
+    display: flex;
+    flex-wrap: wrap;
+
+    gap: 10px;
+
+    color:
+        var(--color-text-muted);
+    font-size: 11.5px;
+}
+
+.edu-news__item-meta span:first-child {
+    color:
+        var(--color-primary);
+    font-weight: 700;
+}
+
+.edu-news__item h5 {
+    margin: 0;
+
+    color:
+        var(--color-text-primary);
+    font-size: 14px;
+    font-weight: 600;
+
+    line-height: 1.5;
+
+    transition:
+        color var(--transition-fast);
+}
+
+.edu-news__item:hover h5 {
+    color:
+        var(--color-primary);
+}
+
+.edu-news__item-more {
+    align-self: flex-end;
+
+    color: #1677ff;
+
+    font-size: 12.5px;
+    font-weight: 600;
+
+    transition:
+        transform var(--transition-fast);
+}
+
+.edu-news__item:hover .edu-news__item-more {
+    transform: translateX(4px);
+}
