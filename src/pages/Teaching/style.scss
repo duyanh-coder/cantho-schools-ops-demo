@@ -4,6 +4,172 @@
 
 
 /* =========================
+   HEADER ACTION
+========================= */
+
+.page-head__actions {
+    display: flex;
+    align-items: center;
+
+    gap: 10px;
+
+    flex-shrink: 0;
+
+    .ant-btn {
+        display: inline-flex;
+        align-items: center;
+
+        gap: 8px;
+
+        height: 40px;
+
+        border-radius: 12px;
+
+        font-weight: 600;
+
+        box-shadow:
+            0 8px 18px
+            rgba(37, 99, 235, 0.22);
+    }
+}
+
+
+/* =========================
+   QR MODAL
+========================= */
+
+.teaching-qr-modal {
+    .ant-modal-content {
+        padding: 24px;
+
+        border-radius: 18px;
+    }
+
+    .ant-modal-header {
+        margin-bottom: 18px;
+    }
+
+    .ant-modal-title {
+        font-size: 17px;
+        font-weight: 700;
+    }
+}
+
+.teaching-qr {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    gap: 16px;
+
+    text-align: center;
+}
+
+.teaching-qr__role {
+    display: inline-flex;
+    align-items: center;
+
+    gap: 6px;
+
+    padding: 5px 12px;
+
+    color: #64748b;
+
+    background:
+        rgba(22, 119, 255, 0.08);
+
+    border:
+        1px solid rgba(22, 119, 255, 0.2);
+
+    border-radius: 999px;
+
+    font-size: 12px;
+    font-weight: 600;
+
+    .anticon {
+        color: #1677ff;
+    }
+}
+
+.teaching-qr__box {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 18px;
+
+    background: #ffffff;
+
+    border:
+        1px solid rgba(100, 116, 139, 0.28);
+
+    border-radius: 16px;
+
+    box-shadow:
+        0 14px 34px
+        rgba(15, 23, 42, 0.12);
+}
+
+.fake-qr {
+    display: block;
+}
+
+.teaching-qr__info {
+    display: flex;
+    flex-direction: column;
+
+    gap: 4px;
+}
+
+.teaching-qr__info span {
+    color: #64748b;
+
+    font-size: 12px;
+}
+
+.teaching-qr__info strong {
+    color: #0f172a;
+
+    font-family:
+        "SFMono-Regular",
+        Consolas,
+        "Liberation Mono",
+        monospace;
+
+    font-size: 16px;
+
+    letter-spacing: 0.5px;
+}
+
+.teaching-qr__note {
+    display: flex;
+    align-items: flex-start;
+
+    gap: 8px;
+
+    max-width: 300px;
+
+    margin: 0;
+
+    color: #64748b;
+
+    font-size: 12.5px;
+
+    line-height: 1.6;
+
+    text-align: left;
+
+    .anticon {
+        flex-shrink: 0;
+
+        margin-top: 2px;
+
+        color: #1677ff;
+    }
+}
+
+
+/* =========================
    FILTER
 ========================= */
 

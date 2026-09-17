@@ -3,19 +3,23 @@ import {
     ClockCircleOutlined,
     CloseCircleOutlined,
     FilterOutlined,
+    QrcodeOutlined,
     SafetyCertificateOutlined,
 } from "@ant-design/icons";
 
 import {
     Badge,
+    Button,
     Card,
     Col,
     Empty,
+    Modal,
     Row,
     Select,
 } from "antd";
 
 import {
+    useMemo,
     useState,
 } from "react";
 
@@ -80,6 +84,257 @@ const SUBJECT_LABELS: Record<string, string> = {
 };
 
 
+/* ============================================================
+   FAKE QR — mã QR minh họa (demo), vẽ bằng SVG thuần, không
+   phải mã QR chuẩn có thể quét thật. Dựa trên seed sinh từ
+   chuỗi mã điểm danh để cùng mã → cùng pattern.
+============================================================ */
+
+const QR_GRID_SIZE = 25;
+
+const hashStringToSeed = (
+    value: string,
+): number => {
+    let hash = 2166136261;
+
+    for (
+        let i = 0;
+        i < value.length;
+        i += 1
+    ) {
+        hash ^= value.charCodeAt(i);
+
+        hash = Math.imul(
+            hash,
+            16777619,
+        );
+    }
+
+    return hash >>> 0;
+};
+
+const mulberry32 = (
+    seed: number,
+): () => number => {
+    let state = seed;
+
+    return () => {
+        state |= 0;
+
+        state =
+            (state + 0x6d2b79f5) | 0;
+
+        let t = Math.imul(
+            state ^ (state >>> 15),
+            1 | state,
+        );
+
+        t =
+            (t +
+                Math.imul(
+                    t ^ (t >>> 7),
+                    61 | t,
+                )) ^
+            t;
+
+        return (
+            (t ^ (t >>> 14)) >>> 0
+        ) / 4294967296;
+    };
+};
+
+interface FakeQrCodeProps {
+    value: string;
+    size?: number;
+}
+
+function FakeQrCode({
+    value,
+    size = 224,
+}: FakeQrCodeProps) {
+    const darkCells = useMemo(
+        () => {
+            const random = mulberry32(
+                hashStringToSeed(value),
+            );
+
+            const insideFinder = (
+                x: number,
+                y: number,
+            ) => {
+                const inside = (
+                    originX: number,
+                    originY: number,
+                ) =>
+                    x >= originX &&
+                    x < originX + 8 &&
+                    y >= originY &&
+                    y < originY + 8;
+
+                return (
+                    inside(0, 0) ||
+                    inside(
+                        QR_GRID_SIZE - 8,
+                        0,
+                    ) ||
+                    inside(
+                        0,
+                        QR_GRID_SIZE - 8,
+                    )
+                );
+            };
+
+            const isFinderDark = (
+                x: number,
+                y: number,
+            ) => {
+                const at = (
+                    originX: number,
+                    originY: number,
+                ) => {
+                    const dx = x - originX;
+                    const dy = y - originY;
+
+                    const ring =
+                        dx >= 0 &&
+                        dx < 7 &&
+                        dy >= 0 &&
+                        dy < 7;
+
+                    const border =
+                        dx >= 1 &&
+                        dx < 6 &&
+                        dy >= 1 &&
+                        dy < 6;
+
+                    const core =
+                        dx >= 2 &&
+                        dx < 5 &&
+                        dy >= 2 &&
+                        dy < 5;
+
+                    return (
+                        ring &&
+                        (!border || core)
+                    );
+                };
+
+                return (
+                    at(0, 0) ||
+                    at(
+                        QR_GRID_SIZE - 7,
+                        0,
+                    ) ||
+                    at(
+                        0,
+                        QR_GRID_SIZE - 7,
+                    )
+                );
+            };
+
+            const cells: Array<{
+                x: number;
+                y: number;
+            }> = [];
+
+            for (
+                let y = 0;
+                y < QR_GRID_SIZE;
+                y += 1
+            ) {
+                for (
+                    let x = 0;
+                    x < QR_GRID_SIZE;
+                    x += 1
+                ) {
+                    if (
+                        insideFinder(x, y)
+                    ) {
+                        if (
+                            isFinderDark(x, y)
+                        ) {
+                            cells.push({ x, y });
+                        }
+
+                        continue;
+                    }
+
+                    if (
+                        random() < 0.42
+                    ) {
+                        cells.push({ x, y });
+                    }
+                }
+            }
+
+            return cells;
+        },
+        [value],
+    );
+
+    return (
+        <svg
+            className="fake-qr"
+            viewBox={`0 0 ${QR_GRID_SIZE} ${QR_GRID_SIZE}`}
+            width={size}
+            height={size}
+            shapeRendering="crispEdges"
+            role="img"
+            aria-label="Mã QR điểm danh (minh họa)"
+        >
+            <rect
+                x={0}
+                y={0}
+                width={QR_GRID_SIZE}
+                height={QR_GRID_SIZE}
+                fill="#ffffff"
+            />
+
+            {darkCells.map((cell) => (
+                <rect
+                    key={`${cell.x}-${cell.y}`}
+                    x={cell.x}
+                    y={cell.y}
+                    width={1}
+                    height={1}
+                    fill="#0f172a"
+                />
+            ))}
+        </svg>
+    );
+}
+
+const generateAttendanceCode =
+    (): string => {
+        const alphabet =
+            "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+
+        let suffix = "";
+
+        for (
+            let i = 0;
+            i < 4;
+            i += 1
+        ) {
+            suffix += alphabet[
+                Math.floor(
+                    Math.random() *
+                        alphabet.length,
+                )
+            ];
+        }
+
+        const date = new Date()
+            .toISOString()
+            .slice(0, 10)
+            .replace(/-/g, "");
+
+        return (
+            `CT-${date}-${suffix}`
+        );
+    };
+
+
 function TeachingPage() {
     const {
         teachingAttendance,
@@ -111,6 +366,32 @@ function TeachingPage() {
     ] = useState<
         AttendanceStatus | "all"
     >("all");
+
+    const [
+        qrOpen,
+        setQrOpen,
+    ] = useState(false);
+
+    const [
+        attendanceCode,
+        setAttendanceCode,
+    ] = useState(
+        generateAttendanceCode,
+    );
+
+    const openQrModal = () => {
+        setAttendanceCode(
+            generateAttendanceCode(),
+        );
+
+        setQrOpen(true);
+    };
+
+    const regenerateCode = () => {
+        setAttendanceCode(
+            generateAttendanceCode(),
+        );
+    };
 
 
     const availableClasses =
@@ -211,6 +492,16 @@ function TeachingPage() {
                             Theo dõi tình hình thực hiện giảng dạy và trạng thái
                             điểm danh của giáo viên.
                         </p>
+                    </div>
+
+                    <div className="page-head__actions">
+                        <Button
+                            type="primary"
+                            icon={<QrcodeOutlined />}
+                            onClick={openQrModal}
+                        >
+                            Điểm danh
+                        </Button>
                     </div>
                 </header>
 
@@ -548,6 +839,68 @@ function TeachingPage() {
                 )}
 
             </div>
+
+            <Modal
+                open={qrOpen}
+                title="Điểm danh giảng dạy"
+                className="teaching-qr-modal"
+                onCancel={() =>
+                    setQrOpen(false)
+                }
+                footer={[
+                    <Button
+                        key="regenerate"
+                        type="primary"
+                        icon={<QrcodeOutlined />}
+                        onClick={regenerateCode}
+                    >
+                        Tạo mã mới
+                    </Button>,
+
+                    <Button
+                        key="close"
+                        onClick={() =>
+                            setQrOpen(false)
+                        }
+                    >
+                        Đóng
+                    </Button>,
+                ]}
+            >
+                <div className="teaching-qr">
+                    <div className="teaching-qr__role">
+                        <SafetyCertificateOutlined />
+
+                        <span>
+                            Dành cho giáo viên, nhân viên
+                        </span>
+                    </div>
+
+                    <div className="teaching-qr__box">
+                        <FakeQrCode
+                            value={attendanceCode}
+                        />
+                    </div>
+
+                    <div className="teaching-qr__info">
+                        <span>Mã điểm danh</span>
+
+                        <strong>
+                            {attendanceCode}
+                        </strong>
+                    </div>
+
+                    <p className="teaching-qr__note">
+                        <QrcodeOutlined />
+
+                        <span>
+                            Giáo viên, nhân viên dùng điện thoại quét mã QR
+                            này khi đến lớp để hoàn tất điểm danh. Mã minh họa,
+                            hiệu lực 60 giây.
+                        </span>
+                    </p>
+                </div>
+            </Modal>
 
         </div>
     );
