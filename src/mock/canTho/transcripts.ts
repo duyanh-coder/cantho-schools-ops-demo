@@ -1,0 +1,28 @@
+import type { Transcript } from "../common/types";
+
+export const canThoTranscripts: Transcript[] = [
+    { id: "can-tho-transcript-001", studentId: "can-tho-student-001", subjectId: "math", semester: 1, academicYear: "2026-2027", score: 8.5, conduct: "Tốt" },
+    { id: "can-tho-transcript-002", studentId: "can-tho-student-001", subjectId: "literature", semester: 1, academicYear: "2026-2027", score: 7.8, conduct: "Tốt" },
+    { id: "can-tho-transcript-003", studentId: "can-tho-student-002", subjectId: "math", semester: 1, academicYear: "2026-2027", score: 9.0, conduct: "Tốt" },
+    { id: "can-tho-transcript-004", studentId: "can-tho-student-002", subjectId: "literature", semester: 1, academicYear: "2026-2027", score: 8.2, conduct: "Tốt" },
+    { id: "can-tho-transcript-005", studentId: "can-tho-student-003", subjectId: "math", semester: 1, academicYear: "2026-2027", score: 6.5, conduct: "Khá" },
+    { id: "can-tho-transcript-006", studentId: "can-tho-student-003", subjectId: "english", semester: 1, academicYear: "2026-2027", score: 7.0, conduct: "Khá" },
+    { id: "can-tho-transcript-007", studentId: "can-tho-student-004", subjectId: "math", semester: 1, academicYear: "2026-2027", score: 8.0, conduct: "Tốt" },
+    { id: "can-tho-transcript-008", studentId: "can-tho-student-004", subjectId: "english", semester: 1, academicYear: "2026-2027", score: 8.8, conduct: "Tốt" },
+    { id: "can-tho-transcript-009", studentId: "can-tho-student-005", subjectId: "math", semester: 1, academicYear: "2026-2027", score: 5.5, conduct: "Đạt" },
+    { id: "can-tho-transcript-010", studentId: "can-tho-student-005", subjectId: "literature", semester: 1, academicYear: "2026-2027", score: 6.0, conduct: "Khá" },
+    { id: "can-tho-transcript-011", studentId: "can-tho-student-006", subjectId: "math", semester: 1, academicYear: "2026-2027", score: 8.4, conduct: "Tốt" },
+    { id: "can-tho-transcript-012", studentId: "can-tho-student-006", subjectId: "literature", semester: 1, academicYear: "2026-2027", score: 9.2, conduct: "Tốt" },
+    { id: "can-tho-transcript-013", studentId: "can-tho-student-007", subjectId: "physics", semester: 1, academicYear: "2026-2027", score: 7.6, conduct: "Khá" },
+    { id: "can-tho-transcript-014", studentId: "can-tho-student-007", subjectId: "math", semester: 1, academicYear: "2026-2027", score: 7.2, conduct: "Khá" },
+    { id: "can-tho-transcript-015", studentId: "can-tho-student-008", subjectId: "physics", semester: 1, academicYear: "2026-2027", score: 8.9, conduct: "Tốt" },
+    { id: "can-tho-transcript-016", studentId: "can-tho-student-008", subjectId: "math", semester: 1, academicYear: "2026-2027", score: 8.6, conduct: "Tốt" },
+    { id: "can-tho-transcript-017", studentId: "can-tho-student-009", subjectId: "english", semester: 1, academicYear: "2026-2027", score: 6.8, conduct: "Khá" },
+    { id: "can-tho-transcript-018", studentId: "can-tho-student-009", subjectId: "literature", semester: 1, academicYear: "2026-2027", score: 7.4, conduct: "Khá" },
+    { id: "can-tho-transcript-019", studentId: "can-tho-student-010", subjectId: "english", semester: 1, academicYear: "2026-2027", score: 9.5, conduct: "Tốt" },
+    { id: "can-tho-transcript-020", studentId: "can-tho-student-010", subjectId: "math", semester: 1, academicYear: "2026-2027", score: 9.1, conduct: "Tốt" },
+    { id: "can-tho-transcript-021", studentId: "can-tho-student-011", subjectId: "math", semester: 1, academicYear: "2026-2027", score: 6.2, conduct: "Đạt" },
+    { id: "can-tho-transcript-022", studentId: "can-tho-student-011", subjectId: "literature", semester: 1, academicYear: "2026-2027", score: 6.5, conduct: "Khá" },
+    { id: "can-tho-transcript-023", studentId: "can-tho-student-012", subjectId: "math", semester: 1, academicYear: "2026-2027", score: 8.1, conduct: "Tốt" },
+    { id: "can-tho-transcript-024", studentId: "can-tho-student-012", subjectId: "literature", semester: 1, academicYear: "2026-2027", score: 7.9, conduct: "Tốt" },
+];

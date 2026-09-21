@@ -18,4 +18,12 @@ export type {
     TeachingAttendance,
     User,
     UserRole,
+    Sector,
+    SectorType,
+    Personnel,
+    Student,
+    Transcript,
+    EnrolmentChange,
+    EnrolmentChangeType,
+    BoardingRecord,
 } from "./types";

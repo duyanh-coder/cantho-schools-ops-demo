@@ -55,6 +55,26 @@ export type {
 } from "./user";
 
 export type {
+    Sector,
+    SectorType,
+} from "./sector";
+
+export type {
+    Personnel,
+} from "./personnel";
+
+export type {
+    Student,
+    Transcript,
+    EnrolmentChange,
+    EnrolmentChangeType,
+} from "./student";
+
+export type {
+    BoardingRecord,
+} from "./boarding";
+
+export type {
     RegionMockData,
 } from "./regionMock";
 

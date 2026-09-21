@@ -1,10 +1,14 @@
 import {
+  ApartmentOutlined,
   BarChartOutlined,
   CalendarOutlined,
+  CoffeeOutlined,
   EnvironmentOutlined,
   FileTextOutlined,
+  ReadOutlined,
   RobotOutlined,
   SolutionOutlined,
+  TeamOutlined,
   WarningOutlined,
 } from "@ant-design/icons";
 
@@ -35,6 +39,26 @@ const menuItems: MenuItem[] = [
     key: "/operations/schools",
     icon: <SolutionOutlined />,
     label: "Trường & Cơ sở",
+  },
+  {
+    key: "/operations/personnel",
+    icon: <TeamOutlined />,
+    label: "Nhân sự",
+  },
+  {
+    key: "/operations/sectors",
+    icon: <ApartmentOutlined />,
+    label: "Khối - tổ",
+  },
+  {
+    key: "/operations/students",
+    icon: <ReadOutlined />,
+    label: "Học sinh",
+  },
+  {
+    key: "/operations/boarding",
+    icon: <CoffeeOutlined />,
+    label: "Bán trú",
   },
   {
     key: "/operations/gis",

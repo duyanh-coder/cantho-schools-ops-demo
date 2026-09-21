@@ -16,6 +16,11 @@ import ReportsPage from "@/pages/Reports";
 import SchoolPage from "@/pages/Schools";
 import TimetablePage from "@/pages/Timetable";
 
+import PersonnelPage from "@/pages/Personnel";
+import SectorsPage from "@/pages/Sector";
+import StudentsPage from "@/pages/Students";
+import BoardingPage from "@/pages/Boarding";
+
 
 
 function AppRouter() {
@@ -36,6 +41,14 @@ function AppRouter() {
           <Route path="/operations/gis" element={<GISPage />} />
 
           <Route path="/operations/reports" element={<ReportsPage />} />
+
+          <Route path="/operations/personnel" element={<PersonnelPage />} />
+
+          <Route path="/operations/sectors" element={<SectorsPage />} />
+
+          <Route path="/operations/students" element={<StudentsPage />} />
+
+          <Route path="/operations/boarding" element={<BoardingPage />} />
 
           <Route path="/operations/alerts" element={<AlertsPage />} />
 

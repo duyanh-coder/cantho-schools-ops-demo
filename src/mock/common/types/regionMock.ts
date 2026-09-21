@@ -11,6 +11,12 @@ import type { TaskItem } from "./task";
 import type { ReportItem } from "./report";
 import type { TeachingAttendance } from "./teachingAttendance";
 import type { User } from "./user";
+import type { Sector } from "./sector";
+import type { Personnel } from "./personnel";
+import type { Student } from "./student";
+import type { Transcript } from "./student";
+import type { EnrolmentChange } from "./student";
+import type { BoardingRecord } from "./boarding";
 import type {
     GisMockData,
 } from "./gis";
@@ -44,4 +50,16 @@ export interface RegionMockData {
     teachingAttendance: TeachingAttendance[];
 
     users: User[];
+
+    sectors: Sector[];
+
+    personnel: Personnel[];
+
+    students: Student[];
+
+    transcripts: Transcript[];
+
+    enrolmentChanges: EnrolmentChange[];
+
+    boarding: BoardingRecord[];
 }
