@@ -1,7 +1,6 @@
 import {
     BookOutlined,
     CalendarOutlined,
-    CheckCircleOutlined,
     TeamOutlined,
 } from "@ant-design/icons";
 import {
@@ -14,12 +13,14 @@ import {
     getCurrentRegionMockData,
 } from "@/mock";
 
-import AttendanceChart from "./components/AttendanceChart";
+import {
+    SCHOOL_FOCUS,
+} from "@/config";
+
 import CampusStatusPanel from "./components/CampusStatus";
 import FilterBar from "./components/FilterBar";
 import OverviewChart from "./components/OverviewChart";
 import StatsCard from "@/components/dashboard/StatCard";
-import StaffStatsPanel from "./components/StaffStats";
 
 import "./style.scss";
 
@@ -48,14 +49,6 @@ const dayOptions = [
     { key: "friday", label: "Thứ Sáu", date: "21/08" },
 ];
 
-const attendanceDates = [
-    "2026-08-17",
-    "2026-08-18",
-    "2026-08-19",
-    "2026-08-20",
-    "2026-08-21",
-];
-
 const TimetablePage = () => {
     const {
         campuses,
@@ -63,11 +56,12 @@ const TimetablePage = () => {
         schools,
         teachers,
         timetables,
-        teachingAttendance,
         alerts,
     } = getCurrentRegionMockData();
 
-    const [selectedSchool, setSelectedSchool] = useState("all");
+    const [selectedSchool, setSelectedSchool] = useState<string>(
+        SCHOOL_FOCUS.id,
+    );
 
     const [selectedCampus, setSelectedCampus] = useState("all");
 
@@ -82,6 +76,12 @@ const TimetablePage = () => {
                   (campus) => campus.schoolId === selectedSchool,
               );
     }, [campuses, selectedSchool]);
+
+    const focusSchools = useMemo(() => {
+        return schools.filter(
+            (school) => school.id === SCHOOL_FOCUS.id,
+        );
+    }, [schools]);
 
     const matchCampus = useCallback(
         (campusId: string) => {
@@ -157,43 +157,6 @@ const TimetablePage = () => {
         });
     }, [filteredCampuses, dayLessons]);
 
-    const attendanceSeries = useMemo(() => {
-        return attendanceDates.map((date, index) => {
-            const items = teachingAttendance.filter(
-                (item) =>
-                    item.date === date &&
-                    matchCampus(item.campusId),
-            );
-
-            const present = items.filter(
-                (item) => item.status === "present",
-            ).length;
-
-            const total = items.length;
-
-            return {
-                label: dayOptions[index]?.label ?? "",
-                value: total === 0 ? 100 : Math.round((present / total) * 100),
-            };
-        });
-    }, [teachingAttendance, matchCampus]);
-
-    const staffStats = useMemo(() => {
-        const items = teachingAttendance.filter(
-            (item) =>
-                item.date === attendanceDates[0] &&
-                matchCampus(item.campusId),
-        );
-
-        return {
-            present: items.filter((item) => item.status === "present")
-                .length,
-            late: items.filter((item) => item.status === "late").length,
-            absent: items.filter((item) => item.status === "absent")
-                .length,
-        };
-    }, [teachingAttendance, matchCampus]);
-
     const alertItems = useMemo(() => {
         return alerts
             .filter(
@@ -202,20 +165,6 @@ const TimetablePage = () => {
             )
             .slice(0, 5);
     }, [alerts, matchCampus]);
-
-    const attendanceRate = useMemo(() => {
-        const items = teachingAttendance.filter((item) =>
-            matchCampus(item.campusId),
-        );
-
-        const present = items.filter(
-            (item) => item.status === "present",
-        ).length;
-
-        return items.length === 0
-            ? 0
-            : Math.round((present / items.length) * 100);
-    }, [teachingAttendance, matchCampus]);
 
     const currentDay = dayOptions.find(
         (day) => day.key === selectedDay,
@@ -274,7 +223,7 @@ const TimetablePage = () => {
 
                 <FilterBar
                 selectedSchool={selectedSchool}
-                schools={schools}
+                schools={focusSchools}
                 selectedCampus={selectedCampus}
                 campuses={filteredCampuses}
                 selectedYear={selectedYear}
@@ -316,11 +265,10 @@ const TimetablePage = () => {
 
                 <StatsCard
                     tone="purple"
-                    title="Tỷ lệ chuyên cần"
-                    value={attendanceRate}
-                    suffix="%"
-                    note="Trong tuần"
-                    icon={<CheckCircleOutlined />}
+                    title="Tiết hôm nay"
+                    value={dayLessons.length}
+                    note="Ngày đang chọn"
+                    icon={<CalendarOutlined />}
                 />
             </div>
 
@@ -338,60 +286,47 @@ const TimetablePage = () => {
                 </div>
             </div>
 
-            <div className="page-grid page-grid--thirds">
-                <div>
-                    <AttendanceChart series={attendanceSeries} />
-                </div>
+            <div className="tt-alerts">
+                <section className="page-panel tt-alerts-panel">
+                    <header className="page-panel__head">
+                        <div>
+                            <h3>Cảnh báo hoạt động</h3>
 
-                <div>
-                    <StaffStatsPanel
-                        item={staffStats}
-                        totalTeachers={availableTeachers.length}
-                    />
-                </div>
-
-                <div className="tt-alerts">
-                    <section className="page-panel tt-alerts-panel">
-                        <header className="page-panel__head">
-                            <div>
-                                <h3>Cảnh báo hoạt động</h3>
-
-                                <p>Sự cố cần lưu ý từ các điểm trường.</p>
-                            </div>
-                        </header>
-
-                        <div className="tt-alerts-panel__list">
-                            {alertItems.map((alert) => (
-                                <article
-                                    key={alert.id}
-                                    className="tt-alerts-panel__item"
-                                >
-                                    <span
-                                        className={[
-                                            "tt-alerts-panel__dot",
-                                            `tt-alerts-panel__dot--${alert.level}`,
-                                        ].join(" ")}
-                                    />
-
-                                    <div className="tt-alerts-panel__body">
-                                        <strong>{alert.title}</strong>
-
-                                        <p>{alert.description}</p>
-
-                                        <span>
-                                            {new Date(
-                                                alert.createdAt,
-                                            ).toLocaleTimeString("vi-VN", {
-                                                hour: "2-digit",
-                                                minute: "2-digit",
-                                            })}
-                                        </span>
-                                    </div>
-                                </article>
-                            ))}
+                            <p>Sự cố cần lưu ý từ các điểm trường.</p>
                         </div>
-                    </section>
-                </div>
+                    </header>
+
+                    <div className="tt-alerts-panel__list">
+                        {alertItems.map((alert) => (
+                            <article
+                                key={alert.id}
+                                className="tt-alerts-panel__item"
+                            >
+                                <span
+                                    className={[
+                                        "tt-alerts-panel__dot",
+                                        `tt-alerts-panel__dot--${alert.level}`,
+                                    ].join(" ")}
+                                />
+
+                                <div className="tt-alerts-panel__body">
+                                    <strong>{alert.title}</strong>
+
+                                    <p>{alert.description}</p>
+
+                                    <span>
+                                        {new Date(
+                                            alert.createdAt,
+                                        ).toLocaleTimeString("vi-VN", {
+                                            hour: "2-digit",
+                                            minute: "2-digit",
+                                        })}
+                                    </span>
+                                </div>
+                            </article>
+                        ))}
+                    </div>
+                </section>
             </div>
 
             <section className="page-panel tt-day-list">

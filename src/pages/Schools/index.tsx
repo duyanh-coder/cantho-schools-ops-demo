@@ -25,7 +25,8 @@ import {
 import StatsCard from "@/components/dashboard/StatCard";
 
 import {
-    getCurrentRegionMockData,
+    getFocusCampuses,
+    getFocusSchool,
 } from "@/mock";
 
 import "./style.scss";
@@ -63,10 +64,13 @@ const STATUS_CONFIG = {
 
 
 function SchoolsPage() {
-    const {
-        schools,
-        campuses,
-    } = getCurrentRegionMockData();
+    const focusSchool = getFocusSchool();
+
+    const schools = useMemo(() => {
+        return focusSchool ? [focusSchool] : [];
+    }, [focusSchool]);
+
+    const campuses = getFocusCampuses();
 
 
     const [

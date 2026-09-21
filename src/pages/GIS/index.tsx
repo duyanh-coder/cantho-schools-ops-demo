@@ -35,7 +35,9 @@ import "leaflet/dist/leaflet.css";
 
 import StatsCard from "@/components/dashboard/StatCard";
 
-import { getCurrentRegionMockData } from "@/mock";
+import { getCurrentRegionMockData, getFocusWardStats } from "@/mock";
+
+import { WARD_FOCUS } from "@/config";
 
 import type { GisWard } from "@/mock";
 
@@ -99,13 +101,24 @@ function GisPage() {
 
   const { province, wards, campuses } = gis;
 
-  const [selectedWardId, setSelectedWardId] = useState("all");
+  const focusWard = wards.find(
+    (ward) => ward.id === WARD_FOCUS.gisWardId,
+  ) ?? null;
+
+  const [selectedWardId, setSelectedWardId] = useState(
+    focusWard?.id ?? "all",
+  );
 
   const [selectedCampusId, setSelectedCampusId] = useState("all");
 
   const [mapBounds, setMapBounds] = useState<LatLngBoundsExpression | null>(
-    () => L.latLngBounds(province.polygons.flat(2)),
+    () =>
+      focusWard
+        ? L.latLngBounds(focusWard.polygon.flat(2))
+        : L.latLngBounds(province.polygons.flat(2)),
   );
+
+  const focusWardStats = getFocusWardStats();
 
   /* ========================================
        SELECTED WARD
@@ -662,6 +675,50 @@ function GisPage() {
                 <strong>{filteredCampuses.length}</strong>
               </div>
             </Card>
+
+            {/* FOCUS WARD MICRO STATS */}
+
+            {focusWardStats.length > 0 && (
+              <Card className="gis-result-card">
+                <div className="gis-sidebar__title">
+                  <BankOutlined />
+
+                  <span>Vi mô Phường Ninh Kiều</span>
+                </div>
+
+                <div className="gis-unit-info__grid">
+                  <span>Giáo viên</span>
+
+                  <strong>
+                    {focusWardStats[0].teacherCount}
+                  </strong>
+
+                  <span>Học sinh đang học</span>
+
+                  <strong>
+                    {focusWardStats[0].studentCount}
+                  </strong>
+
+                  <span>Học 2 buổi</span>
+
+                  <strong>
+                    {focusWardStats[0].twoSessionCount}
+                  </strong>
+
+                  <span>Đối tượng chính sách</span>
+
+                  <strong>
+                    {focusWardStats[0].policyStudentCount}
+                  </strong>
+
+                  <span>Biến động sỉ số</span>
+
+                  <strong>
+                    {focusWardStats[0].enrollmentChangeCount}
+                  </strong>
+                </div>
+              </Card>
+            )}
           </div>
         </Col>
       </Row>
