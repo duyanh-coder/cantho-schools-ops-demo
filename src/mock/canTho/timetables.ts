@@ -617,4 +617,348 @@ export const canThoTimetables: TimetableItem[] = [
         startTime: "07:50",
         endTime: "08:35",
     },
+
+    // ========================================
+    // TRƯỜNG THCS NINH KIỀU - BỔ SUNG TIẾT MẪU
+    // ========================================
+
+    {
+        id: "can-tho-timetable-035",
+
+        campusId: "can-tho-campus-001",
+        classId: "can-tho-class-001",
+        teacherId: "can-tho-teacher-021",
+        subjectId: "english",
+
+        day: "tuesday",
+        period: 1,
+
+        room: "A101",
+
+        startTime: "07:00",
+        endTime: "07:45",
+    },
+
+    {
+        id: "can-tho-timetable-036",
+
+        campusId: "can-tho-campus-002",
+        classId: "can-tho-class-002",
+        teacherId: "can-tho-teacher-014",
+        subjectId: "math",
+
+        day: "wednesday",
+        period: 1,
+
+        room: "A201",
+
+        startTime: "07:00",
+        endTime: "07:45",
+    },
+
+    {
+        id: "can-tho-timetable-037",
+
+        campusId: "can-tho-campus-003",
+        classId: "can-tho-class-003",
+        teacherId: "can-tho-teacher-021",
+        subjectId: "english",
+
+        day: "tuesday",
+        period: 1,
+
+        room: "B101",
+
+        startTime: "07:00",
+        endTime: "07:45",
+    },
+
+    {
+        id: "can-tho-timetable-038",
+
+        campusId: "can-tho-campus-003",
+        classId: "can-tho-class-004",
+        teacherId: "can-tho-teacher-019",
+        subjectId: "literature",
+
+        day: "wednesday",
+        period: 1,
+
+        room: "B101",
+
+        startTime: "07:00",
+        endTime: "07:45",
+    },
+
+    {
+        id: "can-tho-timetable-039",
+
+        campusId: "can-tho-campus-001",
+        classId: "can-tho-class-013",
+        teacherId: "can-tho-teacher-013",
+        subjectId: "math",
+
+        day: "monday",
+        period: 1,
+
+        room: "A103",
+
+        startTime: "07:00",
+        endTime: "07:45",
+    },
+
+    {
+        id: "can-tho-timetable-040",
+
+        campusId: "can-tho-campus-001",
+        classId: "can-tho-class-013",
+        teacherId: "can-tho-teacher-020",
+        subjectId: "literature",
+
+        day: "monday",
+        period: 2,
+
+        room: "A103",
+
+        startTime: "07:50",
+        endTime: "08:35",
+    },
+
+    {
+        id: "can-tho-timetable-041",
+
+        campusId: "can-tho-campus-001",
+        classId: "can-tho-class-013",
+        teacherId: "can-tho-teacher-021",
+        subjectId: "english",
+
+        day: "wednesday",
+        period: 1,
+
+        room: "A103",
+
+        startTime: "07:00",
+        endTime: "07:45",
+    },
+
+    {
+        id: "can-tho-timetable-042",
+
+        campusId: "can-tho-campus-001",
+        classId: "can-tho-class-013",
+        teacherId: "can-tho-teacher-015",
+        subjectId: "physics",
+
+        day: "friday",
+        period: 1,
+
+        room: "A104",
+
+        startTime: "07:00",
+        endTime: "07:45",
+    },
+
+    {
+        id: "can-tho-timetable-043",
+
+        campusId: "can-tho-campus-004",
+        classId: "can-tho-class-014",
+        teacherId: "can-tho-teacher-023",
+        subjectId: "math",
+
+        day: "monday",
+        period: 1,
+
+        room: "D101",
+
+        startTime: "07:00",
+        endTime: "07:45",
+    },
+
+    {
+        id: "can-tho-timetable-044",
+
+        campusId: "can-tho-campus-004",
+        classId: "can-tho-class-014",
+        teacherId: "can-tho-teacher-019",
+        subjectId: "literature",
+
+        day: "tuesday",
+        period: 2,
+
+        room: "D101",
+
+        startTime: "07:50",
+        endTime: "08:35",
+    },
+
+    {
+        id: "can-tho-timetable-045",
+
+        campusId: "can-tho-campus-004",
+        classId: "can-tho-class-014",
+        teacherId: "can-tho-teacher-022",
+        subjectId: "english",
+
+        day: "wednesday",
+        period: 1,
+
+        room: "D102",
+
+        startTime: "07:00",
+        endTime: "07:45",
+    },
+
+    {
+        id: "can-tho-timetable-046",
+
+        campusId: "can-tho-campus-004",
+        classId: "can-tho-class-014",
+        teacherId: "can-tho-teacher-024",
+        subjectId: "chemistry",
+
+        day: "thursday",
+        period: 2,
+
+        room: "D102",
+
+        startTime: "07:50",
+        endTime: "08:35",
+    },
+
+    {
+        id: "can-tho-timetable-047",
+
+        campusId: "can-tho-campus-015",
+        classId: "can-tho-class-015",
+        teacherId: "can-tho-teacher-014",
+        subjectId: "math",
+
+        day: "monday",
+        period: 1,
+
+        room: "E101",
+
+        startTime: "07:00",
+        endTime: "07:45",
+    },
+
+    {
+        id: "can-tho-timetable-048",
+
+        campusId: "can-tho-campus-015",
+        classId: "can-tho-class-015",
+        teacherId: "can-tho-teacher-025",
+        subjectId: "physics",
+
+        day: "monday",
+        period: 2,
+
+        room: "E101",
+
+        startTime: "07:50",
+        endTime: "08:35",
+    },
+
+    {
+        id: "can-tho-timetable-049",
+
+        campusId: "can-tho-campus-015",
+        classId: "can-tho-class-015",
+        teacherId: "can-tho-teacher-027",
+        subjectId: "english",
+
+        day: "tuesday",
+        period: 1,
+
+        room: "E102",
+
+        startTime: "07:00",
+        endTime: "07:45",
+    },
+
+    {
+        id: "can-tho-timetable-050",
+
+        campusId: "can-tho-campus-015",
+        classId: "can-tho-class-015",
+        teacherId: "can-tho-teacher-026",
+        subjectId: "literature",
+
+        day: "friday",
+        period: 2,
+
+        room: "E102",
+
+        startTime: "07:50",
+        endTime: "08:35",
+    },
+
+    {
+        id: "can-tho-timetable-051",
+
+        campusId: "can-tho-campus-016",
+        classId: "can-tho-class-016",
+        teacherId: "can-tho-teacher-029",
+        subjectId: "math",
+
+        day: "monday",
+        period: 1,
+
+        room: "F101",
+
+        startTime: "07:00",
+        endTime: "07:45",
+    },
+
+    {
+        id: "can-tho-timetable-052",
+
+        campusId: "can-tho-campus-016",
+        classId: "can-tho-class-016",
+        teacherId: "can-tho-teacher-030",
+        subjectId: "chemistry",
+
+        day: "tuesday",
+        period: 2,
+
+        room: "F101",
+
+        startTime: "07:50",
+        endTime: "08:35",
+    },
+
+    {
+        id: "can-tho-timetable-053",
+
+        campusId: "can-tho-campus-016",
+        classId: "can-tho-class-016",
+        teacherId: "can-tho-teacher-003",
+        subjectId: "english",
+
+        day: "thursday",
+        period: 1,
+
+        room: "F102",
+
+        startTime: "07:00",
+        endTime: "07:45",
+    },
+
+    {
+        id: "can-tho-timetable-054",
+
+        campusId: "can-tho-campus-016",
+        classId: "can-tho-class-016",
+        teacherId: "can-tho-teacher-028",
+        subjectId: "biology",
+
+        day: "friday",
+        period: 2,
+
+        room: "F102",
+
+        startTime: "07:50",
+        endTime: "08:35",
+    },
 ];

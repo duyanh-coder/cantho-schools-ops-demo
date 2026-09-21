@@ -10,13 +10,31 @@ export const canThoCampuses: Campus[] = [
     {
         id: "can-tho-campus-002", schoolId: "can-tho-school-001", wardId: "can-tho-ward-001", code: "CT-CS-002",
         name: "Phân hiệu Chu Văn An", address: "Phường Ninh Kiều, thành phố Cần Thơ",
-        location: { lat: 10.039, lng: 105.786 }, managerId: "can-tho-user-001", isMainCampus: false, status: "active",
+        location: { lat: 10.039, lng: 105.786 }, managerId: "can-tho-user-002", isMainCampus: false, status: "active",
     },
 
     {
         id: "can-tho-campus-003", schoolId: "can-tho-school-001", wardId: "can-tho-ward-001", code: "CT-CS-003",
         name: "Phân hiệu Thới Bình", address: "Phường Ninh Kiều, thành phố Cần Thơ",
         location: { lat: 10.0375, lng: 105.777 }, managerId: "can-tho-user-003", isMainCampus: false, status: "active",
+    },
+
+    {
+        id: "can-tho-campus-004", schoolId: "can-tho-school-001", wardId: "can-tho-ward-001", code: "CT-CS-004",
+        name: "Phân hiệu An Lạc", address: "Phường Ninh Kiều, thành phố Cần Thơ",
+        location: { lat: 10.039, lng: 105.788 }, managerId: "can-tho-user-002", isMainCampus: false, status: "active",
+    },
+
+    {
+        id: "can-tho-campus-015", schoolId: "can-tho-school-001", wardId: "can-tho-ward-001", code: "CT-CS-015",
+        name: "Phân hiệu Trần Hưng Đạo", address: "Phường Ninh Kiều, thành phố Cần Thơ",
+        location: { lat: 10.026, lng: 105.779 }, managerId: "can-tho-user-004", isMainCampus: false, status: "active",
+    },
+
+    {
+        id: "can-tho-campus-016", schoolId: "can-tho-school-001", wardId: "can-tho-ward-001", code: "CT-CS-016",
+        name: "Phân hiệu Huỳnh Thúc Kháng", address: "Phường Ninh Kiều, thành phố Cần Thơ",
+        location: { lat: 10.0355, lng: 105.7855 }, managerId: "can-tho-user-003", isMainCampus: false, status: "active",
     },
 
     {

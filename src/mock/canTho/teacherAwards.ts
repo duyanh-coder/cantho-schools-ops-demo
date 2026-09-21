@@ -1,0 +1,16 @@
+import type { TeacherAward } from "../common/types";
+
+export const canThoTeacherAwards: TeacherAward[] = [
+    { id: "can-tho-award-001", teacherId: "can-tho-teacher-001", schoolId: "can-tho-school-001", type: "good_teaching", level: "city", title: "Giáo viên dạy giỏi cấp thành phố môn Toán", academicYear: "2025-2026", decisionNumber: "QĐ-01/2026", date: "2026-03-20", note: "Xếp loại Xuất sắc" },
+    { id: "can-tho-award-002", teacherId: "can-tho-teacher-001", schoolId: "can-tho-school-001", type: "emulation_fighter", level: "school", title: "Chiến sĩ thi đua cơ sở", academicYear: "2025-2026", decisionNumber: "QĐ-05/2026", date: "2026-05-28" },
+    { id: "can-tho-award-003", teacherId: "can-tho-teacher-002", schoolId: "can-tho-school-001", type: "good_teaching", level: "school", title: "Giáo viên dạy giỏi cấp trường môn Ngữ văn", academicYear: "2025-2026", decisionNumber: "QĐ-03/2026", date: "2026-02-15" },
+    { id: "can-tho-award-004", teacherId: "can-tho-teacher-003", schoolId: "can-tho-school-001", type: "good_teaching", level: "city", title: "Giáo viên dạy giỏi cấp thành phố môn Tiếng Anh", academicYear: "2024-2025", decisionNumber: "QĐ-09/2025", date: "2025-03-25" },
+    { id: "can-tho-award-005", teacherId: "can-tho-teacher-003", schoolId: "can-tho-school-001", type: "commendation", level: "city", title: "Khen thưởng đạt chuẩn chuyên môn Tiếng Anh bậc trung học", academicYear: "2024-2025", decisionNumber: "QĐ-12/2025", date: "2025-05-20" },
+    { id: "can-tho-award-006", teacherId: "can-tho-teacher-004", schoolId: "can-tho-school-001", type: "good_teaching", level: "school", title: "Giáo viên dạy giỏi cấp trường môn Vật lý", academicYear: "2025-2026", decisionNumber: "QĐ-04/2026", date: "2026-02-22" },
+    { id: "can-tho-award-007", teacherId: "can-tho-teacher-013", schoolId: "can-tho-school-001", type: "good_teaching", level: "school", title: "Giáo viên dạy giỏi cấp trường môn Toán", academicYear: "2025-2026", decisionNumber: "QĐ-06/2026", date: "2026-02-20" },
+    { id: "can-tho-award-008", teacherId: "can-tho-teacher-015", schoolId: "can-tho-school-001", type: "emulation_fighter", level: "school", title: "Chiến sĩ thi đua cơ sở", academicYear: "2024-2025", decisionNumber: "QĐ-08/2025", date: "2025-05-25" },
+    { id: "can-tho-award-009", teacherId: "can-tho-teacher-016", schoolId: "can-tho-school-001", type: "creative_teaching", level: "city", title: "Sáng kiến 'Nâng cao hiệu quả thí nghiệm Hóa học an toàn'", academicYear: "2024-2025", decisionNumber: "QĐ-07/2025", date: "2025-05-10" },
+    { id: "can-tho-award-010", teacherId: "can-tho-teacher-019", schoolId: "can-tho-school-001", type: "good_teaching", level: "school", title: "Giáo viên dạy giỏi cấp trường môn Ngữ văn", academicYear: "2025-2026", decisionNumber: "QĐ-07/2026", date: "2026-02-25" },
+    { id: "can-tho-award-011", teacherId: "can-tho-teacher-021", schoolId: "can-tho-school-001", type: "commendation", level: "city", title: "Giáo viên chủ nhiệm giỏi cấp thành phố", academicYear: "2023-2024", decisionNumber: "QĐ-15/2024", date: "2024-05-20" },
+    { id: "can-tho-award-012", teacherId: "can-tho-teacher-031", schoolId: "can-tho-school-001", type: "emulation_fighter", level: "school", title: "Chiến sĩ thi đua cơ sở", academicYear: "2024-2025", decisionNumber: "QĐ-11/2025", date: "2025-05-25" },
+];
