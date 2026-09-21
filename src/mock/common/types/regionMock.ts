@@ -14,6 +14,40 @@ import type { User } from "./user";
 import type {
     GisMockData,
 } from "./gis";
+import type {
+    Department,
+} from "./department";
+import type {
+    Guardian,
+    Student,
+} from "./student";
+import type {
+    AcademicRecord,
+} from "./academicRecord";
+import type {
+    EnrollmentChange,
+} from "./enrollmentChange";
+import type {
+    CareDemand,
+} from "./careDemand";
+import type {
+    TeacherAward,
+} from "./teacherAward";
+import type {
+    Facility,
+} from "./facility";
+import type {
+    FinanceItem,
+} from "./finance";
+import type {
+    SchoolHealthItem,
+} from "./schoolHealth";
+import type {
+    StudentDiscipline,
+} from "./studentDiscipline";
+import type {
+    PolicyGroup,
+} from "./policyGroup";
 
 
 export interface RegionMockData {
@@ -44,4 +78,28 @@ export interface RegionMockData {
     teachingAttendance: TeachingAttendance[];
 
     users: User[];
+
+    departments: Department[];
+
+    students: Student[];
+
+    guardians: Guardian[];
+
+    academicRecords: AcademicRecord[];
+
+    enrollmentChanges: EnrollmentChange[];
+
+    careDemands: CareDemand[];
+
+    teacherAwards: TeacherAward[];
+
+    facilities: Facility[];
+
+    finances: FinanceItem[];
+
+    schoolHealth: SchoolHealthItem[];
+
+    studentDisciplines: StudentDiscipline[];
+
+    policyGroups: PolicyGroup[];
 }

@@ -17,6 +17,7 @@ import { canThoGis } from "./gis";
 
 export const canThoMockData: RegionMockData = {
     regions: canThoRegions, wards: canThoWards, schools: canThoSchools, campuses: canThoCampuses, gis: canThoGis, users: canThoUsers, teachers: canThoTeachers, classes: canThoClasses, timetables: canThoTimetables, teachingAttendance: canThoTeachingAttendance, documents: canThoDocuments, alerts: canThoAlerts, tasks: canThoTasks, reports: canThoReports,
+    departments: [], students: [], guardians: [], academicRecords: [], enrollmentChanges: [], careDemands: [], teacherAwards: [], facilities: [], finances: [], schoolHealth: [], studentDisciplines: [], policyGroups: [],
 };
 
 export { canThoRegions, canThoWards, canThoSchools, canThoCampuses, canThoGis, canThoUsers, canThoTeachers, canThoClasses, canThoTimetables, canThoTeachingAttendance, canThoDocuments, canThoAlerts, canThoTasks, canThoReports };

@@ -84,4 +84,5 @@ export const canThoGis: GisMockData = {
     province,
     wards,
     campuses,
+    wardStats: [],
 };
