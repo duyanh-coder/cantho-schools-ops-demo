@@ -1,5 +1,6 @@
 import {
     DeleteOutlined,
+    DownloadOutlined,
     EditOutlined,
     PlusOutlined,
     ReloadOutlined,
@@ -428,6 +429,115 @@ function CrudManager<T extends { id: string }>({
         });
     };
 
+
+    const toCsvValue = (
+        row: T,
+        field: CrudField<T>,
+    ): string => {
+        const value =
+            row[field.name];
+
+        if (
+            value === null ||
+            value === undefined
+        ) {
+            return "";
+        }
+
+        if (
+            field.type === "select" ||
+            field.type === "multiselect"
+        ) {
+            const values =
+                (
+                    Array.isArray(value)
+                        ? value
+                        : [value]
+                ).map(
+                    (entry) =>
+                        labelMaps.get(
+                            field.name,
+                        )?.get(
+                            String(entry),
+                        ) ?? String(entry),
+                );
+
+            return values.join(", ");
+        }
+
+        return String(value);
+    };
+
+
+    const handleExport = () => {
+        const exportableFields =
+            fields.filter(
+                (field) =>
+                    field.hideInForm ||
+                    field.table !== false,
+            );
+
+        const rows =
+            [exportableFields.map((f) => f.label)]
+                .concat(
+                    filtered.map(
+                        (row) =>
+                            exportableFields.map(
+                                (field) =>
+                                    `"${toCsvValue(row, field).replaceAll('"', '""')}"`,
+                            ),
+                    ),
+                );
+
+        const csv =
+            "\ufeff" +
+            rows
+                .map((cells) => cells.join(","))
+                .join("\r\n");
+
+        const blob =
+            new Blob(
+                [csv],
+                {
+                    type: "text/csv;charset=utf-8",
+                },
+            );
+
+        const url =
+            URL.createObjectURL(
+                blob,
+            );
+
+        const anchor =
+            document.createElement(
+                "a",
+            );
+
+        anchor.href = url;
+
+        anchor.download =
+            `${storageKey}.csv`;
+
+        document.body.appendChild(
+            anchor,
+        );
+
+        anchor.click();
+
+        document.body.removeChild(
+            anchor,
+        );
+
+        URL.revokeObjectURL(
+            url,
+        );
+
+        message.success(
+            "Đã xuất file Excel",
+        );
+    };
+
+
     const renderFormItem = (field: CrudField<T>) => {
         const type = field.type ?? "text";
 
@@ -546,6 +656,15 @@ function CrudManager<T extends { id: string }>({
                             }
                             className="crud-panel__search"
                         />
+
+                        <Button
+                            icon={<DownloadOutlined />}
+                            onClick={handleExport}
+                            className="crud-panel__export"
+                            title="Xuất danh sách hiện tại ra file CSV (Excel)"
+                        >
+                            Xuất Excel
+                        </Button>
 
                         <Button
                             icon={<ReloadOutlined />}
