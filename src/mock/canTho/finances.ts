@@ -1,0 +1,11 @@
+import type { FinanceItem } from "../common/types";
+
+export const canThoFinances: FinanceItem[] = [
+    { id: "can-tho-fin-001", schoolId: "can-tho-school-001", academicYear: "2026-2027", category: "tuition", itemName: "Học phí (THCS công lập)", amountPerStudent: 0, basis: "Miễn học phí bậc THCS theo Nghị định 81/2021/NĐ-CP", note: "Không thu học phí" },
+    { id: "can-tho-fin-002", schoolId: "can-tho-school-001", campusId: "can-tho-campus-001", academicYear: "2026-2027", category: "meal_fee", itemName: "Tiền ăn sáng - cơm trưa (căn tin)", amountPerStudent: 12000, basis: "Hợp đồng dịch vụ căn tin", note: "Thu theo tuần, học sinh tự nguyện" },
+    { id: "can-tho-fin-003", schoolId: "can-tho-school-001", academicYear: "2026-2027", category: "insurance", itemName: "Bảo hiểm y tế học sinh", amountPerStudent: 73200, basis: "Theo quy định của Bộ Y tế", note: "BHYT tự nguyện, có giảm cho hộ nghèo" },
+    { id: "can-tho-fin-004", schoolId: "can-tho-school-001", academicYear: "2026-2027", category: "voluntary_fee", itemName: "Quỹ lớp, quỹ đội phong trào", amountPerStudent: 50000, basis: "Thỏa thuận của Ban đại diện cha mẹ học sinh", decisionNumber: "BB/2026-BBĐDCMHS", publicDate: "2026-09-15", note: "Được công khai tại cuộc họp phụ huynh đầu năm" },
+    { id: "can-tho-fin-005", schoolId: "can-tho-school-001", academicYear: "2026-2027", category: "voluntary_fee", itemName: "Đồng phục học sinh (2 bộ)", amountPerStudent: 320000, basis: "Nhà trường đấu thầu, công khai báo giá", publicDate: "2026-08-10", note: "Thu một lần đầu năm" },
+    { id: "can-tho-fin-006", schoolId: "can-tho-school-001", academicYear: "2026-2027", category: "other", itemName: "Hoạt động trải nghiệm, tham quan", amountPerStudent: 150000, basis: "Theo kế hoạch năm học, thỏa thuận phụ huynh", note: "Tự nguyện, không bắt buộc" },
+    { id: "can-tho-fin-007", schoolId: "can-tho-school-001", academicYear: "2026-2027", category: "other", itemName: "Học 2 buổi/ngày (kèm chuyên sâu)", amountPerStudent: 90000, basis: "Quy định thu tiền học 2 buổi theo công văn của Sở", decisionNumber: "CV/SGDĐT-2026", publicDate: "2026-09-01", note: "Áp dụng cho HS đăng ký, miễn giảm cho đối tượng chính sách" },
+];

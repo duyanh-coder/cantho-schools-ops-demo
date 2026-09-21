@@ -15,6 +15,8 @@ import canThoProvinceFeatureCollection from "@/assets/data/gis/cantho_geo.json";
 
 import canThoWardFeatureCollection from "@/assets/data/gis/cantho_phuongxa_geo.json";
 
+import { canThoWardStats } from "./wardStats";
+
 
 const wardGeo = canThoWardFeatureCollection as unknown as GisGeoFeatureCollection;
 
@@ -87,5 +89,5 @@ export const canThoGis: GisMockData = {
     province,
     wards,
     campuses,
-    wardStats: [],
+    wardStats: canThoWardStats,
 };
