@@ -14,7 +14,6 @@ import GISPage from "@/pages/GIS";
 import HomePage from "@/pages/Home";
 import ReportsPage from "@/pages/Reports";
 import SchoolPage from "@/pages/Schools";
-import TeachingPage from "@/pages/Teaching";
 import TimetablePage from "@/pages/Timetable";
 
 
@@ -31,8 +30,6 @@ function AppRouter() {
           <Route path="/operations/documents" element={<DocumentsPage />} />
 
           <Route path="/operations/timetable" element={<TimetablePage />} />
-
-          <Route path="/operations/teaching" element={<TeachingPage />} />
 
           <Route path="/operations/schools" element={<SchoolPage />} />
 

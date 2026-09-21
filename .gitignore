@@ -27,3 +27,5 @@ pnpm-debug.log*
 
 # Microsoft Office temp files
 ~$*
+# Backups
+backups/

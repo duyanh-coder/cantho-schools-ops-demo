@@ -9,10 +9,10 @@ export const canThoAlerts: AlertItem[] = [
 
         campusId: "can-tho-campus-001",
 
-        title: "Chưa hoàn thành điểm danh giảng dạy",
+        title: "Chưa cập nhật lịch giảng dạy tuần mới",
 
         description:
-            "Một số tiết học trong ngày chưa được cập nhật trạng thái giảng dạy.",
+            "Một số tiết học trong tuần kế tiếp chưa được xác nhận lại.",
 
         level: "warning",
 
@@ -26,10 +26,10 @@ export const canThoAlerts: AlertItem[] = [
 
         campusId: "can-tho-campus-001",
 
-        title: "Giáo viên đi trễ",
+        title: "Giáo viên chưa hoàn thiện hồ sơ chuyên môn",
 
         description:
-            "Có giáo viên được ghi nhận vào lớp trễ theo lịch giảng dạy.",
+            "Có giáo viên chưa nộp đủ hồ sơ chuẩn bị đầu năm học.",
 
         level: "warning",
 
@@ -77,7 +77,7 @@ export const canThoAlerts: AlertItem[] = [
 
         campusId: "can-tho-campus-003",
 
-        title: "Giáo viên vắng giảng dạy",
+        title: "Giáo viên vắng mặt không phép",
 
         description:
             "Một tiết học được ghi nhận giáo viên vắng mặt.",
@@ -121,56 +121,5 @@ export const canThoAlerts: AlertItem[] = [
         createdAt: "2026-08-19T14:00:00",
 
         status: "resolved",
-    },
-
-    {
-        id: "can-tho-alert-008",
-
-        campusId: "can-tho-campus-007",
-
-        title: "Cần xử lý văn bản quá hạn",
-
-        description:
-            "Có văn bản đang xử lý gần hoặc vượt thời hạn quy định.",
-
-        level: "danger",
-
-        createdAt: "2026-08-19T15:30:00",
-
-        status: "processing",
-    },
-
-    {
-        id: "can-tho-alert-009",
-
-        campusId: "can-tho-campus-008",
-
-        title: "Cần duyệt kế hoạch giảng dạy",
-
-        description:
-            "Kế hoạch giảng dạy đầu năm học đang chờ phê duyệt.",
-
-        level: "info",
-
-        createdAt: "2026-08-20T08:30:00",
-
-        status: "new",
-    },
-
-    {
-        id: "can-tho-alert-010",
-
-        campusId: "can-tho-campus-009",
-
-        title: "Rà soát danh sách lớp đầu năm",
-
-        description:
-            "Danh sách học sinh các lớp cần được rà soát và cập nhật.",
-
-        level: "warning",
-
-        createdAt: "2026-08-20T10:00:00",
-
-        status: "new",
     },
 ];

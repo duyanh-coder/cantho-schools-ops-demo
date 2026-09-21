@@ -4,7 +4,6 @@ import {
   EnvironmentOutlined,
   FileTextOutlined,
   RobotOutlined,
-  SafetyCertificateOutlined,
   SolutionOutlined,
   WarningOutlined,
 } from "@ant-design/icons";
@@ -31,11 +30,6 @@ const menuItems: MenuItem[] = [
     key: "/operations/timetable",
     icon: <CalendarOutlined />,
     label: "Thời khóa biểu",
-  },
-  {
-    key: "/operations/teaching",
-    icon: <SafetyCertificateOutlined />,
-    label: "Điểm danh giảng dạy",
   },
   {
     key: "/operations/schools",
