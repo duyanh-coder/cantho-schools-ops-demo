@@ -1,3 +1,8 @@
+import {
+    SCHOOL_FOCUS,
+    WARD_FOCUS,
+} from "@/config";
+
 import type {
     Campus,
     School,
@@ -7,6 +12,16 @@ import type {
 import {
     getCurrentRegionMockData,
 } from "./getCurrentRegionMockData";
+
+
+const getFocusSchoolId = (): string => {
+    return SCHOOL_FOCUS.id;
+};
+
+
+const getFocusWardId = (): string => {
+    return WARD_FOCUS.id;
+};
 
 
 export const getCurrentSchools = (): School[] => {
@@ -80,5 +95,26 @@ export const getSchoolByCampusId = (
 
     return getSchoolById(
         campus.schoolId,
+    );
+};
+
+
+export const getFocusSchool = (): School | undefined => {
+    return getSchoolById(
+        getFocusSchoolId(),
+    );
+};
+
+
+export const getFocusCampuses = (): Campus[] => {
+    return getCampusesBySchoolId(
+        getFocusSchoolId(),
+    );
+};
+
+
+export const getFocusWard = (): Ward | undefined => {
+    return getWardById(
+        getFocusWardId(),
     );
 };
