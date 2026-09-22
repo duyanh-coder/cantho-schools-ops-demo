@@ -13,7 +13,8 @@ localStorage.
 | GĐ 2 | Unit tests cho `useCrud` (Vitest + jsdom + Testing Library) — CRUD + persistence, 7/7 pass | `7a9ece7` | `gd2-crud-tests` |
 | GĐ 3 | Trợ lý AI — đề xuất nhanh (quick prompts) trên giao diện chatbot sẵn có | `cef9bc6` | `gd3-chatbot-quick` |
 | GĐ 4 | Xuất Excel (CSV, UTF-8 BOM) từ danh sách đang lọc + panel phân bố theo biến nhóm trong `CrudManager` (áp dụng cho 4 module) | `0ec7e7b` | `gd4-crud-csv-export` |
-| GĐ 5 | Tổng kết: PROGRESS.md, CHANGELOG, gate xanh (lint 0 lỗi / build / 7 test pass) | `(commit GĐ 5)` | `gd5-hoanthien` |
+| GĐ 5 | Tổng kết: PROGRESS.md, CHANGELOG, gate xanh (lint 0 lỗi / build / 7 test pass) | `44bc932` | `gd5-hoanthien` |
+| GĐ 6 | Import Excel (CSV): parser thuần (`src/utils/csv.ts`) + 8 unit tests, nút "Nhập Excel" với `Upload` antd, map label→field name, hỗ trợ select/multiselect | `ba1f52b` | `gd6-csv-import` |
 
 ## Quy ước kỹ thuật
 
