@@ -1,6 +1,7 @@
 import {
     DeleteOutlined,
     DownloadOutlined,
+    UploadOutlined,
     EditOutlined,
     PlusOutlined,
     ReloadOutlined,
@@ -18,6 +19,7 @@ import {
     Space,
     Table,
     Tag,
+    Upload,
     message,
 } from "antd";
 
@@ -39,6 +41,10 @@ import StatsCard from "@/components/dashboard/StatCard";
 import {
     useCrud,
 } from "@/store/useCrud";
+
+import {
+    parseCsv,
+} from "@/utils/csv";
 
 import "./style.scss";
 
@@ -538,6 +544,164 @@ function CrudManager<T extends { id: string }>({
     };
 
 
+    const handleImport = (
+        file: File,
+    ) => {
+        const reader =
+            new FileReader();
+
+        reader.onload = () => {
+            const content =
+                String(
+                    reader.result,
+                );
+
+            const parsed =
+                parseCsv(
+                    content,
+                );
+
+            if (
+                parsed.headers.length === 0 ||
+                parsed.rows.length === 0
+            ) {
+                message.warning(
+                    "File CSV không có dữ liệu hợp lệ",
+                );
+
+                return;
+            }
+
+            const headerToField =
+                new Map<string, string>();
+
+            fields.forEach(
+                (field) => {
+                    if (
+                        field.name === "id"
+                    ) {
+                        return;
+                    }
+
+                    headerToField.set(
+                        field.label.toLowerCase(),
+                        field.name,
+                    );
+                },
+            );
+
+            let imported = 0;
+
+            parsed.rows.forEach(
+                (cells) => {
+                    const record:
+                        Record<string, unknown> = {
+                            id:
+                                `${storageKey}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`,
+                        };
+
+                    let valid = false;
+
+                    parsed.headers.forEach(
+                        (header, index) => {
+                            const name =
+                                headerToField.get(
+                                    header.trim().toLowerCase(),
+                                );
+
+                            const value =
+                                cells[index];
+
+                            if (
+                                name &&
+                                value !== undefined &&
+                                value.trim().length > 0
+                            ) {
+                                const field =
+                                    fields.find(
+                                        (candidate) =>
+                                            candidate.name === name,
+                                    );
+
+                                if (
+                                    field?.type ===
+                                        "multiselect"
+                                ) {
+                                    const values =
+                                        value
+                                            .split(",")
+                                            .map((part) => part.trim())
+                                            .filter((part) => part.length > 0);
+
+                                    const selected =
+                                        (field.options ?? [])
+                                            .filter(
+                                                (option) =>
+                                                    values.includes(
+                                                        String(option.label),
+                                                    ),
+                                            )
+                                            .map(
+                                                (option) =>
+                                                    option.value,
+                                            );
+
+                                    record[name] =
+                                        selected;
+                                } else if (
+                                    field?.type ===
+                                        "select"
+                                ) {
+                                    const option =
+                                        (field.options ?? []).find(
+                                            (candidate) =>
+                                                String(candidate.label) ===
+                                                value.trim(),
+                                        );
+
+                                    record[name] =
+                                        option?.value ??
+                                        value.trim();
+                                } else {
+                                    record[name] =
+                                        value.trim();
+                                }
+
+                                valid = true;
+                            }
+                        },
+                    );
+
+                    if (valid) {
+                        create(
+                            record as T,
+                        );
+
+                        imported += 1;
+                    }
+                },
+            );
+
+            if (imported > 0) {
+                message.success(
+                    `Đã nhập thêm ${imported} bản ghi`,
+                );
+            } else {
+                message.warning(
+                    "Không nhập được bản ghi nào",
+                );
+            }
+        };
+
+        reader.readAsText(
+            file,
+            "utf-8",
+        );
+
+        return false;
+    };
+
+
     const renderFormItem = (field: CrudField<T>) => {
         const type = field.type ?? "text";
 
@@ -665,6 +829,20 @@ function CrudManager<T extends { id: string }>({
                         >
                             Xuất Excel
                         </Button>
+
+                        <Upload
+                            accept=".csv,text/csv"
+                            showUploadList={false}
+                            beforeUpload={handleImport}
+                        >
+                            <Button
+                                icon={<UploadOutlined />}
+                                className="crud-panel__import"
+                                title="Nhập dữ liệu từ file CSV (Excel)"
+                            >
+                                Nhập Excel
+                            </Button>
+                        </Upload>
 
                         <Button
                             icon={<ReloadOutlined />}
