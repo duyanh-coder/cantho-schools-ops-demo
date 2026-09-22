@@ -253,7 +253,13 @@ const campusKpis: CrudKpi[] = [
 ];
 
 
-const TAB_KEYS = ["schools", "personnel", "sectors", "students"] as const;
+const TAB_KEYS = [
+    "schools",
+    "campuses",
+    "personnel",
+    "sectors",
+    "students",
+] as const;
 
 type TabKey = (typeof TAB_KEYS)[number];
 
@@ -283,6 +289,10 @@ function SchoolsHub() {
 
             if (next === "schools") {
                 return "schools" as TabKey;
+            }
+
+            if (next === "campuses") {
+                return "campuses" as TabKey;
             }
 
             if (next === "personnel") {
@@ -326,50 +336,36 @@ function SchoolsHub() {
         TabsProps["items"] = [
             {
                 key: "schools",
-                label: "Trường & Cơ sở",
+                label: "Danh sách trường",
                 children: (
-                    <div className="schools-hub__entity">
-                        <Tabs
-                            defaultActiveKey="schools-list"
-                            tabBarStyle={{ margin: 0 }}
-                            items={[
-                                {
-                                    key: "schools-list",
-                                    label: "Danh sách trường",
-                                    children: (
-                                        <CrudManager<School>
-                                            eyebrow="QUẢN LÝ TRƯỜNG HỌC"
-                                            title="Trường học trực thuộc"
-                                            description="Quản lý trường, cấp học và hiệu trưởng phụ trách trong hệ thống."
-                                            storageKey="can-tho-schools"
-                                            seed={canThoMockData.schools}
-                                            fields={schoolFields}
-                                            kpis={schoolKpis}
-                                            entityName="trường"
-                                            newLabel="Thêm trường"
-                                        />
-                                    ),
-                                },
-                                {
-                                    key: "campuses-list",
-                                    label: "Danh sách cơ sở",
-                                    children: (
-                                        <CrudManager<Campus>
-                                            eyebrow="QUẢN LÝ CƠ SỞ"
-                                            title="Cơ sở trực thuộc trường"
-                                            description="Quản lý các cơ sở, địa chỉ và trụ sở chính của từng trường."
-                                            storageKey="can-tho-campuses"
-                                            seed={canThoMockData.campuses}
-                                            fields={campusFields}
-                                            kpis={campusKpis}
-                                            entityName="cơ sở"
-                                            newLabel="Thêm cơ sở"
-                                        />
-                                    ),
-                                },
-                            ]}
-                        />
-                    </div>
+                    <CrudManager<School>
+                        eyebrow="QUẢN LÝ TRƯỜNG HỌC"
+                        title="Trường học trực thuộc"
+                        description="Quản lý trường, cấp học và hiệu trưởng phụ trách trong hệ thống."
+                        storageKey="can-tho-schools"
+                        seed={canThoMockData.schools}
+                        fields={schoolFields}
+                        kpis={schoolKpis}
+                        entityName="trường"
+                        newLabel="Thêm trường"
+                    />
+                ),
+            },
+            {
+                key: "campuses",
+                label: "Danh sách cơ sở",
+                children: (
+                    <CrudManager<Campus>
+                        eyebrow="QUẢN LÝ CƠ SỞ"
+                        title="Cơ sở trực thuộc trường"
+                        description="Quản lý các cơ sở, địa chỉ và trụ sở chính của từng trường."
+                        storageKey="can-tho-campuses"
+                        seed={canThoMockData.campuses}
+                        fields={campusFields}
+                        kpis={campusKpis}
+                        entityName="cơ sở"
+                        newLabel="Thêm cơ sở"
+                    />
                 ),
             },
             {

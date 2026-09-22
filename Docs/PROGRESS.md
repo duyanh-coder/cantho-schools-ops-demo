@@ -20,6 +20,7 @@ localStorage.
 | GĐ 9 | Ẩn dòng mô tả dưới tiêu đề ở mọi `page-head`; tab Nhân sự rút bảng còn 6 cột (Mã CB-GV, Họ tên, Chức vụ, Môn giảng dạy, Tổ chuyên môn, Trạng thái) + nút chi tiết (mắt) mở popup `Descriptions` hiện đủ thông tin còn lại; `CrudManager` thêm prop `detail`; export CSV xuất đủ các trường editable (bỏ trường hệ thống ẩn) | `76e1469` | `gd9-header-gon-nhansu` |
 | GĐ 10 | Popup chi tiết thêm `detailWidth` (Nhân sự 1000px); tab Khối & Tổ rút gọn theo width, ẩn cột Mô tả khỏi bảng (chỉ hiện trong popup chi tiết), cột Thành viên hiển thị 3 người + Tooltip đủ danh sách, bật nút chi tiết | `97f8eb5` | `gd10-khoito-gon-detail` |
 | GĐ 11 | Tab Học sinh rút gọn theo width: bảng Danh sách học sinh còn Mã HS, Họ tên, Giới tính, Cơ sở, Lớp, Trạng thái (ẩn Ngày sinh, SĐT phụ huynh, Địa chỉ vào popup); ẩn Lý do khỏi bảng Biến động sỉ số; bật nút chi tiết cho cả 3 sub-tab | `e871a1d` | `gd11-hocsinh-gon-detail` |
+| GĐ 12 | Hub "Trường & Cơ sở" nâng 2 sub-tab thành 2 tab lớn (Danh sách trường, Danh sách cơ sở) → 5 tab lớn: trường, cơ sở, nhân sự, khối & tổ, học sinh; thêm param `tab=campuses`, bỏ wrapper sub-tabs |  |  |
 
 ## Quy ước kỹ thuật
 
