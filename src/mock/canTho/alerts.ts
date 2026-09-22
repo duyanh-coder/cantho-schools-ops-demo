@@ -122,4 +122,38 @@ export const canThoAlerts: AlertItem[] = [
 
         status: "resolved",
     },
+
+    {
+        id: "can-tho-alert-008",
+
+        campusId: "can-tho-campus-008",
+
+        title: "Chưa rà soát phòng thí nghiệm phân hiệu Hưng Phú",
+
+        description:
+            "Danh mục thiết bị thí nghiệm của phân hiệu chưa được kiểm kê trước năm học mới.",
+
+        level: "warning",
+
+        createdAt: "2026-08-20T08:30:00",
+
+        status: "new",
+    },
+
+    {
+        id: "can-tho-alert-009",
+
+        campusId: "can-tho-campus-002",
+
+        title: "Cần cập nhật danh sách học sinh phân hiệu Chu Văn An",
+
+        description:
+            "Danh sách học sinh mới nhập học chưa được đồng bộ vào sổ theo dõi của phân hiệu.",
+
+        level: "danger",
+
+        createdAt: "2026-08-20T10:00:00",
+
+        status: "new",
+    },
 ];
