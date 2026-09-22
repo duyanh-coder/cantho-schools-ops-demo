@@ -15,7 +15,7 @@ localStorage.
 | GĐ 4 | Xuất Excel (CSV, UTF-8 BOM) từ danh sách đang lọc + panel phân bố theo biến nhóm trong `CrudManager` (áp dụng cho 4 module) | `0ec7e7b` | `gd4-crud-csv-export` |
 | GĐ 5 | Tổng kết: PROGRESS.md, CHANGELOG, gate xanh (lint 0 lỗi / build / 7 test pass) | `44bc932` | `gd5-hoanthien` |
 | GĐ 6 | Import Excel (CSV): parser thuần (`src/utils/csv.ts`) + 8 unit tests, nút "Nhập Excel" với `Upload` antd, map label→field name, hỗ trợ select/multiselect | `ba1f52b` | `gd6-csv-import` |
-| GĐ 7 | Cổng thông tin điều hành: `/operations` (việc cần làm, thông báo, gợi ý chức năng theo vai — không chặn quyền), trang Công việc cần làm, danh mục dùng chung + trang Danh mục, hướng dẫn 3 bước & phân bố dữ liệu trong `CrudManager`, module dùng chung catalog | *cập nhật sau* | `gd7-portal-hoanthien` |
+| GĐ 7 | Cổng thông tin điều hành: `/operations` (việc cần làm, thông báo, gợi ý chức năng theo vai — không chặn quyền), trang Công việc cần làm, danh mục dùng chung + trang Danh mục, hướng dẫn 3 bước & phân bố dữ liệu trong `CrudManager`, module dùng chung catalog | `619d0e2` | `gd7-portal-hoanthien` |
 
 ## Quy ước kỹ thuật
 
