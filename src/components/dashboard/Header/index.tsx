@@ -1,6 +1,5 @@
 import {
   BellOutlined,
-  LogoutOutlined,
   MenuOutlined,
   UserOutlined,
 } from "@ant-design/icons";
@@ -10,13 +9,7 @@ import {
   Badge,
   Button,
   Space,
-  Tag,
 } from "antd";
-
-import { useNavigate } from "react-router-dom";
-
-import { useAuth } from "@/store/auth";
-import { getRoleLabel } from "@/utils/permission";
 
 import "./style.scss";
 
@@ -27,16 +20,6 @@ interface DashboardHeaderProps {
 const DashboardHeader = ({
   onToggleSidebar,
 }: DashboardHeaderProps) => {
-  const navigate = useNavigate();
-
-  const { user, signOut } = useAuth();
-
-  const handleSignOut = () => {
-    signOut();
-
-    navigate("/login");
-  };
-
   return (
     <header className="dashboard-header">
       <div className="dashboard-header__left">
@@ -73,25 +56,8 @@ const DashboardHeader = ({
           />
 
           <div className="dashboard-header__greeting">
-            <strong>{user?.fullName ?? "Khách"}</strong>
-
-            {user && (
-              <Tag color="blue" className="dashboard-header__role">
-                {getRoleLabel(user.role)}
-              </Tag>
-            )}
+            <strong>Welcome, Admin</strong>
           </div>
-
-          {user && (
-            <Button
-              type="text"
-              icon={<LogoutOutlined />}
-              onClick={handleSignOut}
-              className="dashboard-header__signout"
-            >
-              Đăng xuất
-            </Button>
-          )}
         </Space>
       </div>
     </header>
