@@ -1,65 +1,66 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="800" height="680" viewBox="0 0 800 680" font-family="Arial, Helvetica, sans-serif">
-  <!-- Definitions / arrow marker -->
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="340" viewBox="0 0 960 340" font-family="Arial, Helvetica, sans-serif">
+  <!-- definitions / arrow marker -->
   <defs>
     <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
-      <path d="M0,0 L8,3 L0,6 Z" fill="#2563eb"/>
+      <path d="M0,0 L8,3 L0,6 Z" fill="#3b82f6"/>
     </marker>
   </defs>
 
-  <!-- START node -->
-  <ellipse cx="400" cy="45" rx="95" ry="30" fill="#ecfdf5" stroke="#16a34a" stroke-width="2.5"/>
-  <text x="400" y="41" text-anchor="middle" font-size="17" font-weight="700" fill="#0f172a">Bắt đầu</text>
-  <text x="400" y="59" text-anchor="middle" font-size="12" fill="#475569">mở danh mục cần thao tác</text>
+  <!-- ============ CARD 1: Tìm ============ -->
+  <rect x="70" y="42" width="250" height="196" rx="20" fill="#ffffff" stroke="#2563eb" stroke-width="2.5"/>
+  <!-- icon circle -->
+  <circle cx="195" cy="108" r="34" fill="#eff6ff" stroke="#2563eb" stroke-width="2.5"/>
+  <!-- magnifier icon -->
+  <circle cx="190" cy="103" r="14" fill="none" stroke="#2563eb" stroke-width="4"/>
+  <line x1="200" y1="113" x2="212" y2="125" stroke="#2563eb" stroke-width="4" stroke-linecap="round"/>
+  <!-- badge number -->
+  <circle cx="168" cy="82" r="13" fill="#2563eb"/>
+  <text x="168" y="87" text-anchor="middle" font-size="13" font-weight="700" fill="#ffffff">1</text>
 
-  <!-- arrow start - box1 -->
-  <line x1="400" y1="75" x2="400" y2="112" stroke="#2563eb" stroke-width="2.5" marker-end="url(#arrow)"/>
+  <text x="195" y="165" text-anchor="middle" font-size="19" font-weight="700" fill="#111827">Tìm</text>
+  <text x="195" y="188" text-anchor="middle" font-size="13" fill="#475569">Xem &amp; tìm bản ghi sẵn có</text>
+  <text x="195" y="207" text-anchor="middle" font-size="12" fill="#64748b">theo từ khóa bất kỳ</text>
 
-  <!-- BOX 1 -->
-  <rect x="248" y="115" width="304" height="56" rx="12" fill="#eff6ff" stroke="#2563eb" stroke-width="2.5"/>
-  <text x="400" y="141" text-anchor="middle" font-size="16" font-weight="700" fill="#1e3a8a">Xem &amp; tìm bản ghi sẵn có</text>
-  <text x="400" y="160" text-anchor="middle" font-size="12" fill="#475569">tìm kiếm theo từ khóa bất kỳ</text>
+  <!-- arrow 1 -> 2 -->
+  <line x1="320" y1="140" x2="360" y2="140" stroke="#3b82f6" stroke-width="3" marker-end="url(#arrow)"/>
 
-  <!-- arrow box1 - diamond -->
-  <line x1="400" y1="171" x2="400" y2="215" stroke="#2563eb" stroke-width="2.5" marker-end="url(#arrow)"/>
+  <!-- ============ CARD 2: Thêm / Sửa ============ -->
+  <rect x="360" y="42" width="250" height="196" rx="20" fill="#ffffff" stroke="#2563eb" stroke-width="2.5"/>
+  <!-- icon circle -->
+  <circle cx="485" cy="108" r="34" fill="#eff6ff" stroke="#2563eb" stroke-width="2.5"/>
+  <!-- pencil icon -->
+  <path d="M474 118 L496 96 L502 102 L480 124 Z" fill="#2563eb"/>
+  <line x1="472" y1="128" x2="494" y2="130" stroke="#2563eb" stroke-width="4" stroke-linecap="round"/>
+  <!-- badge number -->
+  <circle cx="458" cy="82" r="13" fill="#2563eb"/>
+  <text x="458" y="87" text-anchor="middle" font-size="13" font-weight="700" fill="#ffffff">2</text>
 
-  <!-- DIAMOND decision -->
-  <polygon points="400,218 505,260 400,302 295,260" fill="#fff7ed" stroke="#f59e0b" stroke-width="2.5"/>
-  <text x="400" y="255" text-anchor="middle" font-size="14" font-weight="700" fill="#92400e">Đã có bản ghi</text>
-  <text x="400" y="273" text-anchor="middle" font-size="14" font-weight="700" fill="#92400e">cần cập nhật?</text>
+  <text x="485" y="165" text-anchor="middle" font-size="19" font-weight="700" fill="#111827">Thêm / Sửa</text>
+  <text x="485" y="188" text-anchor="middle" font-size="13" fill="#475569">Thêm mới hoặc chỉnh sửa ngay</text>
+  <text x="485" y="207" text-anchor="middle" font-size="12" fill="#64748b">điền thông tin bên dưới bảng</text>
 
-  <!-- YES branch (right) -->
-  <line x1="505" y1="260" x2="560" y2="260" stroke="#3b82f6" stroke-width="2.5" marker-end="url(#arrow)"/>
-  <text x="532" y="251" text-anchor="middle" font-size="13" font-weight="700" fill="#16a34a">Có</text>
+  <!-- arrow 2 -> 3 -->
+  <line x1="610" y1="140" x2="650" y2="140" stroke="#3b82f6" stroke-width="3" marker-end="url(#arrow)"/>
 
-  <!-- BOX YES -->
-  <rect x="561" y="233" width="150" height="52" rx="12" fill="#eff6ff" stroke="#2563eb" stroke-width="2.5"/>
-  <text x="636" y="263" text-anchor="middle" font-size="15" font-weight="700" fill="#1e3a8a">Sửa ngay</text>
+  <!-- ============ CARD 3: Excel ============ -->
+  <rect x="650" y="42" width="250" height="196" rx="20" fill="#ffffff" stroke="#2563eb" stroke-width="2.5"/>
+  <!-- icon circle -->
+  <circle cx="775" cy="108" r="34" fill="#eff6ff" stroke="#2563eb" stroke-width="2.5"/>
+  <!-- spreadsheet icon -->
+  <rect x="765" y="92" width="20" height="26" rx="3" fill="#2563eb"/>
+  <line x1="768" y1="98" x2="782" y2="98" stroke="#ffffff" stroke-width="2"/>
+  <line x1="768" y1="104" x2="782" y2="104" stroke="#ffffff" stroke-width="2"/>
+  <line x1="768" y1="110" x2="782" y2="110" stroke="#ffffff" stroke-width="2"/>
+  <!-- badge number -->
+  <circle cx="748" cy="82" r="13" fill="#2563eb"/>
+  <text x="748" y="87" text-anchor="middle" font-size="13" font-weight="700" fill="#ffffff">3</text>
 
-  <!-- yes down to merge line -->
-  <line x1="636" y1="285" x2="636" y2="470" stroke="#2563eb" stroke-width="2.5"/>
-  <line x1="636" y1="470" x2="400" y2="470" stroke="#2563eb" stroke-width="2.5"/>
+  <text x="775" y="165" text-anchor="middle" font-size="19" font-weight="700" fill="#111827">Excel</text>
+  <text x="775" y="188" text-anchor="middle" font-size="13" fill="#475569">Xuất / Nhập qua Excel</text>
+  <text x="775" y="207" text-anchor="middle" font-size="12" fill="#64748b">trao đổi dữ liệu bảng tính</text>
 
-  <!-- NO branch (down) -->
-  <line x1="400" y1="302" x2="400" y2="340" stroke="#3b82f6" stroke-width="2.5" marker-end="url(#arrow)"/>
-  <text x="414" y="326" font-size="13" font-weight="700" fill="#dc2626">Không</text>
-
-  <!-- BOX NO -->
-  <rect x="200" y="343" width="400" height="50" rx="12" fill="#eff6ff" stroke="#2563eb" stroke-width="2.5"/>
-  <text x="400" y="372" text-anchor="middle" font-size="15" font-weight="700" fill="#1e3a8a">Thêm mới bên dưới</text>
-
-  <!-- no down to merge line -->
-  <line x1="400" y1="393" x2="400" y2="503" stroke="#2563eb" stroke-width="2.5" marker-end="url(#arrow)"/>
-
-  <!-- BOX 3 -->
-  <rect x="205" y="506" width="390" height="58" rx="12" fill="#eff6ff" stroke="#2563eb" stroke-width="2.5"/>
-  <text x="400" y="533" text-anchor="middle" font-size="16" font-weight="700" fill="#1e3a8a">Xuất Excel / Nhập Excel</text>
-  <text x="400" y="552" text-anchor="middle" font-size="12" fill="#475569">trao đổi dữ liệu với bảng tính</text>
-
-  <!-- arrow box3 - end -->
-  <line x1="400" y1="564" x2="400" y2="612" stroke="#2563eb" stroke-width="2.5" marker-end="url(#arrow)"/>
-
-  <!-- END node -->
-  <ellipse cx="400" cy="648" rx="150" ry="32" fill="#ecfdf5" stroke="#16a34a" stroke-width="2.5"/>
-  <text x="400" y="644" text-anchor="middle" font-size="16" font-weight="700" fill="#0f172a">Kết thúc — Đã lưu</text>
-  <text x="400" y="663" text-anchor="middle" font-size="12" fill="#475569">tự động trên trình duyệt (localStorage)</text>
+  <!-- footer note -->
+  <rect x="150" y="262" width="660" height="46" rx="23" fill="#f0fdf4" stroke="#22c55e" stroke-width="2"/>
+  <text x="480" y="280" text-anchor="middle" font-size="15" font-weight="700" fill="#166534">Mọi thay đổi đã được lưu lại ngay</text>
+  <text x="480" y="298" text-anchor="middle" font-size="12" fill="#475569">không cần bấm nút lưu — dữ liệu tự động cập nhật</text>
 </svg>

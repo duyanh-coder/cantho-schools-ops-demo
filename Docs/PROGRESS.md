@@ -22,6 +22,7 @@ localStorage.
 | GĐ 11 | Tab Học sinh rút gọn theo width: bảng Danh sách học sinh còn Mã HS, Họ tên, Giới tính, Cơ sở, Lớp, Trạng thái (ẩn Ngày sinh, SĐT phụ huynh, Địa chỉ vào popup); ẩn Lý do khỏi bảng Biến động sỉ số; bật nút chi tiết cho cả 3 sub-tab | `e871a1d` | `gd11-hocsinh-gon-detail` |
 | GĐ 12 | Hub "Trường & Cơ sở" nâng 2 sub-tab thành 2 tab lớn (Danh sách trường, Danh sách cơ sở) → 5 tab lớn: trường, cơ sở, nhân sự, khối & tổ, học sinh; thêm param `tab=campuses`, bỏ wrapper sub-tabs | `5ae210b` | `gd12-hub-5tab` |
 | GĐ 13 | Thay phần "Cách thực hiện công việc" (3 bước dạng text) bằng lưu đồ đầy đủ dạng ảnh: SVG nguồn (`src/assets/images/workflow/cach-thuc-hien.svg`) → rasterize PNG (1600×1360, nền trong suốt) bằng Chrome headless; gồm Bắt đầu → Xem & tìm → Diamond "Có? Sửa / Không? Thêm" → Xuất/Nhập Excel → Kết thúc (lưu tự động) | `e2b85bc` | `gd13-workflow-flowchart-png` |
+| GĐ 14 | Thay lưu đồ dọc kiểu lập trình viên bằng ảnh ngang (960×340 → PNG 1920×680) thân thiện người dùng: 3 thẻ tròn góc có icon + số bước (1 Tìm, 2 Thêm/Sửa, 3 Excel) nối mũi tên trái→phải, đáy là ghi chú "Mọi thay đổi đã được lưu lại ngay"; bỏ diamond/nhánh rẽ |  |  |
 
 ## Quy ước kỹ thuật
 
