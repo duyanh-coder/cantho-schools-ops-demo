@@ -71,17 +71,17 @@ const buildStudentFields = (
     studentStatusOptions: Array<{ value: string | number; label: string }>,
 ): CrudField<Student>[] => [
     {
+        name: "code",
+        label: "Mã học sinh",
+        required: true,
+        tableWidth: 110,
+        hideInForm: true,
+    },
+    {
         name: "fullName",
         label: "Họ và tên",
         required: true,
         tableWidth: 200,
-    },
-    {
-        name: "code",
-        label: "Mã học sinh",
-        required: true,
-        tableWidth: 120,
-        hideInForm: true,
     },
     {
         name: "gender",
@@ -97,6 +97,7 @@ const buildStudentFields = (
         required: true,
         type: "date",
         tableWidth: 120,
+        table: false,
     },
     {
         name: "campusId",
@@ -119,6 +120,7 @@ const buildStudentFields = (
         label: "SĐT phụ huynh",
         required: true,
         tableWidth: 130,
+        table: false,
     },
     {
         name: "address",
@@ -126,6 +128,7 @@ const buildStudentFields = (
         type: "textarea",
         span: 24,
         tableWidth: 200,
+        table: false,
     },
     {
         name: "status",
@@ -242,6 +245,7 @@ const buildEnrolmentChangeFields = (
         type: "textarea",
         span: 24,
         tableWidth: 220,
+        table: false,
     },
     {
         name: "status",
@@ -315,6 +319,8 @@ const buildItems = (
                 kpis={studentKpis}
                 entityName="học sinh"
                 newLabel="Thêm học sinh"
+                detail
+                detailWidth={1000}
             />
         ),
     },
@@ -331,6 +337,8 @@ const buildItems = (
                 fields={transcriptFields}
                 entityName="học bạ"
                 newLabel="Thêm học bạ"
+                detail
+                detailWidth={900}
             />
         ),
     },
@@ -347,6 +355,8 @@ const buildItems = (
                 fields={enrolmentChangeFields}
                 entityName="biến động sỉ số"
                 newLabel="Thêm biến động"
+                detail
+                detailWidth={900}
             />
         ),
     },

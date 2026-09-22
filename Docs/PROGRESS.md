@@ -19,6 +19,7 @@ localStorage.
 | GĐ 8 | Gọn menu, tập trung "Trường & Cơ sở": hub 1 header + tabs (Trường/Cơ sở CRUD, Nhân sự, Khối & tổ, Học sinh); bán trú thành thuộc tính `hasBoarding` của khối/tổ (bỏ trang Bán trú); Danh mục cuối menu (submenu từ `CATALOG_DEFS`, deep-link `?key=`); thêm catalog Cấp trường/Môn học/Chức vụ/Trình độ/Danh hiệu; `/operations` redirect → schools; Personnel/Sector nhận `compact` | `d886650` | `gd8-truong-coso-hub` |
 | GĐ 9 | Ẩn dòng mô tả dưới tiêu đề ở mọi `page-head`; tab Nhân sự rút bảng còn 6 cột (Mã CB-GV, Họ tên, Chức vụ, Môn giảng dạy, Tổ chuyên môn, Trạng thái) + nút chi tiết (mắt) mở popup `Descriptions` hiện đủ thông tin còn lại; `CrudManager` thêm prop `detail`; export CSV xuất đủ các trường editable (bỏ trường hệ thống ẩn) | `76e1469` | `gd9-header-gon-nhansu` |
 | GĐ 10 | Popup chi tiết thêm `detailWidth` (Nhân sự 1000px); tab Khối & Tổ rút gọn theo width, ẩn cột Mô tả khỏi bảng (chỉ hiện trong popup chi tiết), cột Thành viên hiển thị 3 người + Tooltip đủ danh sách, bật nút chi tiết | `97f8eb5` | `gd10-khoito-gon-detail` |
+| GĐ 11 | Tab Học sinh rút gọn theo width: bảng Danh sách học sinh còn Mã HS, Họ tên, Giới tính, Cơ sở, Lớp, Trạng thái (ẩn Ngày sinh, SĐT phụ huynh, Địa chỉ vào popup); ẩn Lý do khỏi bảng Biến động sỉ số; bật nút chi tiết cho cả 3 sub-tab |  |  |
 
 ## Quy ước kỹ thuật
 
