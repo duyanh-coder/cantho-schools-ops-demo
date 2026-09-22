@@ -21,6 +21,10 @@ import {
     subjects,
 } from "@/mock/common";
 
+import {
+    useCatalogOptions,
+} from "@/store/useCatalog";
+
 import type {
     CrudField,
     CrudKpi,
@@ -35,17 +39,6 @@ import {
 } from "antd";
 
 
-
-const genderOptions = [
-    { value: "male", label: "Nam" },
-    { value: "female", label: "Nữ" },
-];
-
-const studentStatusOptions = [
-    { value: "studying", label: "Đang học" },
-    { value: "suspended", label: "Tạm nghỉ" },
-    { value: "graduated", label: "Đã tốt nghiệp" },
-];
 
 const campusOptions = canThoMockData.campuses.map((campus) => ({
     value: campus.id,
@@ -72,29 +65,11 @@ const subjectOptions = subjects.map((subject) => ({
     label: subject.name,
 }));
 
-const semesterOptions = [
-    { value: 1, label: "HK1" },
-    { value: 2, label: "HK2" },
-];
 
-const conductOptions = [
-    { value: "Tốt", label: "Tốt" },
-    { value: "Khá", label: "Khá" },
-    { value: "Đạt", label: "Đạt" },
-];
-
-const changeTypeOptions = [
-    { value: "increase", label: "Nhập học / tăng" },
-    { value: "decrease", label: "Thôi học / giảm" },
-];
-
-const changeStatusOptions = [
-    { value: "pending", label: "Chờ duyệt" },
-    { value: "approved", label: "Đã duyệt" },
-];
-
-
-const studentFields: CrudField<Student>[] = [
+const buildStudentFields = (
+    genderOptions: Array<{ value: string | number; label: string }>,
+    studentStatusOptions: Array<{ value: string | number; label: string }>,
+): CrudField<Student>[] => [
     {
         name: "fullName",
         label: "Họ và tên",
@@ -163,7 +138,10 @@ const studentFields: CrudField<Student>[] = [
     },
 ];
 
-const transcriptFields: CrudField<Transcript>[] = [
+const buildTranscriptFields = (
+    semesterOptions: Array<{ value: string | number; label: string }>,
+    conductOptions: Array<{ value: string | number; label: string }>,
+): CrudField<Transcript>[] => [
     {
         name: "studentId",
         label: "Học sinh",
@@ -215,7 +193,10 @@ const transcriptFields: CrudField<Transcript>[] = [
     },
 ];
 
-const enrolmentChangeFields: CrudField<EnrolmentChange>[] = [
+const buildEnrolmentChangeFields = (
+    changeTypeOptions: Array<{ value: string | number; label: string }>,
+    changeStatusOptions: Array<{ value: string | number; label: string }>,
+): CrudField<EnrolmentChange>[] => [
     {
         name: "studentName",
         label: "Học sinh",
@@ -315,7 +296,11 @@ const studentKpis: CrudKpi[] = [
 ];
 
 
-const items: TabsProps["items"] = [
+const buildItems = (
+    studentFields: CrudField<Student>[],
+    transcriptFields: CrudField<Transcript>[],
+    enrolmentChangeFields: CrudField<EnrolmentChange>[],
+): TabsProps["items"] => [
     {
         key: "students",
         label: "Danh sách học sinh",
@@ -369,6 +354,61 @@ const items: TabsProps["items"] = [
 
 
 const StudentsPage = () => {
+    const genderOptions =
+        useCatalogOptions(
+            "gender",
+        );
+
+    const studentStatusOptions =
+        useCatalogOptions(
+            "student-status",
+        );
+
+    const semesterOptions =
+        useCatalogOptions(
+            "semester",
+        );
+
+    const conductOptions =
+        useCatalogOptions(
+            "conduct",
+        );
+
+    const changeTypeOptions =
+        useCatalogOptions(
+            "enrolment-type",
+        );
+
+    const changeStatusOptions =
+        useCatalogOptions(
+            "enrolment-status",
+        );
+
+    const studentFields =
+        buildStudentFields(
+            genderOptions,
+            studentStatusOptions,
+        );
+
+    const transcriptFields =
+        buildTranscriptFields(
+            semesterOptions,
+            conductOptions,
+        );
+
+    const enrolmentChangeFields =
+        buildEnrolmentChangeFields(
+            changeTypeOptions,
+            changeStatusOptions,
+        );
+
+    const items =
+        buildItems(
+            studentFields,
+            transcriptFields,
+            enrolmentChangeFields,
+        );
+
     return (
         <div className="students-page">
             <Tabs

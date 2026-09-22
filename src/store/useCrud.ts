@@ -8,6 +8,30 @@ import {
 export const CRUD_STORAGE_PREFIX = "htql:crud:";
 
 
+export const readCrudItems = <T extends { id: string }>(
+    storageKey: string,
+    seed: T[],
+): T[] => {
+    const fullKey = `${CRUD_STORAGE_PREFIX}${storageKey}`;
+
+    const raw = localStorage.getItem(fullKey);
+
+    if (raw) {
+        try {
+            const parsed = JSON.parse(raw) as T[];
+
+            if (Array.isArray(parsed)) {
+                return parsed;
+            }
+        } catch {
+            /* ignore broken cache and fall back to seed */
+        }
+    }
+
+    return seed;
+};
+
+
 export interface CrudApi<T extends { id: string }> {
     items: T[];
 

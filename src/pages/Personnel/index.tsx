@@ -24,22 +24,11 @@ import {
     subjects,
 } from "@/mock/common";
 
+import {
+    useCatalogOptions,
+} from "@/store/useCatalog";
 
 
-const genderOptions = [
-    { value: "male", label: "Nam" },
-    { value: "female", label: "Nữ" },
-];
-
-const yesNoOptions = [
-    { value: "1", label: "Có" },
-    { value: "0", label: "Không" },
-];
-
-const statusOptions = [
-    { value: "active", label: "Đang công tác" },
-    { value: "inactive", label: "Đã nghỉ / tạm ngừng" },
-];
 
 const campusOptions = canThoMockData.campuses.map((campus) => ({
     value: campus.id,
@@ -56,7 +45,11 @@ const subjectOptions = subjects.map((subject) => ({
 }));
 
 
-const personnelFields: CrudField<Personnel>[] = [
+const buildPersonnelFields = (
+    genderOptions: Array<{ value: string | number; label: string }>,
+    yesNoOptions: Array<{ value: string | number; label: string }>,
+    statusOptions: Array<{ value: string | number; label: string }>,
+): CrudField<Personnel>[] => [
     {
         name: "fullName",
         label: "Họ và tên",
@@ -189,6 +182,28 @@ const personnelKpis: CrudKpi[] = [
 
 
 const PersonnelPage = () => {
+    const genderOptions =
+        useCatalogOptions(
+            "gender",
+        );
+
+    const yesNoOptions =
+        useCatalogOptions(
+            "yes-no",
+        );
+
+    const statusOptions =
+        useCatalogOptions(
+            "personnel-status",
+        );
+
+    const personnelFields =
+        buildPersonnelFields(
+            genderOptions,
+            yesNoOptions,
+            statusOptions,
+        );
+
     return (
         <CrudManager<Personnel>
             eyebrow="QUẢN LÝ NHÂN SỰ"

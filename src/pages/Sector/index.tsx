@@ -15,21 +15,15 @@ import {
     canThoMockData,
 } from "@/mock";
 
+import {
+    useCatalogOptions,
+} from "@/store/useCatalog";
+
 import type {
     CrudField,
     CrudKpi,
 } from "@/components/dashboard/CrudManager";
 
-
-const sectorTypeOptions = [
-    { value: "grade", label: "Khối lớp" },
-    { value: "subject_group", label: "Tổ bộ môn" },
-];
-
-const statusOptions = [
-    { value: "active", label: "Đang hoạt động" },
-    { value: "inactive", label: "Tạm ngưng" },
-];
 
 const managerOptions = canThoMockData.personnel
     .filter((item) => item.status === "active")
@@ -45,15 +39,12 @@ const memberOptions = canThoMockData.personnel
         label: item.fullName,
     }));
 
-const gradeOptions = [
-    { value: 6, label: "Khối 6" },
-    { value: 7, label: "Khối 7" },
-    { value: 8, label: "Khối 8" },
-    { value: 9, label: "Khối 9" },
-];
 
-
-const sectorFields: CrudField<Sector>[] = [
+const buildFields = (
+    sectorTypeOptions: Array<{ value: string | number; label: string }>,
+    gradeOptions: Array<{ value: string | number; label: string }>,
+    statusOptions: Array<{ value: string | number; label: string }>,
+): CrudField<Sector>[] => [
     {
         name: "name",
         label: "Tên tổ / khối",
@@ -151,6 +142,28 @@ const kpis: CrudKpi[] = [
 
 
 const SectorPage = () => {
+    const sectorTypeOptions =
+        useCatalogOptions(
+            "sector-type",
+        );
+
+    const gradeOptions =
+        useCatalogOptions(
+            "grade",
+        );
+
+    const statusOptions =
+        useCatalogOptions(
+            "status",
+        );
+
+    const sectorFields =
+        buildFields(
+            sectorTypeOptions,
+            gradeOptions,
+            statusOptions,
+        );
+
     return (
         <CrudManager<Sector>
             eyebrow="KHỐI NGÀNH & TỔ CHUYÊN MÔN"

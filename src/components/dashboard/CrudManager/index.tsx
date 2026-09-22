@@ -1,11 +1,12 @@
 import {
+    BulbOutlined,
     DeleteOutlined,
     DownloadOutlined,
-    UploadOutlined,
     EditOutlined,
     PlusOutlined,
     ReloadOutlined,
     SearchOutlined,
+    UploadOutlined,
 } from "@ant-design/icons";
 
 import {
@@ -139,6 +140,45 @@ const toLabelMap = (
             ],
         ),
     );
+};
+
+
+const remainingBySelector = <T extends { id: string }>(
+    items: T[],
+    fields: CrudField<T>[],
+): string => {
+    const selector = fields.find(
+        (field) =>
+            field.type === "select" &&
+            field.options &&
+            field.options.length > 0,
+    );
+
+    if (!selector) {
+        return "Dữ liệu quản lý tập trung tại một danh sách";
+    }
+
+    const map = toLabelMap(selector.options);
+
+    const counts = new Map<string, number>();
+
+    items.forEach((item) => {
+        const value = String(item[selector.name]);
+
+        const label = map.get(value) ?? value;
+
+        counts.set(label, (counts.get(label) ?? 0) + 1);
+    });
+
+    const entries = [...counts.entries()].sort(
+        (a, b) => b[1] - a[1],
+    );
+
+    const summary = entries
+        .map(([label, count]) => `${label} (${count})`)
+        .join(" · ");
+
+    return `${selector.label}: ${summary}`;
 };
 
 
@@ -778,6 +818,38 @@ function CrudManager<T extends { id: string }>({
                     <p>{description}</p>
                 </div>
             </header>
+
+            <div className="crud-panel__workflow">
+                <div className="crud-panel__workflow-title">
+                    <BulbOutlined />
+
+                    <strong>Cách thực hiện công việc</strong>
+
+                    <span>
+                        {remainingBySelector(
+                            items,
+                            fields,
+                        )}
+                    </span>
+                </div>
+
+                <div className="crud-panel__workflow-steps">
+                    <span>
+                        <em>1</em>
+                        Xem &amp; tìm bản ghi sẵn có
+                    </span>
+
+                    <span>
+                        <em>2</em>
+                        Thêm mới hoặc sửa ngay bên dưới
+                    </span>
+
+                    <span>
+                        <em>3</em>
+                        Xuất Excel / Nhập Excel để trao đổi dữ liệu
+                    </span>
+                </div>
+            </div>
 
             {kpis && kpis.length > 0 && (
                 <div className="page-kpi">

@@ -1,8 +1,11 @@
 import {
   ApartmentOutlined,
+  AppstoreOutlined,
   BarChartOutlined,
   CalendarOutlined,
+  CheckCircleOutlined,
   CoffeeOutlined,
+  DashboardOutlined,
   EnvironmentOutlined,
   FileTextOutlined,
   ReadOutlined,
@@ -25,6 +28,24 @@ type MenuItem = Required<MenuProps>["items"][number];
 const { Sider } = Layout;
 
 const menuItems: MenuItem[] = [
+  {
+    key: "/operations",
+    icon: <DashboardOutlined />,
+    label: "Trung tâm điều hành",
+  },
+  {
+    key: "/operations/tasks",
+    icon: <CheckCircleOutlined />,
+    label: "Công việc cần làm",
+  },
+  {
+    key: "/operations/catalogs",
+    icon: <AppstoreOutlined />,
+    label: "Danh mục dùng chung",
+  },
+  {
+    type: "divider",
+  },
   {
     key: "/operations/documents",
     icon: <FileTextOutlined />,

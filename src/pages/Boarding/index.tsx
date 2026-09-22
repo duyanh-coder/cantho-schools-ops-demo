@@ -15,6 +15,10 @@ import {
     canThoMockData,
 } from "@/mock";
 
+import {
+    useCatalogOptions,
+} from "@/store/useCatalog";
+
 import type {
     CrudField,
     CrudKpi,
@@ -27,20 +31,11 @@ const campusOptions = canThoMockData.campuses.map((campus) => ({
     label: campus.name,
 }));
 
-const gradeOptions = [
-    { value: 6, label: "Khối 6" },
-    { value: 7, label: "Khối 7" },
-    { value: 8, label: "Khối 8" },
-    { value: 9, label: "Khối 9" },
-];
 
-const statusOptions = [
-    { value: "active", label: "Triển khai" },
-    { value: "inactive", label: "Tạm ngưng" },
-];
-
-
-const boardingFields: CrudField<BoardingRecord>[] = [
+const buildBoardingFields = (
+    gradeOptions: Array<{ value: string | number; label: string }>,
+    statusOptions: Array<{ value: string | number; label: string }>,
+): CrudField<BoardingRecord>[] => [
     {
         name: "campusId",
         label: "Cơ sở",
@@ -154,6 +149,22 @@ const boardingKpis: CrudKpi[] = [
 
 
 const BoardingPage = () => {
+    const gradeOptions =
+        useCatalogOptions(
+            "grade",
+        );
+
+    const statusOptions =
+        useCatalogOptions(
+            "boarding-status",
+        );
+
+    const boardingFields =
+        buildBoardingFields(
+            gradeOptions,
+            statusOptions,
+        );
+
     return (
         <CrudManager<BoardingRecord>
             eyebrow="BÁN TRÚ & CĂN TIN"

@@ -16,6 +16,10 @@ import ReportsPage from "@/pages/Reports";
 import SchoolPage from "@/pages/Schools";
 import TimetablePage from "@/pages/Timetable";
 
+import OperationsDashboardPage from "@/pages/OperationsDashboard";
+import CatalogsPage from "@/pages/Catalogs";
+import TasksPage from "@/pages/Tasks";
+
 import PersonnelPage from "@/pages/Personnel";
 import SectorsPage from "@/pages/Sector";
 import StudentsPage from "@/pages/Students";
@@ -32,6 +36,8 @@ function AppRouter() {
 
         {/* Operations */}
         <Route element={<OperationLayout />}>
+          <Route path="/operations" element={<OperationsDashboardPage />} />
+
           <Route path="/operations/documents" element={<DocumentsPage />} />
 
           <Route path="/operations/timetable" element={<TimetablePage />} />
@@ -53,6 +59,10 @@ function AppRouter() {
           <Route path="/operations/alerts" element={<AlertsPage />} />
 
           <Route path="/operations/chatbot" element={<ChatbotPage />} />
+
+          <Route path="/operations/tasks" element={<TasksPage />} />
+
+          <Route path="/operations/catalogs" element={<CatalogsPage />} />
         </Route>
 
         {/* Fallback */}
