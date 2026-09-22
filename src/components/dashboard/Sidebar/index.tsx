@@ -20,6 +20,9 @@ import { useLocation, useNavigate } from "react-router-dom";
 
 import "./style.scss";
 
+import { useAuth } from "@/store/auth";
+import { canAccess } from "@/utils/permission";
+
 type MenuItem = Required<MenuProps>["items"][number];
 
 const { Sider } = Layout;
@@ -96,6 +99,24 @@ const DashboardSidebar = ({
 
   const location = useLocation();
 
+  const { user } = useAuth();
+
+  const visibleItems =
+    user
+      ? menuItems.filter(
+          (item) => {
+            const key =
+              typeof item === "object" &&
+              item !== null &&
+              "key" in item
+                ? String(item.key)
+                : "";
+
+            return canAccess(user.role, key);
+          },
+        )
+      : menuItems;
+
   const handleBrandClick = () => {
     sessionStorage.removeItem("home-scroll-position");
 
@@ -132,7 +153,7 @@ const DashboardSidebar = ({
       <Menu
         mode="inline"
         selectedKeys={[location.pathname]}
-        items={menuItems}
+        items={visibleItems}
         onClick={(item) => navigate(item.key)}
         className="dashboard-sidebar__menu"
       />
