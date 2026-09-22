@@ -21,6 +21,7 @@ localStorage.
 | GĐ 10 | Popup chi tiết thêm `detailWidth` (Nhân sự 1000px); tab Khối & Tổ rút gọn theo width, ẩn cột Mô tả khỏi bảng (chỉ hiện trong popup chi tiết), cột Thành viên hiển thị 3 người + Tooltip đủ danh sách, bật nút chi tiết | `97f8eb5` | `gd10-khoito-gon-detail` |
 | GĐ 11 | Tab Học sinh rút gọn theo width: bảng Danh sách học sinh còn Mã HS, Họ tên, Giới tính, Cơ sở, Lớp, Trạng thái (ẩn Ngày sinh, SĐT phụ huynh, Địa chỉ vào popup); ẩn Lý do khỏi bảng Biến động sỉ số; bật nút chi tiết cho cả 3 sub-tab | `e871a1d` | `gd11-hocsinh-gon-detail` |
 | GĐ 12 | Hub "Trường & Cơ sở" nâng 2 sub-tab thành 2 tab lớn (Danh sách trường, Danh sách cơ sở) → 5 tab lớn: trường, cơ sở, nhân sự, khối & tổ, học sinh; thêm param `tab=campuses`, bỏ wrapper sub-tabs | `5ae210b` | `gd12-hub-5tab` |
+| GĐ 13 | Thay phần "Cách thực hiện công việc" (3 bước dạng text) bằng lưu đồ đầy đủ dạng ảnh: SVG nguồn (`src/assets/images/workflow/cach-thuc-hien.svg`) → rasterize PNG (1600×1360, nền trong suốt) bằng Chrome headless; gồm Bắt đầu → Xem & tìm → Diamond "Có? Sửa / Không? Thêm" → Xuất/Nhập Excel → Kết thúc (lưu tự động) |  |  |
 
 ## Quy ước kỹ thuật
 

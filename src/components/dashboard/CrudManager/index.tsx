@@ -49,6 +49,8 @@ import {
     parseCsv,
 } from "@/utils/csv";
 
+import workflowDiagram from "@/assets/images/workflow/cach-thuc-hien.png";
+
 import "./style.scss";
 
 
@@ -928,22 +930,11 @@ function CrudManager<T extends { id: string }>({
                     </span>
                 </div>
 
-                <div className="crud-panel__workflow-steps">
-                    <span>
-                        <em>1</em>
-                        Xem &amp; tìm bản ghi sẵn có
-                    </span>
-
-                    <span>
-                        <em>2</em>
-                        Thêm mới hoặc sửa ngay bên dưới
-                    </span>
-
-                    <span>
-                        <em>3</em>
-                        Xuất Excel / Nhập Excel để trao đổi dữ liệu
-                    </span>
-                </div>
+                <img
+                    src={workflowDiagram}
+                    alt="Lưu đồ cách thực hiện công việc"
+                    className="crud-panel__workflow-img"
+                />
             </div>
 
             {kpis && kpis.length > 0 && (
