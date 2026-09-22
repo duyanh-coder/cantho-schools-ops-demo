@@ -227,6 +227,7 @@ const PersonnelPage = ({
             entityName="cán bộ – giáo viên"
             newLabel="Thêm nhân sự"
             detail
+            detailWidth={1000}
         />
     );
 };

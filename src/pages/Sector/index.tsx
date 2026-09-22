@@ -24,6 +24,16 @@ import type {
     CrudKpi,
 } from "@/components/dashboard/CrudManager";
 
+import type {
+    ReactNode,
+} from "react";
+
+import {
+    Space,
+    Tag,
+    Tooltip,
+} from "antd";
+
 
 const managerOptions = canThoMockData.personnel
     .filter((item) => item.status === "active")
@@ -39,6 +49,64 @@ const memberOptions = canThoMockData.personnel
         label: item.fullName,
     }));
 
+const memberNameMap = new Map<string, string>(
+    memberOptions.map(
+        (option) => [String(option.value), option.label],
+    ),
+);
+
+const renderMembers = (
+    row: Sector,
+): ReactNode => {
+    const ids = row.memberIds ?? [];
+
+    if (ids.length === 0) {
+        return (
+            <span className="crud-panel__muted">
+                —
+            </span>
+        );
+    }
+
+    const names = ids.map(
+        (id) => memberNameMap.get(id) ?? id,
+    );
+
+    const visible = names.slice(0, 3);
+
+    const hiddenCount = names.length - visible.length;
+
+    return (
+        <Tooltip
+            title={
+                hiddenCount > 0
+                    ? names.join("; ")
+                    : undefined
+            }
+        >
+            <Space
+                size={4}
+                wrap
+            >
+                {visible.map((name) => (
+                    <Tag
+                        color="blue"
+                        key={name}
+                    >
+                        {name}
+                    </Tag>
+                ))}
+
+                {hiddenCount > 0 && (
+                    <Tag>
+                        +{hiddenCount}
+                    </Tag>
+                )}
+            </Space>
+        </Tooltip>
+    );
+};
+
 
 const buildFields = (
     sectorTypeOptions: Array<{ value: string | number; label: string }>,
@@ -50,7 +118,7 @@ const buildFields = (
         name: "name",
         label: "Tên tổ / khối",
         required: true,
-        tableWidth: 220,
+        tableWidth: 200,
     },
     {
         name: "type",
@@ -58,14 +126,14 @@ const buildFields = (
         required: true,
         type: "select",
         options: sectorTypeOptions,
-        tableWidth: 140,
+        tableWidth: 130,
     },
     {
         name: "grade",
         label: "Khối lớp",
         type: "select",
         options: gradeOptions,
-        tableWidth: 110,
+        tableWidth: 90,
         hideInForm: false,
     },
     {
@@ -73,14 +141,14 @@ const buildFields = (
         label: "Trưởng khối / tổ trưởng",
         type: "select",
         options: managerOptions,
-        tableWidth: 190,
+        tableWidth: 180,
     },
     {
         name: "hasBoarding",
         label: "Tổ chức bán trú",
         type: "select",
         options: yesNoOptions,
-        tableWidth: 140,
+        tableWidth: 130,
         initialValue: "0",
     },
     {
@@ -88,14 +156,15 @@ const buildFields = (
         label: "Thành viên",
         type: "multiselect",
         options: memberOptions,
-        tableWidth: 240,
+        tableWidth: 220,
+        render: renderMembers,
     },
     {
         name: "about",
         label: "Mô tả nhiệm vụ",
         type: "textarea",
         span: 24,
-        tableWidth: 260,
+        table: false,
     },
     {
         name: "status",
@@ -103,7 +172,7 @@ const buildFields = (
         required: true,
         type: "select",
         options: statusOptions,
-        tableWidth: 130,
+        tableWidth: 120,
         initialValue: "active",
     },
 ];
@@ -195,6 +264,8 @@ const SectorPage = ({
             seed={canThoMockData.sectors}
             fields={sectorFields}
             kpis={kpis}
+            detail
+            detailWidth={960}
         />
     );
 };

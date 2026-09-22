@@ -132,6 +132,8 @@ export interface CrudManagerProps<T extends { id: string }> {
     compact?: boolean;
 
     detail?: boolean;
+
+    detailWidth?: number;
 }
 
 
@@ -200,6 +202,7 @@ function CrudManager<T extends { id: string }>({
     newLabel,
     compact,
     detail,
+    detailWidth,
 }: CrudManagerProps<T>) {
     const {
         items,
@@ -1110,7 +1113,7 @@ function CrudManager<T extends { id: string }>({
                 open={detailRow !== null}
                 title={`Chi tiết ${entityName ?? title}`}
                 footer={null}
-                width={720}
+                width={detailWidth ?? 720}
                 destroyOnHidden
                 onCancel={() => setDetailRow(null)}
             >
