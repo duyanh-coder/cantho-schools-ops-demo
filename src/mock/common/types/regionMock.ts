@@ -16,6 +16,7 @@ import type { Personnel } from "./personnel";
 import type { Student } from "./student";
 import type { Transcript } from "./student";
 import type { EnrolmentChange } from "./student";
+import type { SchoolFacility } from "./schoolFacility";
 import type { BoardingRecord } from "./boarding";
 import type {
     GisMockData,
@@ -60,6 +61,8 @@ export interface RegionMockData {
     transcripts: Transcript[];
 
     enrolmentChanges: EnrolmentChange[];
+
+    facilities: SchoolFacility[];
 
     boarding: BoardingRecord[];
 }

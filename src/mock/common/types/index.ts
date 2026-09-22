@@ -71,6 +71,11 @@ export type {
 } from "./student";
 
 export type {
+    SchoolFacility,
+    SchoolFacilityCategory,
+} from "./schoolFacility";
+
+export type {
     BoardingRecord,
 } from "./boarding";
 

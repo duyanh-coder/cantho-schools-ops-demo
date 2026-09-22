@@ -25,4 +25,15 @@ export const canThoTranscripts: Transcript[] = [
     { id: "can-tho-transcript-022", studentId: "can-tho-student-011", subjectId: "literature", semester: 1, academicYear: "2026-2027", score: 6.5, conduct: "Khá" },
     { id: "can-tho-transcript-023", studentId: "can-tho-student-012", subjectId: "math", semester: 1, academicYear: "2026-2027", score: 8.1, conduct: "Tốt" },
     { id: "can-tho-transcript-024", studentId: "can-tho-student-012", subjectId: "literature", semester: 1, academicYear: "2026-2027", score: 7.9, conduct: "Tốt" },
+
+    { id: "can-tho-transcript-025", studentId: "can-tho-student-013", subjectId: "math", semester: 1, academicYear: "2026-2027", score: 7.8, conduct: "Khá" },
+    { id: "can-tho-transcript-026", studentId: "can-tho-student-014", subjectId: "literature", semester: 1, academicYear: "2026-2027", score: 8.6, conduct: "Tốt" },
+    { id: "can-tho-transcript-027", studentId: "can-tho-student-015", subjectId: "math", semester: 1, academicYear: "2026-2027", score: 8.3, conduct: "Tốt" },
+    { id: "can-tho-transcript-028", studentId: "can-tho-student-016", subjectId: "english", semester: 1, academicYear: "2026-2027", score: 7.5, conduct: "Khá" },
+    { id: "can-tho-transcript-029", studentId: "can-tho-student-017", subjectId: "math", semester: 1, academicYear: "2026-2027", score: 6.7, conduct: "Khá" },
+    { id: "can-tho-transcript-030", studentId: "can-tho-student-018", subjectId: "math", semester: 1, academicYear: "2026-2027", score: 8.0, conduct: "Tốt" },
+    { id: "can-tho-transcript-031", studentId: "can-tho-student-019", subjectId: "literature", semester: 1, academicYear: "2026-2027", score: 7.7, conduct: "Khá" },
+    { id: "can-tho-transcript-032", studentId: "can-tho-student-020", subjectId: "math", semester: 1, academicYear: "2026-2027", score: 8.9, conduct: "Tốt" },
+    { id: "can-tho-transcript-033", studentId: "can-tho-student-021", subjectId: "physics", semester: 1, academicYear: "2026-2027", score: 7.4, conduct: "Khá" },
+    { id: "can-tho-transcript-034", studentId: "can-tho-student-022", subjectId: "math", semester: 1, academicYear: "2026-2027", score: 8.2, conduct: "Tốt" },
 ];

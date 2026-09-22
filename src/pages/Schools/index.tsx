@@ -1,13 +1,13 @@
 import {
-    ApartmentOutlined,
     BankOutlined,
     EnvironmentOutlined,
     PartitionOutlined,
-    ReadOutlined,
-    TeamOutlined,
+    SelectOutlined,
 } from "@ant-design/icons";
 
 import {
+    Select,
+    Space,
     Tabs,
 } from "antd";
 
@@ -34,7 +34,6 @@ import {
 
 import type {
     Campus,
-    School,
 } from "@/mock/common/types";
 
 import PersonnelPage from "@/pages/Personnel";
@@ -47,76 +46,15 @@ import {
     useCatalogOptions,
 } from "@/store/useCatalog";
 
+import SchoolOverview from "./SchoolOverview";
+
 import "./style.scss";
 
-
-const principalOptions = canThoMockData.personnel
-    .map((item) => ({
-        value: item.id,
-        label: item.fullName,
-    }));
 
 const schoolOptions = canThoMockData.schools.map((school) => ({
     value: school.id,
     label: school.name,
 }));
-
-
-const buildSchoolFields = (
-    educationLevelOptions: Array<{ value: string | number; label: string }>,
-    statusOptions: Array<{ value: string | number; label: string }>,
-): CrudField<School>[] => [
-    {
-        name: "regionId",
-        label: "Miền",
-        hideInForm: true,
-        table: false,
-        initialValue: "can-tho",
-    },
-    {
-        name: "wardId",
-        label: "Phường/Xã",
-        hideInForm: true,
-        table: false,
-        initialValue: "can-tho-ward-001",
-    },
-    {
-        name: "name",
-        label: "Tên trường",
-        required: true,
-        tableWidth: 260,
-    },
-    {
-        name: "code",
-        label: "Mã trường",
-        required: true,
-        tableWidth: 140,
-    },
-    {
-        name: "educationLevel",
-        label: "Cấp học",
-        required: true,
-        type: "select",
-        options: educationLevelOptions,
-        tableWidth: 150,
-    },
-    {
-        name: "principalId",
-        label: "Hiệu trưởng",
-        type: "select",
-        options: principalOptions,
-        tableWidth: 190,
-    },
-    {
-        name: "status",
-        label: "Trạng thái",
-        required: true,
-        type: "select",
-        options: statusOptions,
-        tableWidth: 130,
-        initialValue: "active",
-    },
-];
 
 
 const buildCampusFields = (
@@ -186,71 +124,41 @@ const buildCampusFields = (
 ];
 
 
-const schoolKpis: CrudKpi[] = [
-    {
-        title: "Trường học",
-        value: canThoMockData.schools.length,
-        icon: <BankOutlined />,
-        tone: "blue",
-        note: "đơn vị giáo dục",
-    },
-    {
-        title: "Cấp học",
-        value: canThoMockData.schools.filter(
-            (item) => item.educationLevel === "THCS",
-        ).length,
-        icon: <ReadOutlined />,
-        tone: "green",
-        note: "THCS quản lý",
-    },
-    {
-        title: "Đang hoạt động",
-        value: canThoMockData.schools.filter(
-            (item) => item.status === "active",
-        ).length,
-        icon: <ApartmentOutlined />,
-        tone: "orange",
-        note: "100% kích hoạt",
-    },
-    {
-        title: "Có hiệu trưởng",
-        value: canThoMockData.schools.filter(
-            (item) => Boolean(item.principalId),
-        ).length,
-        icon: <TeamOutlined />,
-        tone: "purple",
-        note: "đã bổ nhiệm",
-    },
-];
+const buildCampusKpis = (
+    schoolId: string,
+): CrudKpi[] => {
+    const scopedCampuses = canThoMockData.campuses.filter(
+        (campus) => campus.schoolId === schoolId,
+    );
 
-
-const campusKpis: CrudKpi[] = [
-    {
-        title: "Tổng cơ sở",
-        value: canThoMockData.campuses.length,
-        icon: <EnvironmentOutlined />,
-        tone: "blue",
-        note: "cơ sở trực thuộc",
-    },
-    {
-        title: "Trụ sở chính",
-        value: canThoMockData.campuses.filter(
-            (item) => item.isMainCampus,
-        ).length,
-        icon: <BankOutlined />,
-        tone: "green",
-        note: "chính quyền đóng tại đây",
-    },
-    {
-        title: "Đang hoạt động",
-        value: canThoMockData.campuses.filter(
-            (item) => item.status === "active",
-        ).length,
-        icon: <PartitionOutlined />,
-        tone: "orange",
-        note: "phục vụ giảng dạy",
-    },
-];
+    return [
+        {
+            title: "Tổng cơ sở",
+            value: scopedCampuses.length,
+            icon: <EnvironmentOutlined />,
+            tone: "blue",
+            note: "cơ sở trực thuộc",
+        },
+        {
+            title: "Trụ sở chính",
+            value: scopedCampuses.filter(
+                (item) => item.isMainCampus,
+            ).length,
+            icon: <BankOutlined />,
+            tone: "green",
+            note: "chính quyền đóng tại đây",
+        },
+        {
+            title: "Đang hoạt động",
+            value: scopedCampuses.filter(
+                (item) => item.status === "active",
+            ).length,
+            icon: <PartitionOutlined />,
+            tone: "orange",
+            note: "phục vụ giảng dạy",
+        },
+    ];
+};
 
 
 const TAB_KEYS = [
@@ -306,24 +214,71 @@ function SchoolsHub() {
             return "students" as TabKey;
         }, [searchParams]);
 
+    const schoolId =
+        useMemo(() => {
+            const raw = searchParams.get("school");
 
-    const handleTabChange = (
-        key: string,
+            const matched = canThoMockData.schools.find(
+                (school) => school.id === raw,
+            );
+
+            return matched?.id
+                ?? canThoMockData.schools[0]?.id;
+        }, [searchParams]);
+
+    const selectedSchool =
+        canThoMockData.schools.find(
+            (school) => school.id === schoolId,
+        );
+
+    const syncParams = (
+        patch: {
+            tab?: string;
+
+            school?: string;
+        },
     ) => {
+        const next: Record<string, string> = {};
+
+        if (patch.tab) {
+            next.tab = patch.tab;
+        }
+
+        if (patch.school) {
+            next.school = patch.school;
+        }
+
         setSearchParams(
-            key === "schools"
-                ? {}
-                : { tab: key },
+            Object.keys(next).length > 0
+                ? next
+                : {},
             { replace: true },
         );
     };
 
 
-    const schoolFields =
-        buildSchoolFields(
-            useCatalogOptions("education-level"),
-            useCatalogOptions("status"),
-        );
+    const handleTabChange = (
+        key: string,
+    ) => {
+        syncParams({
+            tab: key === "schools"
+                ? ""
+                : key,
+            school: schoolId,
+        });
+    };
+
+    const handleSchoolChange = (
+        nextSchoolId: string,
+    ) => {
+        syncParams({
+            tab: activeTab === "schools"
+                ? ""
+                : activeTab,
+            school: nextSchoolId,
+        });
+    };
+
 
     const campusFields =
         buildCampusFields(
@@ -336,23 +291,9 @@ function SchoolsHub() {
         TabsProps["items"] = [
             {
                 key: "schools",
-                label: "Danh sách trường",
+                label: "Tổng quan trường",
                 children: (
-                    <CrudManager<School>
-                        eyebrow="QUẢN LÝ TRƯỜNG HỌC"
-                        title="Trường học trực thuộc"
-                        description="Quản lý trường, cấp học và hiệu trưởng phụ trách trong hệ thống."
-                        storageKey="can-tho-schools"
-                        seed={canThoMockData.schools}
-                        fields={schoolFields}
-                        kpis={schoolKpis}
-                        filters={[
-                            { field: "educationLevel" },
-                            { field: "status" },
-                        ]}
-                        entityName="trường"
-                        newLabel="Thêm trường"
-                    />
+                    <SchoolOverview school={selectedSchool} />
                 ),
             },
             {
@@ -362,11 +303,19 @@ function SchoolsHub() {
                     <CrudManager<Campus>
                         eyebrow="QUẢN LÝ CƠ SỞ"
                         title="Cơ sở trực thuộc trường"
-                        description="Quản lý các cơ sở, địa chỉ và trụ sở chính của từng trường."
+                        description={
+                            selectedSchool
+                                ? `Quản lý các cơ sở, địa chỉ và trụ sở chính của ${selectedSchool.name}. Nhân sự được phân công theo cơ sở để khớp với tổng quan trường.`
+                                : "Quản lý các cơ sở, địa chỉ và trụ sở chính của từng trường."
+                        }
                         storageKey="can-tho-campuses"
                         seed={canThoMockData.campuses}
+                        itemFilter={
+                            (item) => item.schoolId === schoolId
+                        }
+                        createDefaults={{ schoolId }}
                         fields={campusFields}
-                        kpis={campusKpis}
+                        kpis={buildCampusKpis(schoolId)}
                         filters={[
                             { field: "schoolId" },
                             { field: "isMainCampus" },
@@ -381,21 +330,21 @@ function SchoolsHub() {
                 key: "personnel",
                 label: "Nhân sự",
                 children: (
-                    <PersonnelPage compact />
+                    <PersonnelPage compact schoolId={schoolId} />
                 ),
             },
             {
                 key: "sectors",
                 label: "Khối & tổ",
                 children: (
-                    <SectorPage compact />
+                    <SectorPage compact schoolId={schoolId} />
                 ),
             },
             {
                 key: "students",
                 label: "Học sinh",
                 children: (
-                    <StudentsPage />
+                    <StudentsPage schoolId={schoolId} />
                 ),
             },
         ];
@@ -417,6 +366,27 @@ function SchoolsHub() {
                         </p>
                     </div>
                 </header>
+            </div>
+
+            <div className="schools-page__school-select">
+                <Space
+                    size={8}
+                    wrap
+                >
+                    <SelectOutlined />
+
+                    <span>Trường đang xem</span>
+
+                    <Select
+                        value={schoolId}
+                        onChange={handleSchoolChange}
+                        options={schoolOptions}
+                        showSearch
+                        optionFilterProp="label"
+                        style={{ minWidth: 300 }}
+                        placeholder="Chọn trường"
+                    />
+                </Space>
             </div>
 
             <Tabs

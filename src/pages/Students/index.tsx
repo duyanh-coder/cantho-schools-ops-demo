@@ -40,16 +40,6 @@ import {
 
 
 
-const campusOptions = canThoMockData.campuses.map((campus) => ({
-    value: campus.id,
-    label: campus.name,
-}));
-
-const classOptions = canThoMockData.classes.map((classItem) => ({
-    value: classItem.id,
-    label: classItem.name,
-}));
-
 const transcriptStudentOptions = canThoMockData.students.map((student) => ({
     value: student.id,
     label: student.fullName,
@@ -69,6 +59,8 @@ const subjectOptions = subjects.map((subject) => ({
 const buildStudentFields = (
     genderOptions: Array<{ value: string | number; label: string }>,
     studentStatusOptions: Array<{ value: string | number; label: string }>,
+    campusOptionsArg: Array<{ value: string | number; label: string }>,
+    classOptionsArg: Array<{ value: string | number; label: string }>,
 ): CrudField<Student>[] => [
     {
         name: "code",
@@ -104,7 +96,7 @@ const buildStudentFields = (
         label: "Cơ sở",
         required: true,
         type: "select",
-        options: campusOptions,
+        options: campusOptionsArg,
         tableWidth: 200,
     },
     {
@@ -112,7 +104,7 @@ const buildStudentFields = (
         label: "Lớp",
         required: true,
         type: "select",
-        options: classOptions,
+        options: classOptionsArg,
         tableWidth: 120,
     },
     {
@@ -199,6 +191,8 @@ const buildTranscriptFields = (
 const buildEnrolmentChangeFields = (
     changeTypeOptions: Array<{ value: string | number; label: string }>,
     changeStatusOptions: Array<{ value: string | number; label: string }>,
+    campusOptionsArg: Array<{ value: string | number; label: string }>,
+    classOptionsArg: Array<{ value: string | number; label: string }>,
 ): CrudField<EnrolmentChange>[] => [
     {
         name: "studentName",
@@ -213,7 +207,7 @@ const buildEnrolmentChangeFields = (
         label: "Cơ sở",
         required: true,
         type: "select",
-        options: campusOptions,
+        options: campusOptionsArg,
         tableWidth: 200,
     },
     {
@@ -221,7 +215,7 @@ const buildEnrolmentChangeFields = (
         label: "Lớp",
         required: true,
         type: "select",
-        options: classOptions,
+        options: classOptionsArg,
         tableWidth: 120,
     },
     {
@@ -259,10 +253,14 @@ const buildEnrolmentChangeFields = (
 ];
 
 
-const studentKpis: CrudKpi[] = [
+const buildScopedStudentKpis = (
+    scopedStudents: Student[],
+    scopedTranscripts: Transcript[],
+    scopedEnrolments: EnrolmentChange[],
+): CrudKpi[] => [
     {
         title: "Đang học",
-        value: canThoMockData.students.filter(
+        value: scopedStudents.filter(
             (item) => item.status === "studying",
         ).length,
         icon: <TeamOutlined />,
@@ -271,7 +269,7 @@ const studentKpis: CrudKpi[] = [
     },
     {
         title: "Học sinh nữ",
-        value: canThoMockData.students.filter(
+        value: scopedStudents.filter(
             (item) => item.gender === "female",
         ).length,
         icon: <WomanOutlined />,
@@ -281,10 +279,10 @@ const studentKpis: CrudKpi[] = [
     {
         title: "Điểm TB môn HK1",
         value: (
-            canThoMockData.transcripts.reduce(
+            scopedTranscripts.reduce(
                 (total, item) => total + item.score,
                 0,
-            ) / canThoMockData.transcripts.length
+            ) / (scopedTranscripts.length || 1)
         ).toFixed(1),
         icon: <ReadOutlined />,
         tone: "green",
@@ -292,10 +290,10 @@ const studentKpis: CrudKpi[] = [
     },
     {
         title: "Biến động sỉ số",
-        value: canThoMockData.enrolmentChanges.length,
+        value: scopedEnrolments.length,
         icon: <SwapOutlined />,
         tone: "orange",
-        note: `+${canThoMockData.enrolmentChanges.filter((item) => item.changeType === "increase").length} / -${canThoMockData.enrolmentChanges.filter((item) => item.changeType === "decrease").length}`,
+        note: `+${scopedEnrolments.filter((item) => item.changeType === "increase").length} / -${scopedEnrolments.filter((item) => item.changeType === "decrease").length}`,
     },
 ];
 
@@ -304,83 +302,153 @@ const buildItems = (
     studentFields: CrudField<Student>[],
     transcriptFields: CrudField<Transcript>[],
     enrolmentChangeFields: CrudField<EnrolmentChange>[],
-): TabsProps["items"] => [
-    {
-        key: "students",
-        label: "Danh sách học sinh",
-        children: (
-            <CrudManager<Student>
-                eyebrow="TUYỂN SINH & HỒ SƠ HỌC SINH"
-                title="Học sinh các khối lớp"
-                description="Quản lý hồ sơ học sinh từ khối 6 đến khối 9 phân bổ tại 6 cơ sở của Trường THCS Ninh Kiều."
-                storageKey="can-tho-students"
-                seed={canThoMockData.students}
-                fields={studentFields}
-                kpis={studentKpis}
-                filters={[
-                    { field: "gender" },
-                    { field: "campusId" },
-                    { field: "classId" },
-                    { field: "status" },
-                ]}
-                entityName="học sinh"
-                newLabel="Thêm học sinh"
-                detail
-                detailWidth={1000}
-            />
-        ),
-    },
-    {
-        key: "transcripts",
-        label: "Học bạ số",
-        children: (
-            <CrudManager<Transcript>
-                eyebrow="HỌC BẠ SỐ"
-                title="Điểm học bạ theo môn & học kỳ"
-                description="Nhập điểm trung bình môn, xếp loại hạnh kiểm cho từng học sinh theo học kỳ và năm học."
-                storageKey="can-tho-transcripts"
-                seed={canThoMockData.transcripts}
-                fields={transcriptFields}
-                filters={[
-                    { field: "semester" },
-                    { field: "subjectId" },
-                    { field: "conduct" },
-                ]}
-                entityName="học bạ"
-                newLabel="Thêm học bạ"
-                detail
-                detailWidth={900}
-            />
-        ),
-    },
-    {
-        key: "enrolment-changes",
-        label: "Biến động sỉ số",
-        children: (
-            <CrudManager<EnrolmentChange>
-                eyebrow="BIẾN ĐỘNG SỈ SỐ"
-                title="Cập nhật sỉ số – nhập / thôi học"
-                description="Theo dõi nhập học, chuyển đi/đến, thôi học ảnh hưởng đến sỉ số từng lớp, từng cơ sở."
-                storageKey="can-tho-enrolment-changes"
-                seed={canThoMockData.enrolmentChanges}
-                fields={enrolmentChangeFields}
-                filters={[
-                    { field: "classId" },
-                    { field: "campusId" },
-                    { field: "changeType" },
-                    { field: "status" },
-                ]}
-                entityName="biến động sỉ số"
-                newLabel="Thêm biến động"
-                detail
-                detailWidth={900}
-            />
-        ),
-    },
-];
+    scopedStudents: Student[],
+    scopedTranscripts: Transcript[],
+    scopedEnrolments: EnrolmentChange[],
+    schoolId: string | undefined,
+    schoolName: string | undefined,
+): TabsProps["items"] => {
+
+    const scopedStudentIds = new Set(
+        scopedStudents.map((item) => item.id),
+    );
+
+    const scopedStudentKpis =
+        buildScopedStudentKpis(
+            scopedStudents,
+            scopedTranscripts,
+            scopedEnrolments,
+        );
+
+    return [
+        {
+            key: "students",
+            label: "Danh sách học sinh",
+            children: (
+                <CrudManager<Student>
+                    eyebrow="TUYỂN SINH & HỒ SƠ HỌC SINH"
+                    title="Học sinh các khối lớp"
+                    description={
+                        schoolId
+                            ? `Quản lý hồ sơ học sinh trong nhà trường ${schoolName ?? "đang chọn"}, phân bổ tại các cơ sở trực thuộc.`
+                            : "Quản lý hồ sơ học sinh từ khối 6 đến khối 9 phân bổ tại 6 cơ sở của Trường THCS Ninh Kiều."
+                    }
+                    storageKey="can-tho-students"
+                    seed={canThoMockData.students}
+                    itemFilter={
+                        schoolId
+                            ? (item) => item.schoolId === schoolId
+                            : undefined
+                    }
+                    createDefaults={
+                        schoolId
+                            ? { schoolId }
+                            : undefined
+                    }
+                    fields={studentFields}
+                    kpis={scopedStudentKpis}
+                    filters={[
+                        { field: "gender" },
+                        { field: "campusId" },
+                        { field: "classId" },
+                        { field: "status" },
+                    ]}
+                    entityName="học sinh"
+                    newLabel="Thêm học sinh"
+                    detail
+                    detailWidth={1000}
+                />
+            ),
+        },
+        {
+            key: "transcripts",
+            label: "Học bạ số",
+            children: (
+                <CrudManager<Transcript>
+                    eyebrow="HỌC BẠ SỐ"
+                    title="Điểm học bạ theo môn & học kỳ"
+                    description="Nhập điểm trung bình môn, xếp loại hạnh kiểm cho từng học sinh theo học kỳ và năm học."
+                    storageKey="can-tho-transcripts"
+                    seed={canThoMockData.transcripts}
+                    itemFilter={
+                        schoolId
+                            ? (item) => scopedStudentIds.has(item.studentId)
+                            : undefined
+                    }
+                    fields={transcriptFields}
+                    kpis={[
+                        {
+                            title: "Học bạ đang quản lý",
+                            value: scopedTranscripts.length,
+                            icon: <ReadOutlined />,
+                            tone: "blue",
+                            note: "bản ghi điểm",
+                        },
+                    ]}
+                    filters={[
+                        { field: "semester" },
+                        { field: "subjectId" },
+                        { field: "conduct" },
+                    ]}
+                    entityName="học bạ"
+                    newLabel="Thêm học bạ"
+                    detail
+                    detailWidth={900}
+                />
+            ),
+        },
+        {
+            key: "enrolment-changes",
+            label: "Biến động sỉ số",
+            children: (
+                <CrudManager<EnrolmentChange>
+                    eyebrow="BIẾN ĐỘNG SỈ SỐ"
+                    title="Cập nhật sỉ số – nhập / thôi học"
+                    description="Theo dõi nhập học, chuyển đi/đến, thôi học ảnh hưởng đến sỉ số từng lớp, từng cơ sở."
+                    storageKey="can-tho-enrolment-changes"
+                    seed={canThoMockData.enrolmentChanges}
+                    itemFilter={
+                        schoolId
+                            ? (item) => item.schoolId === schoolId
+                            : undefined
+                    }
+                    createDefaults={
+                        schoolId
+                            ? { schoolId }
+                            : undefined
+                    }
+                    fields={enrolmentChangeFields}
+                    kpis={[
+                        {
+                            title: "Biến động sỉ số",
+                            value: scopedEnrolments.length,
+                            icon: <SwapOutlined />,
+                            tone: "orange",
+                            note: `+${scopedEnrolments.filter((item) => item.changeType === "increase").length} / -${scopedEnrolments.filter((item) => item.changeType === "decrease").length}`,
+                        },
+                    ]}
+                    filters={[
+                        { field: "classId" },
+                        { field: "campusId" },
+                        { field: "changeType" },
+                        { field: "status" },
+                    ]}
+                    entityName="biến động sỉ số"
+                    newLabel="Thêm biến động"
+                    detail
+                    detailWidth={900}
+                />
+            ),
+        },
+    ];
+};
 
 
-const StudentsPage = () => {
+const StudentsPage = ({
+    schoolId,
+}: {
+    schoolId?: string;
+}) => {
     const genderOptions =
         useCatalogOptions(
             "gender",
@@ -411,10 +479,68 @@ const StudentsPage = () => {
             "enrolment-status",
         );
 
+    const school =
+        canThoMockData.schools.find(
+            (candidate) => candidate.id === schoolId,
+        );
+
+    const scopedCampuses =
+        schoolId
+            ? canThoMockData.campuses.filter(
+                (candidate) => candidate.schoolId === schoolId,
+            )
+            : canThoMockData.campuses;
+
+    const scopedClasses =
+        schoolId
+            ? canThoMockData.classes.filter(
+                (candidate) => candidate.schoolId === schoolId,
+            )
+            : canThoMockData.classes;
+
+    const scopedStudents =
+        schoolId
+            ? canThoMockData.students.filter(
+                (item) => item.schoolId === schoolId,
+            )
+            : canThoMockData.students;
+
+    const scopedStudentIds = new Set(
+        scopedStudents.map((item) => item.id),
+    );
+
+    const scopedTranscripts =
+        schoolId
+            ? canThoMockData.transcripts.filter(
+                (item) => scopedStudentIds.has(item.studentId),
+            )
+            : canThoMockData.transcripts;
+
+    const scopedEnrolments =
+        schoolId
+            ? canThoMockData.enrolmentChanges.filter(
+                (item) => item.schoolId === schoolId,
+            )
+            : canThoMockData.enrolmentChanges;
+
+    const scopedCampusOptions =
+        scopedCampuses.map((campus) => ({
+            value: campus.id,
+            label: campus.name,
+        }));
+
+    const scopedClassOptions =
+        scopedClasses.map((classItem) => ({
+            value: classItem.id,
+            label: classItem.name,
+        }));
+
     const studentFields =
         buildStudentFields(
             genderOptions,
             studentStatusOptions,
+            scopedCampusOptions,
+            scopedClassOptions,
         );
 
     const transcriptFields =
@@ -427,6 +553,8 @@ const StudentsPage = () => {
         buildEnrolmentChangeFields(
             changeTypeOptions,
             changeStatusOptions,
+            scopedCampusOptions,
+            scopedClassOptions,
         );
 
     const items =
@@ -434,6 +562,11 @@ const StudentsPage = () => {
             studentFields,
             transcriptFields,
             enrolmentChangeFields,
+            scopedStudents,
+            scopedTranscripts,
+            scopedEnrolments,
+            schoolId,
+            school?.name,
         );
 
     return (

@@ -13,4 +13,16 @@ export const canThoClasses: SchoolClass[] = [
     { id: "can-tho-class-010", schoolId: "can-tho-school-001", campusId: "can-tho-campus-005", code: "7A1", name: "7A1", grade: 7, academicYear: "2026-2027", status: "active" },
     { id: "can-tho-class-011", schoolId: "can-tho-school-001", campusId: "can-tho-campus-006", code: "6A1", name: "6A1", grade: 6, academicYear: "2026-2027", status: "active" },
     { id: "can-tho-class-012", schoolId: "can-tho-school-001", campusId: "can-tho-campus-006", code: "7A1", name: "7A1", grade: 7, academicYear: "2026-2027", status: "active" },
+
+    { id: "can-tho-class-013", schoolId: "can-tho-school-002", campusId: "can-tho-campus-007", code: "6A1", name: "6A1", grade: 6, academicYear: "2026-2027", status: "active" },
+    { id: "can-tho-class-014", schoolId: "can-tho-school-002", campusId: "can-tho-campus-007", code: "7A1", name: "7A1", grade: 7, academicYear: "2026-2027", status: "active" },
+    { id: "can-tho-class-015", schoolId: "can-tho-school-002", campusId: "can-tho-campus-008", code: "8A1", name: "8A1", grade: 8, academicYear: "2026-2027", status: "active" },
+    { id: "can-tho-class-016", schoolId: "can-tho-school-002", campusId: "can-tho-campus-008", code: "9A1", name: "9A1", grade: 9, academicYear: "2026-2027", status: "active" },
+
+    { id: "can-tho-class-017", schoolId: "can-tho-school-003", campusId: "can-tho-campus-009", code: "6A1", name: "6A1", grade: 6, academicYear: "2026-2027", status: "active" },
+    { id: "can-tho-class-018", schoolId: "can-tho-school-003", campusId: "can-tho-campus-009", code: "7A1", name: "7A1", grade: 7, academicYear: "2026-2027", status: "active" },
+
+    { id: "can-tho-class-019", schoolId: "can-tho-school-004", campusId: "can-tho-campus-010", code: "10A1", name: "10A1", grade: 10, academicYear: "2026-2027", status: "active" },
+    { id: "can-tho-class-020", schoolId: "can-tho-school-004", campusId: "can-tho-campus-010", code: "11A1", name: "11A1", grade: 11, academicYear: "2026-2027", status: "active" },
+    { id: "can-tho-class-021", schoolId: "can-tho-school-004", campusId: "can-tho-campus-010", code: "12A1", name: "12A1", grade: 12, academicYear: "2026-2027", status: "active" },
 ];

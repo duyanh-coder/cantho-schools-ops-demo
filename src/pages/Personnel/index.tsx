@@ -30,15 +30,6 @@ import {
 
 
 
-const campusOptions = canThoMockData.campuses.map((campus) => ({
-    value: campus.id,
-    label: campus.name,
-}));
-
-const sectorOptions = canThoMockData.sectors
-    .filter((sector) => sector.type === "subject_group")
-    .map((sector) => ({ value: sector.id, label: sector.name }));
-
 const subjectOptions = subjects.map((subject) => ({
     value: subject.id,
     label: subject.name,
@@ -49,6 +40,8 @@ const buildPersonnelFields = (
     genderOptions: Array<{ value: string | number; label: string }>,
     yesNoOptions: Array<{ value: string | number; label: string }>,
     statusOptions: Array<{ value: string | number; label: string }>,
+    campusOptionsArg: Array<{ value: string | number; label: string }>,
+    sectorOptionsArg: Array<{ value: string | number; label: string }>,
 ): CrudField<Personnel>[] => [
     {
         name: "code",
@@ -96,14 +89,14 @@ const buildPersonnelFields = (
         name: "teamId",
         label: "Tổ chuyên môn",
         type: "select",
-        options: sectorOptions,
+        options: sectorOptionsArg,
         tableWidth: 170,
     },
     {
         name: "campusIds",
         label: "Cơ sở công tác",
         type: "multiselect",
-        options: campusOptions,
+        options: campusOptionsArg,
         tableWidth: 230,
         required: true,
         table: false,
@@ -189,8 +182,11 @@ const personnelKpis: CrudKpi[] = [
 
 const PersonnelPage = ({
     compact,
+    schoolId,
 }: {
     compact?: boolean;
+
+    schoolId?: string;
 }) => {
     const genderOptions =
         useCatalogOptions(
@@ -207,11 +203,82 @@ const PersonnelPage = ({
             "personnel-status",
         );
 
+    const school =
+        canThoMockData.schools.find(
+            (candidate) => candidate.id === schoolId,
+        );
+
+    const scopedPersonnel =
+        schoolId
+            ? canThoMockData.personnel.filter(
+                (item) => item.schoolId === schoolId,
+            )
+            : canThoMockData.personnel;
+
+    const scopedCampuses =
+        schoolId
+            ? canThoMockData.campuses.filter(
+                (candidate) => candidate.schoolId === schoolId,
+            )
+            : canThoMockData.campuses;
+
+    const scopedSectors =
+        schoolId
+            ? canThoMockData.sectors.filter(
+                (sector) =>
+                    sector.schoolId === schoolId &&
+                    sector.type === "subject_group",
+            )
+            : canThoMockData.sectors;
+
+    const scopedCampusOptions = scopedCampuses.map((campus) => ({
+        value: campus.id,
+        label: campus.name,
+    }));
+
+    const scopedSectorOptions =
+        scopedSectors.map((sector) => ({
+            value: sector.id,
+            label: sector.name,
+        }));
+
+    const scopedKpis: CrudKpi[] = schoolId
+        ? [
+            {
+                title: "Tổng CB-GV",
+                value: scopedPersonnel.length,
+                icon: <TeamOutlined />,
+                tone: "blue",
+                note: school?.name ?? "toàn trường",
+            },
+            {
+                title: "GV giỏi / CSTĐ",
+                value: scopedPersonnel.filter(
+                    (item) => item.isExcellentTeacher,
+                ).length,
+                icon: <TrophyOutlined />,
+                tone: "orange",
+                note: "đạt danh hiệu tiêu biểu",
+            },
+            {
+                title: "Cán bộ quản lý",
+                value: scopedPersonnel.filter(
+                    (item) => item.roleTitle.includes("Hiệu trưởng"),
+                ).length,
+                icon: <IdcardOutlined />,
+                tone: "green",
+                note: "Ban giám hiệu",
+            },
+        ]
+        : personnelKpis;
+
     const personnelFields =
         buildPersonnelFields(
             genderOptions,
             yesNoOptions,
             statusOptions,
+            scopedCampusOptions,
+            scopedSectorOptions,
         );
 
     return (
@@ -219,11 +286,25 @@ const PersonnelPage = ({
             compact={compact}
             eyebrow="QUẢN LÝ NHÂN SỰ"
             title="Cán bộ – giáo viên – nhân viên"
-            description="Hồ sơ đội ngũ cán bộ quản lý, giáo viên và nhân viên của Trường THCS Ninh Kiều, phân công theo hệ thống cơ sở."
+            description={
+                schoolId
+                    ? `Hồ sơ đội ngũ cán bộ quản lý, giáo viên và nhân viên của ${school?.name ?? "trường đang chọn"}, phân công theo hệ thống cơ sở.`
+                    : "Hồ sơ đội ngũ cán bộ quản lý, giáo viên và nhân viên của Trường THCS Ninh Kiều, phân công theo hệ thống cơ sở."
+            }
             storageKey="can-tho-personnel"
             seed={canThoMockData.personnel}
+            itemFilter={
+                schoolId
+                    ? (item) => item.schoolId === schoolId
+                    : undefined
+            }
+            createDefaults={
+                schoolId
+                    ? { schoolId }
+                    : undefined
+            }
             fields={personnelFields}
-            kpis={personnelKpis}
+            kpis={scopedKpis}
             filters={[
                 { field: "gender" },
                 { field: "teamId" },

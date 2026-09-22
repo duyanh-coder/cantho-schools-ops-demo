@@ -12,4 +12,10 @@ export const canThoEnrolmentChanges: EnrolmentChange[] = [
     { id: "can-tho-enrolment-005", schoolId: "can-tho-school-001", campusId: "can-tho-campus-005", classId: "can-tho-class-009", changeType: "increase", studentName: "Dương Hoàng Nam", effectiveDate: "2026-08-20", reason: "Chuyển đến từ trường công lập khác", status: "pending" },
 
     { id: "can-tho-enrolment-006", schoolId: "can-tho-school-001", campusId: "can-tho-campus-006", classId: "can-tho-class-011", changeType: "increase", studentName: "Lý Minh Trí", effectiveDate: "2026-08-21", reason: "Hoàn tất thủ tục nhập học chậm", status: "pending" },
+
+    { id: "can-tho-enrolment-007", schoolId: "can-tho-school-002", campusId: "can-tho-campus-007", classId: "can-tho-class-013", changeType: "increase", studentName: "Lê Nhật Minh", effectiveDate: "2026-08-17", reason: "Nhập học đầu cấp theo tuyển sinh", status: "completed" },
+
+    { id: "can-tho-enrolment-008", schoolId: "can-tho-school-002", campusId: "can-tho-campus-008", classId: "can-tho-class-016", changeType: "increase", studentName: "Võ Trung Kiên", effectiveDate: "2026-08-20", reason: "Chuyển đến từ trường công lập khác", status: "pending" },
+
+    { id: "can-tho-enrolment-009", schoolId: "can-tho-school-003", campusId: "can-tho-campus-009", classId: "can-tho-class-017", changeType: "increase", studentName: "Đặng Ánh Tuyết", effectiveDate: "2026-08-18", reason: "Nhập học đầu cấp theo tuyển sinh", status: "completed" },
 ];

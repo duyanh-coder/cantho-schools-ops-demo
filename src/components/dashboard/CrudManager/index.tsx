@@ -148,6 +148,10 @@ export interface CrudManagerProps<T extends { id: string }> {
     detailWidth?: number;
 
     showWorkflow?: boolean;
+
+    itemFilter?: (item: T) => boolean;
+
+    createDefaults?: Partial<T>;
 }
 
 
@@ -234,6 +238,8 @@ function CrudManager<T extends { id: string }>({
     detail,
     detailWidth,
     showWorkflow = false,
+    itemFilter,
+    createDefaults,
 }: CrudManagerProps<T>) {
     const {
         items,
@@ -312,9 +318,13 @@ function CrudManager<T extends { id: string }>({
         () => {
             const kw = keyword.trim().toLowerCase();
 
+            const scopedItems = itemFilter
+                ? items.filter(itemFilter)
+                : items;
+
             const keywordRows = !kw
-                ? items
-                : items.filter((row) =>
+                ? scopedItems
+                : scopedItems.filter((row) =>
                     fields.some((field) => {
                         if (field.table === false || field.name === "id") {
                             return false;
@@ -398,7 +408,7 @@ function CrudManager<T extends { id: string }>({
                 }),
             );
         },
-        [items, keyword, fields, labelMaps, filterValues, filterConfigs],
+        [items, keyword, fields, labelMaps, filterValues, filterConfigs, itemFilter],
     );
 
     const hasActiveFilters = Object.values(filterValues).some((value) => {
@@ -582,6 +592,7 @@ function CrudManager<T extends { id: string }>({
 
             create({
                 ...defaults,
+                ...createDefaults,
                 ...values,
                 id: `${storageKey}-${Date.now().toString(36)}`,
             } as T);
@@ -1041,7 +1052,7 @@ function CrudManager<T extends { id: string }>({
 
                         <span>
                             {remainingBySelector(
-                                items,
+                                filtered,
                                 fields,
                             )}
                         </span>
