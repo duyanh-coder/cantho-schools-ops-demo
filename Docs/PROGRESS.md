@@ -18,7 +18,7 @@ localStorage.
 | GĐ 7 | Cổng thông tin điều hành: `/operations` (việc cần làm, thông báo, gợi ý chức năng theo vai — không chặn quyền), trang Công việc cần làm, danh mục dùng chung + trang Danh mục, hướng dẫn 3 bước & phân bố dữ liệu trong `CrudManager`, module dùng chung catalog | `619d0e2` | `gd7-portal-hoanthien` |
 | GĐ 8 | Gọn menu, tập trung "Trường & Cơ sở": hub 1 header + tabs (Trường/Cơ sở CRUD, Nhân sự, Khối & tổ, Học sinh); bán trú thành thuộc tính `hasBoarding` của khối/tổ (bỏ trang Bán trú); Danh mục cuối menu (submenu từ `CATALOG_DEFS`, deep-link `?key=`); thêm catalog Cấp trường/Môn học/Chức vụ/Trình độ/Danh hiệu; `/operations` redirect → schools; Personnel/Sector nhận `compact` | `d886650` | `gd8-truong-coso-hub` |
 | GĐ 9 | Ẩn dòng mô tả dưới tiêu đề ở mọi `page-head`; tab Nhân sự rút bảng còn 6 cột (Mã CB-GV, Họ tên, Chức vụ, Môn giảng dạy, Tổ chuyên môn, Trạng thái) + nút chi tiết (mắt) mở popup `Descriptions` hiện đủ thông tin còn lại; `CrudManager` thêm prop `detail`; export CSV xuất đủ các trường editable (bỏ trường hệ thống ẩn) | `76e1469` | `gd9-header-gon-nhansu` |
-| GĐ 10 | Popup chi tiết thêm `detailWidth` (Nhân sự 1000px); tab Khối & Tổ rút gọn theo width, ẩn cột Mô tả khỏi bảng (chỉ hiện trong popup chi tiết), cột Thành viên hiển thị 3 người + Tooltip đủ danh sách, bật nút chi tiết |  |  |
+| GĐ 10 | Popup chi tiết thêm `detailWidth` (Nhân sự 1000px); tab Khối & Tổ rút gọn theo width, ẩn cột Mô tả khỏi bảng (chỉ hiện trong popup chi tiết), cột Thành viên hiển thị 3 người + Tooltip đủ danh sách, bật nút chi tiết | `97f8eb5` | `gd10-khoito-gon-detail` |
 
 ## Quy ước kỹ thuật
 
