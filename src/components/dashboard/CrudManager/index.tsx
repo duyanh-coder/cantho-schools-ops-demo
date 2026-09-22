@@ -126,6 +126,8 @@ export interface CrudManagerProps<T extends { id: string }> {
     entityName?: string;
 
     newLabel?: string;
+
+    compact?: boolean;
 }
 
 
@@ -192,6 +194,7 @@ function CrudManager<T extends { id: string }>({
     kpis,
     entityName,
     newLabel,
+    compact,
 }: CrudManagerProps<T>) {
     const {
         items,
@@ -425,7 +428,20 @@ function CrudManager<T extends { id: string }>({
 
             message.success("Đã cập nhật bản ghi");
         } else {
+            const defaults: Record<string, unknown> = {};
+
+            fields.forEach((field) => {
+                if (
+                    field.hideInForm &&
+                    field.initialValue !== undefined
+                ) {
+                    defaults[field.name] =
+                        field.initialValue;
+                }
+            });
+
             create({
+                ...defaults,
                 ...values,
                 id: `${storageKey}-${Date.now().toString(36)}`,
             } as T);
@@ -806,18 +822,20 @@ function CrudManager<T extends { id: string }>({
     };
 
     return (
-        <div className="crud-panel">
-            <header className="page-head">
-                <div className="page-head__inner">
-                    <span className="page-head__eyebrow">
-                        {eyebrow}
-                    </span>
+        <div className={compact ? "crud-panel crud-panel--compact" : "crud-panel"}>
+            {!compact && (
+                <header className="page-head">
+                    <div className="page-head__inner">
+                        <span className="page-head__eyebrow">
+                            {eyebrow}
+                        </span>
 
-                    <h2>{title}</h2>
+                        <h2>{title}</h2>
 
-                    <p>{description}</p>
-                </div>
-            </header>
+                        <p>{description}</p>
+                    </div>
+                </header>
+            )}
 
             <div className="crud-panel__workflow">
                 <div className="crud-panel__workflow-title">

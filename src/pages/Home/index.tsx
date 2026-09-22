@@ -375,7 +375,7 @@ function HomePage() {
 
                   <Button
                     size="large"
-                    onClick={() => navigate("/operations")}
+                    onClick={() => navigate("/operations/schools")}
                   >
                     Vào trang điều hành
                   </Button>

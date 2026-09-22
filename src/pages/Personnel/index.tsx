@@ -181,7 +181,11 @@ const personnelKpis: CrudKpi[] = [
 ];
 
 
-const PersonnelPage = () => {
+const PersonnelPage = ({
+    compact,
+}: {
+    compact?: boolean;
+}) => {
     const genderOptions =
         useCatalogOptions(
             "gender",
@@ -206,6 +210,7 @@ const PersonnelPage = () => {
 
     return (
         <CrudManager<Personnel>
+            compact={compact}
             eyebrow="QUẢN LÝ NHÂN SỰ"
             title="Cán bộ – giáo viên – nhân viên"
             description="Hồ sơ đội ngũ cán bộ quản lý, giáo viên và nhân viên của Trường THCS Ninh Kiều, phân công theo hệ thống cơ sở."

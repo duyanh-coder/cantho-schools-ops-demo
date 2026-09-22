@@ -16,6 +16,7 @@ localStorage.
 | GĐ 5 | Tổng kết: PROGRESS.md, CHANGELOG, gate xanh (lint 0 lỗi / build / 7 test pass) | `44bc932` | `gd5-hoanthien` |
 | GĐ 6 | Import Excel (CSV): parser thuần (`src/utils/csv.ts`) + 8 unit tests, nút "Nhập Excel" với `Upload` antd, map label→field name, hỗ trợ select/multiselect | `ba1f52b` | `gd6-csv-import` |
 | GĐ 7 | Cổng thông tin điều hành: `/operations` (việc cần làm, thông báo, gợi ý chức năng theo vai — không chặn quyền), trang Công việc cần làm, danh mục dùng chung + trang Danh mục, hướng dẫn 3 bước & phân bố dữ liệu trong `CrudManager`, module dùng chung catalog | `619d0e2` | `gd7-portal-hoanthien` |
+| GĐ 8 | Gọn menu, tập trung "Trường & Cơ sở": hub 1 header + tabs (Trường/Cơ sở CRUD, Nhân sự, Khối & tổ, Học sinh); bán trú thành thuộc tính `hasBoarding` của khối/tổ (bỏ trang Bán trú); Danh mục cuối menu (submenu từ `CATALOG_DEFS`, deep-link `?key=`); thêm catalog Cấp trường/Môn học/Chức vụ/Trình độ/Danh hiệu; `/operations` redirect → schools; Personnel/Sector nhận `compact` | | `gd8-truong-coso-hub` |
 
 ## Quy ước kỹ thuật
 

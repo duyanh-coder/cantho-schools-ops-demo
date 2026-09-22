@@ -7,8 +7,10 @@ import {
 } from "antd";
 
 import {
-    useState,
+    useMemo,
 } from "react";
+
+import { useSearchParams } from "react-router-dom";
 
 import CrudManager from "@/components/dashboard/CrudManager";
 
@@ -63,24 +65,43 @@ const catalogFields:
 
 const CatalogsPage = () => {
     const [
-        catalogKey,
-        setCatalogKey,
+        searchParams,
+        setSearchParams,
     ] =
-        useState(
-            CATALOG_DEFS[0].key,
-        );
+        useSearchParams();
+
+    const catalogKey =
+        searchParams.get("key");
 
     const catalog =
-        CATALOG_DEFS.find(
-            (item) =>
-                item.key ===
-                catalogKey,
-        ) ?? CATALOG_DEFS[0];
+        useMemo(
+            () => {
+                return (
+                    CATALOG_DEFS.find(
+                        (item) =>
+                            item.key ===
+                            catalogKey,
+                    ) ?? CATALOG_DEFS[0]
+                );
+            },
+            [catalogKey],
+        );
 
     const options =
         useCatalogOptions(
             catalog.key,
         );
+
+    const handleCatalogChange = (
+        key: string,
+    ) => {
+        setSearchParams(
+            { key },
+            {
+                replace: true,
+            },
+        );
+    };
 
     return (
         <div className="catalog-page">
@@ -103,7 +124,7 @@ const CatalogsPage = () => {
             <div className="catalog-page__toolbar">
                 <Select
                     value={catalog.key}
-                    onChange={setCatalogKey}
+                    onChange={handleCatalogChange}
                     options={catalogSelectOptions}
                     className="catalog-page__select"
                 />
@@ -114,6 +135,7 @@ const CatalogsPage = () => {
             </div>
 
             <CrudManager<CatalogRecord>
+                key={catalog.key}
                 eyebrow={`DANH MỤC · ${catalog.title.toUpperCase()}`}
                 title={catalog.title}
                 description={catalog.description}

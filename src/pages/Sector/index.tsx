@@ -44,6 +44,7 @@ const buildFields = (
     sectorTypeOptions: Array<{ value: string | number; label: string }>,
     gradeOptions: Array<{ value: string | number; label: string }>,
     statusOptions: Array<{ value: string | number; label: string }>,
+    yesNoOptions: Array<{ value: string | number; label: string }>,
 ): CrudField<Sector>[] => [
     {
         name: "name",
@@ -73,6 +74,14 @@ const buildFields = (
         type: "select",
         options: managerOptions,
         tableWidth: 190,
+    },
+    {
+        name: "hasBoarding",
+        label: "Tổ chức bán trú",
+        type: "select",
+        options: yesNoOptions,
+        tableWidth: 140,
+        initialValue: "0",
     },
     {
         name: "memberIds",
@@ -141,7 +150,11 @@ const kpis: CrudKpi[] = [
 ];
 
 
-const SectorPage = () => {
+const SectorPage = ({
+    compact,
+}: {
+    compact?: boolean;
+}) => {
     const sectorTypeOptions =
         useCatalogOptions(
             "sector-type",
@@ -157,15 +170,22 @@ const SectorPage = () => {
             "status",
         );
 
+    const yesNoOptions =
+        useCatalogOptions(
+            "yes-no",
+        );
+
     const sectorFields =
         buildFields(
             sectorTypeOptions,
             gradeOptions,
             statusOptions,
+            yesNoOptions,
         );
 
     return (
         <CrudManager<Sector>
+            compact={compact}
             eyebrow="KHỐI NGÀNH & TỔ CHUYÊN MÔN"
             title="Khối lớp & tổ bộ môn"
             description="Phân chia khối ngành theo khối lớp 6–9 và tổ chuyên môn/bộ môn của Trường THCS Ninh Kiều, gắn với phân công giáo viên."

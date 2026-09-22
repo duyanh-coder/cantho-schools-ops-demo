@@ -6,7 +6,6 @@ import {
     CalendarOutlined,
     CheckCircleOutlined,
     ClockCircleOutlined,
-    CoffeeOutlined,
     EnvironmentOutlined,
     FileTextOutlined,
     PlusOutlined,
@@ -92,31 +91,24 @@ const moduleSummaryDefs:
     ModuleSummary[] = [
         {
             title: "Nhân sự",
-            path: "/operations/personnel",
+            path: "/operations/schools?tab=personnel",
             tone: "blue",
             icon: <TeamOutlined />,
             catalog: "personnel-status",
         },
         {
             title: "Khối & tổ",
-            path: "/operations/sectors",
+            path: "/operations/schools?tab=sectors",
             tone: "green",
             icon: <ApartmentOutlined />,
             catalog: "sector-type",
         },
         {
             title: "Học sinh",
-            path: "/operations/students",
+            path: "/operations/schools?tab=students",
             tone: "purple",
             icon: <ReadOutlined />,
             catalog: "student-status",
-        },
-        {
-            title: "Bán trú",
-            path: "/operations/boarding",
-            tone: "orange",
-            icon: <CoffeeOutlined />,
-            catalog: "boarding-status",
         },
     ];
 
@@ -230,25 +222,20 @@ const OperationsDashboard = () => {
 
     const moduleCounts:
         Record<string, number> = {
-            "/operations/personnel":
+            "/operations/schools?tab=personnel":
                 readCrudItems(
                     "can-tho-personnel",
                     regionMock.personnel,
                 ).length,
-            "/operations/sectors":
+            "/operations/schools?tab=sectors":
                 readCrudItems(
                     "can-tho-sectors",
                     regionMock.sectors,
                 ).length,
-            "/operations/students":
+            "/operations/schools?tab=students":
                 readCrudItems(
                     "can-tho-students",
                     regionMock.students,
-                ).length,
-            "/operations/boarding":
-                readCrudItems(
-                    "can-tho-boarding",
-                    regionMock.boarding,
                 ).length,
         };
 
@@ -422,7 +409,6 @@ const getTaskModuleHint = (
                                             school: <SolutionOutlined />,
                                             timetable: <CalendarOutlined />,
                                             student: <ReadOutlined />,
-                                            boarding: <CoffeeOutlined />,
                                             sector: <ApartmentOutlined />,
                                             catalog: <AppstoreOutlined />,
                                         }[feature.iconKey]

@@ -20,11 +20,6 @@ import OperationsDashboardPage from "@/pages/OperationsDashboard";
 import CatalogsPage from "@/pages/Catalogs";
 import TasksPage from "@/pages/Tasks";
 
-import PersonnelPage from "@/pages/Personnel";
-import SectorsPage from "@/pages/Sector";
-import StudentsPage from "@/pages/Students";
-import BoardingPage from "@/pages/Boarding";
-
 
 
 function AppRouter() {
@@ -36,7 +31,9 @@ function AppRouter() {
 
         {/* Operations */}
         <Route element={<OperationLayout />}>
-          <Route path="/operations" element={<OperationsDashboardPage />} />
+          <Route path="/operations" element={<Navigate to="/operations/schools" replace />} />
+
+          <Route path="/operations/dashboard" element={<OperationsDashboardPage />} />
 
           <Route path="/operations/documents" element={<DocumentsPage />} />
 
@@ -48,13 +45,11 @@ function AppRouter() {
 
           <Route path="/operations/reports" element={<ReportsPage />} />
 
-          <Route path="/operations/personnel" element={<PersonnelPage />} />
+          <Route path="/operations/personnel" element={<Navigate to="/operations/schools?tab=personnel" replace />} />
 
-          <Route path="/operations/sectors" element={<SectorsPage />} />
+          <Route path="/operations/sectors" element={<Navigate to="/operations/schools?tab=sectors" replace />} />
 
-          <Route path="/operations/students" element={<StudentsPage />} />
-
-          <Route path="/operations/boarding" element={<BoardingPage />} />
+          <Route path="/operations/students" element={<Navigate to="/operations/schools?tab=students" replace />} />
 
           <Route path="/operations/alerts" element={<AlertsPage />} />
 

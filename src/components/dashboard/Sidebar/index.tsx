@@ -1,17 +1,11 @@
 import {
-  ApartmentOutlined,
   AppstoreOutlined,
   BarChartOutlined,
   CalendarOutlined,
-  CheckCircleOutlined,
-  CoffeeOutlined,
-  DashboardOutlined,
   EnvironmentOutlined,
   FileTextOutlined,
-  ReadOutlined,
   RobotOutlined,
   SolutionOutlined,
-  TeamOutlined,
   WarningOutlined,
 } from "@ant-design/icons";
 
@@ -21,30 +15,24 @@ import type { MenuProps } from "antd";
 
 import { useLocation, useNavigate } from "react-router-dom";
 
+import { CATALOG_DEFS } from "@/config/catalogs";
+
 import "./style.scss";
 
 type MenuItem = Required<MenuProps>["items"][number];
 
 const { Sider } = Layout;
 
+const catalogMenuItems: MenuItem[] = CATALOG_DEFS.map((catalog) => ({
+  key: `/operations/catalogs?key=${catalog.key}`,
+  label: catalog.title,
+}));
+
 const menuItems: MenuItem[] = [
   {
-    key: "/operations",
-    icon: <DashboardOutlined />,
-    label: "Trung tâm điều hành",
-  },
-  {
-    key: "/operations/tasks",
-    icon: <CheckCircleOutlined />,
-    label: "Công việc cần làm",
-  },
-  {
-    key: "/operations/catalogs",
-    icon: <AppstoreOutlined />,
-    label: "Danh mục dùng chung",
-  },
-  {
-    type: "divider",
+    key: "/operations/schools",
+    icon: <SolutionOutlined />,
+    label: "Trường & Cơ sở",
   },
   {
     key: "/operations/documents",
@@ -55,31 +43,6 @@ const menuItems: MenuItem[] = [
     key: "/operations/timetable",
     icon: <CalendarOutlined />,
     label: "Thời khóa biểu",
-  },
-  {
-    key: "/operations/schools",
-    icon: <SolutionOutlined />,
-    label: "Trường & Cơ sở",
-  },
-  {
-    key: "/operations/personnel",
-    icon: <TeamOutlined />,
-    label: "Nhân sự",
-  },
-  {
-    key: "/operations/sectors",
-    icon: <ApartmentOutlined />,
-    label: "Khối - tổ",
-  },
-  {
-    key: "/operations/students",
-    icon: <ReadOutlined />,
-    label: "Học sinh",
-  },
-  {
-    key: "/operations/boarding",
-    icon: <CoffeeOutlined />,
-    label: "Bán trú",
   },
   {
     key: "/operations/gis",
@@ -101,6 +64,15 @@ const menuItems: MenuItem[] = [
     icon: <RobotOutlined />,
     label: "Trợ lý AI",
   },
+  {
+    type: "divider",
+  },
+  {
+    key: "/operations/catalogs",
+    icon: <AppstoreOutlined />,
+    label: "Danh mục",
+    children: catalogMenuItems,
+  },
 ];
 
 interface DashboardSidebarProps {
@@ -116,6 +88,15 @@ const DashboardSidebar = ({
   const navigate = useNavigate();
 
   const location = useLocation();
+
+  const menuSelectedKey =
+    location.pathname === "/operations/catalogs"
+      ? `${location.pathname}${location.search}`
+      : location.pathname;
+
+  const handleMenuClick: MenuProps["onClick"] = (item) => {
+    navigate(item.key);
+  };
 
   const handleBrandClick = () => {
     sessionStorage.removeItem("home-scroll-position");
@@ -152,9 +133,9 @@ const DashboardSidebar = ({
 
       <Menu
         mode="inline"
-        selectedKeys={[location.pathname]}
+        selectedKeys={[menuSelectedKey]}
         items={menuItems}
-        onClick={(item) => navigate(item.key)}
+        onClick={handleMenuClick}
         className="dashboard-sidebar__menu"
       />
     </Sider>

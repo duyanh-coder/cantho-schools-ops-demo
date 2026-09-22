@@ -2,6 +2,10 @@ import type {
     CrudFieldOption,
 } from "@/components/dashboard/CrudManager";
 
+import {
+    subjects,
+} from "@/mock/common";
+
 
 export interface CatalogDef {
     key: string;
@@ -15,11 +19,48 @@ export interface CatalogDef {
     seed: CrudFieldOption[];
 }
 
+const educationLevelOptions: CrudFieldOption[] = [
+    { value: "primary", label: "Tiểu học" },
+    { value: "THCS", label: "THCS" },
+    { value: "THPT", label: "THPT" },
+    { value: "THCS_THPT", label: "THCS & THPT" },
+];
+
 const gradeOptions: CrudFieldOption[] = [
     { value: 6, label: "Khối 6" },
     { value: 7, label: "Khối 7" },
     { value: 8, label: "Khối 8" },
     { value: 9, label: "Khối 9" },
+];
+
+const subjectOptions: CrudFieldOption[] = subjects.map((subject) => ({
+    value: subject.id,
+    label: subject.name,
+}));
+
+const roleTitleOptions: CrudFieldOption[] = [
+    { value: "principal", label: "Hiệu trưởng" },
+    { value: "vice_principal", label: "Phó hiệu trưởng" },
+    { value: "head_teacher", label: "Tổ trưởng chuyên môn" },
+    { value: "deputy_head_teacher", label: "Tổ phó chuyên môn" },
+    { value: "grade_lead", label: "Trưởng khối" },
+    { value: "teacher", label: "Giáo viên" },
+    { value: "staff", label: "Nhân viên" },
+];
+
+const degreeOptions: CrudFieldOption[] = [
+    { value: "college", label: "Cao đẳng" },
+    { value: "bachelor", label: "Cử nhân / Đại học" },
+    { value: "master", label: "Thạc sĩ" },
+    { value: "doctor", label: "Tiến sĩ" },
+];
+
+const awardOptions: CrudFieldOption[] = [
+    { value: "ctgd", label: "Chiến sĩ thi đua" },
+    { value: "gvdg", label: "Giáo viên dạy giỏi" },
+    { value: "cstd", label: "Có thạc đức - CSTĐ" },
+    { value: "ldtt", label: "Lao động tiên tiến" },
+    { value: "bang_khen", label: "Bằng khen" },
 ];
 
 const statusOptions: CrudFieldOption[] = [
@@ -74,19 +115,49 @@ const changeStatusOptions: CrudFieldOption[] = [
     { value: "approved", label: "Đã duyệt" },
 ];
 
-const boardingStatusOptions: CrudFieldOption[] = [
-    { value: "active", label: "Triển khai" },
-    { value: "inactive", label: "Tạm ngưng" },
-];
-
 
 export const CATALOG_DEFS: CatalogDef[] = [
     {
+        key: "education-level",
+        title: "Cấp trường",
+        description: "Các cấp học của trường, dùng cho thông tin trường và lọc danh sách.",
+        storageKey: "can-tho-catalog-education-level",
+        seed: educationLevelOptions,
+    },
+    {
         key: "grade",
         title: "Khối lớp",
-        description: "Các khối lớp trong trường, dùng cho phân chia khối và học sinh bán trú.",
+        description: "Các khối lớp trong trường, dùng cho phân chia khối và học sinh.",
         storageKey: "can-tho-catalog-grade",
         seed: gradeOptions,
+    },
+    {
+        key: "subject",
+        title: "Môn học",
+        description: "Danh mục môn học giảng dạy, dùng cho phân công và học bạ.",
+        storageKey: "can-tho-catalog-subject",
+        seed: subjectOptions,
+    },
+    {
+        key: "role-title",
+        title: "Chức vụ / Cán bộ",
+        description: "Các chức vụ, vị trí cán bộ – giáo viên – nhân viên trong trường.",
+        storageKey: "can-tho-catalog-role-title",
+        seed: roleTitleOptions,
+    },
+    {
+        key: "degree",
+        title: "Trình độ / Học vị",
+        description: "Trình độ chuyên môn, học vị của đội ngũ nhân sự.",
+        storageKey: "can-tho-catalog-degree",
+        seed: degreeOptions,
+    },
+    {
+        key: "award",
+        title: "Danh hiệu thi đua – khen thưởng",
+        description: "Các danh hiệu thi đua khen thưởng dùng cho nhân sự và học sinh.",
+        storageKey: "can-tho-catalog-award",
+        seed: awardOptions,
     },
     {
         key: "status",
@@ -126,7 +197,7 @@ export const CATALOG_DEFS: CatalogDef[] = [
     {
         key: "yes-no",
         title: "Có / Không",
-        description: "Danh mục nhị phân dùng cho cờ đánh dấu (giáo viên giỏi, CSTĐ...).",
+        description: "Danh mục nhị phân dùng cho cờ đánh dấu (bán trú, chính, giáo viên giỏi...).",
         storageKey: "can-tho-catalog-yes-no",
         seed: yesNoOptions,
     },
@@ -157,13 +228,6 @@ export const CATALOG_DEFS: CatalogDef[] = [
         description: "Trạng thái phê duyệt các đề nghị biến động sĩ số.",
         storageKey: "can-tho-catalog-enrolment-status",
         seed: changeStatusOptions,
-    },
-    {
-        key: "boarding-status",
-        title: "Trạng thái bán trú",
-        description: "Trạng thái triển khai chương trình bán trú theo khối.",
-        storageKey: "can-tho-catalog-boarding-status",
-        seed: boardingStatusOptions,
     },
 ];
 

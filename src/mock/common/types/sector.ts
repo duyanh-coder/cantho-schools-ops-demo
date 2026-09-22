@@ -16,6 +16,8 @@ export interface Sector {
 
     grade?: number;
 
+    hasBoarding?: "1" | "0";
+
     managerId?: string;
 
     memberIds?: string[];

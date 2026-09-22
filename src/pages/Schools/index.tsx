@@ -1,545 +1,429 @@
 import {
+    ApartmentOutlined,
     BankOutlined,
     EnvironmentOutlined,
-    FilterOutlined,
-    SearchOutlined,
-    SolutionOutlined,
+    PartitionOutlined,
+    ReadOutlined,
+    TeamOutlined,
 } from "@ant-design/icons";
 
 import {
-    Badge,
-    Card,
-    Col,
-    Empty,
-    Input,
-    Row,
-    Select,
-    Tag,
+    Tabs,
+} from "antd";
+
+import type {
+    TabsProps,
 } from "antd";
 
 import {
     useMemo,
-    useState,
 } from "react";
 
-import StatsCard from "@/components/dashboard/StatCard";
+import { useSearchParams } from "react-router-dom";
+
+import CrudManager from "@/components/dashboard/CrudManager";
+
+import type {
+    CrudField,
+    CrudKpi,
+} from "@/components/dashboard/CrudManager";
 
 import {
-    getCurrentRegionMockData,
+    canThoMockData,
 } from "@/mock";
+
+import type {
+    Campus,
+    School,
+} from "@/mock/common/types";
+
+import PersonnelPage from "@/pages/Personnel";
+
+import SectorPage from "@/pages/Sector";
+
+import StudentsPage from "@/pages/Students";
+
+import {
+    useCatalogOptions,
+} from "@/store/useCatalog";
 
 import "./style.scss";
 
 
-const EDUCATION_LEVEL_CONFIG = {
-    THCS: {
-        label: "THCS",
-        color: "blue",
-    },
+const principalOptions = canThoMockData.personnel
+    .map((item) => ({
+        value: item.id,
+        label: item.fullName,
+    }));
 
-    THPT: {
-        label: "THPT",
-        color: "purple",
-    },
+const schoolOptions = canThoMockData.schools.map((school) => ({
+    value: school.id,
+    label: school.name,
+}));
 
-    THCS_THPT: {
-        label: "THCS & THPT",
-        color: "cyan",
+
+const buildSchoolFields = (
+    educationLevelOptions: Array<{ value: string | number; label: string }>,
+    statusOptions: Array<{ value: string | number; label: string }>,
+): CrudField<School>[] => [
+    {
+        name: "regionId",
+        label: "Miền",
+        hideInForm: true,
+        table: false,
+        initialValue: "can-tho",
     },
+    {
+        name: "wardId",
+        label: "Phường/Xã",
+        hideInForm: true,
+        table: false,
+        initialValue: "can-tho-ward-001",
+    },
+    {
+        name: "name",
+        label: "Tên trường",
+        required: true,
+        tableWidth: 260,
+    },
+    {
+        name: "code",
+        label: "Mã trường",
+        required: true,
+        tableWidth: 140,
+    },
+    {
+        name: "educationLevel",
+        label: "Cấp học",
+        required: true,
+        type: "select",
+        options: educationLevelOptions,
+        tableWidth: 150,
+    },
+    {
+        name: "principalId",
+        label: "Hiệu trưởng",
+        type: "select",
+        options: principalOptions,
+        tableWidth: 190,
+    },
+    {
+        name: "status",
+        label: "Trạng thái",
+        required: true,
+        type: "select",
+        options: statusOptions,
+        tableWidth: 130,
+        initialValue: "active",
+    },
+];
+
+
+const buildCampusFields = (
+    schoolOptionsArg: Array<{ value: string | number; label: string }>,
+    yesNoOptions: Array<{ value: string | number; label: string }>,
+    statusOptions: Array<{ value: string | number; label: string }>,
+): CrudField<Campus>[] => [
+    {
+        name: "wardId",
+        label: "Phường/Xã",
+        hideInForm: true,
+        table: false,
+        initialValue: "can-tho-ward-001",
+    },
+    {
+        name: "location",
+        label: "Vị trí",
+        hideInForm: true,
+        table: false,
+        initialValue: { lat: 10.0348, lng: 105.7702 },
+    },
+    {
+        name: "name",
+        label: "Tên cơ sở",
+        required: true,
+        tableWidth: 240,
+    },
+    {
+        name: "code",
+        label: "Mã cơ sở",
+        required: true,
+        tableWidth: 130,
+    },
+    {
+        name: "schoolId",
+        label: "Trực thuộc trường",
+        required: true,
+        type: "select",
+        options: schoolOptionsArg,
+        tableWidth: 240,
+    },
+    {
+        name: "address",
+        label: "Địa chỉ",
+        type: "textarea",
+        span: 24,
+        tableWidth: 240,
+    },
+    {
+        name: "isMainCampus",
+        label: "Trụ sở chính",
+        required: true,
+        type: "select",
+        options: yesNoOptions,
+        tableWidth: 130,
+        initialValue: "0",
+    },
+    {
+        name: "status",
+        label: "Trạng thái",
+        required: true,
+        type: "select",
+        options: statusOptions,
+        tableWidth: 130,
+        initialValue: "active",
+    },
+];
+
+
+const schoolKpis: CrudKpi[] = [
+    {
+        title: "Trường học",
+        value: canThoMockData.schools.length,
+        icon: <BankOutlined />,
+        tone: "blue",
+        note: "đơn vị giáo dục",
+    },
+    {
+        title: "Cấp học",
+        value: canThoMockData.schools.filter(
+            (item) => item.educationLevel === "THCS",
+        ).length,
+        icon: <ReadOutlined />,
+        tone: "green",
+        note: "THCS quản lý",
+    },
+    {
+        title: "Đang hoạt động",
+        value: canThoMockData.schools.filter(
+            (item) => item.status === "active",
+        ).length,
+        icon: <ApartmentOutlined />,
+        tone: "orange",
+        note: "100% kích hoạt",
+    },
+    {
+        title: "Có hiệu trưởng",
+        value: canThoMockData.schools.filter(
+            (item) => Boolean(item.principalId),
+        ).length,
+        icon: <TeamOutlined />,
+        tone: "purple",
+        note: "đã bổ nhiệm",
+    },
+];
+
+
+const campusKpis: CrudKpi[] = [
+    {
+        title: "Tổng cơ sở",
+        value: canThoMockData.campuses.length,
+        icon: <EnvironmentOutlined />,
+        tone: "blue",
+        note: "cơ sở trực thuộc",
+    },
+    {
+        title: "Trụ sở chính",
+        value: canThoMockData.campuses.filter(
+            (item) => item.isMainCampus,
+        ).length,
+        icon: <BankOutlined />,
+        tone: "green",
+        note: "chính quyền đóng tại đây",
+    },
+    {
+        title: "Đang hoạt động",
+        value: canThoMockData.campuses.filter(
+            (item) => item.status === "active",
+        ).length,
+        icon: <PartitionOutlined />,
+        tone: "orange",
+        note: "phục vụ giảng dạy",
+    },
+];
+
+
+const TAB_KEYS = ["schools", "personnel", "sectors", "students"] as const;
+
+type TabKey = (typeof TAB_KEYS)[number];
+
+
+const isValidTab = (
+    value: string | null,
+): value is TabKey => {
+    return (
+        TAB_KEYS.includes(value as TabKey) ||
+        value === null
+    );
 };
 
 
-const STATUS_CONFIG = {
-    active: {
-        label: "Đang hoạt động",
-        status: "success" as const,
-    },
+function SchoolsHub() {
+    const [searchParams, setSearchParams] = useSearchParams();
 
-    inactive: {
-        label: "Không hoạt động",
-        status: "default" as const,
-    },
-};
+    const activeTab =
+        useMemo(() => {
+            const raw = searchParams.get("tab");
 
+            if (!isValidTab(raw)) {
+                return "schools" as TabKey;
+            }
 
-function SchoolsPage() {
-    const {
-        schools,
-        campuses,
-    } = getCurrentRegionMockData();
+            const next = raw ?? "schools";
 
+            if (next === "schools") {
+                return "schools" as TabKey;
+            }
 
-    const [
-        keyword,
-        setKeyword,
-    ] = useState("");
+            if (next === "personnel") {
+                return "personnel" as TabKey;
+            }
 
+            if (next === "sectors") {
+                return "sectors" as TabKey;
+            }
 
-    const [
-        educationLevel,
-        setEducationLevel,
-    ] = useState("all");
+            return "students" as TabKey;
+        }, [searchParams]);
 
 
-    const [
-        status,
-        setStatus,
-    ] = useState("all");
+    const handleTabChange = (
+        key: string,
+    ) => {
+        setSearchParams(
+            key === "schools"
+                ? {}
+                : { tab: key },
+            { replace: true },
+        );
+    };
 
 
-    const filteredSchools = useMemo(() => {
-        const searchKeyword =
-            keyword
-                .trim()
-                .toLowerCase();
+    const schoolFields =
+        buildSchoolFields(
+            useCatalogOptions("education-level"),
+            useCatalogOptions("status"),
+        );
 
-        return schools.filter((school) => {
-            const matchKeyword =
-                !searchKeyword ||
-                school.name
-                    .toLowerCase()
-                    .includes(searchKeyword) ||
-                school.code
-                    .toLowerCase()
-                    .includes(searchKeyword);
+    const campusFields =
+        buildCampusFields(
+            schoolOptions,
+            useCatalogOptions("yes-no"),
+            useCatalogOptions("status"),
+        );
 
-            const matchEducationLevel =
-                educationLevel === "all" ||
-                school.educationLevel === educationLevel;
-
-            const matchStatus =
-                status === "all" ||
-                school.status === status;
-
-            return (
-                matchKeyword &&
-                matchEducationLevel &&
-                matchStatus
-            );
-        });
-    }, [
-        schools,
-        keyword,
-        educationLevel,
-        status,
-    ]);
-
-
-    const statistics = useMemo(() => {
-        return {
-            schools:
-                schools.length,
-
-            campuses:
-                campuses.length,
-
-            activeSchools:
-                schools.filter(
-                    (item) =>
-                        item.status === "active",
-                ).length,
-
-            mainCampuses:
-                campuses.filter(
-                    (item) =>
-                        item.isMainCampus,
-                ).length,
-        };
-    }, [
-        schools,
-        campuses,
-    ]);
-
+    const items:
+        TabsProps["items"] = [
+            {
+                key: "schools",
+                label: "Trường & Cơ sở",
+                children: (
+                    <div className="schools-hub__entity">
+                        <Tabs
+                            defaultActiveKey="schools-list"
+                            tabBarStyle={{ margin: 0 }}
+                            items={[
+                                {
+                                    key: "schools-list",
+                                    label: "Danh sách trường",
+                                    children: (
+                                        <CrudManager<School>
+                                            eyebrow="QUẢN LÝ TRƯỜNG HỌC"
+                                            title="Trường học trực thuộc"
+                                            description="Quản lý trường, cấp học và hiệu trưởng phụ trách trong hệ thống."
+                                            storageKey="can-tho-schools"
+                                            seed={canThoMockData.schools}
+                                            fields={schoolFields}
+                                            kpis={schoolKpis}
+                                            entityName="trường"
+                                            newLabel="Thêm trường"
+                                        />
+                                    ),
+                                },
+                                {
+                                    key: "campuses-list",
+                                    label: "Danh sách cơ sở",
+                                    children: (
+                                        <CrudManager<Campus>
+                                            eyebrow="QUẢN LÝ CƠ SỞ"
+                                            title="Cơ sở trực thuộc trường"
+                                            description="Quản lý các cơ sở, địa chỉ và trụ sở chính của từng trường."
+                                            storageKey="can-tho-campuses"
+                                            seed={canThoMockData.campuses}
+                                            fields={campusFields}
+                                            kpis={campusKpis}
+                                            entityName="cơ sở"
+                                            newLabel="Thêm cơ sở"
+                                        />
+                                    ),
+                                },
+                            ]}
+                        />
+                    </div>
+                ),
+            },
+            {
+                key: "personnel",
+                label: "Nhân sự",
+                children: (
+                    <PersonnelPage compact />
+                ),
+            },
+            {
+                key: "sectors",
+                label: "Khối & tổ",
+                children: (
+                    <SectorPage compact />
+                ),
+            },
+            {
+                key: "students",
+                label: "Học sinh",
+                children: (
+                    <StudentsPage />
+                ),
+            },
+        ];
 
     return (
         <div className="schools-page">
-
             <div className="page-sticky">
                 <header className="page-head">
                     <div className="page-head__title">
                         <span className="page-head__eyebrow">
-                            SCHOOLS
+                            SCHOOLS & CAMPUSES
                         </span>
 
                         <h2>Trường & Cơ sở</h2>
 
                         <p>
-                            Theo dõi thông tin trường học và các cơ sở trực
-                            thuộc trên địa bàn.
+                            Quản lý tập trung trường học, cơ sở trực thuộc cùng
+                            nhân sự, khối tổ và học sinh trong hệ thống.
                         </p>
                     </div>
                 </header>
-
-            <Card className="schools-page__filters">
-
-                <div className="schools-page__filter-header">
-
-                    <FilterOutlined />
-
-                    <span>
-                        Bộ lọc trường học
-                    </span>
-
-                </div>
-
-
-                <Row gutter={[12, 12]}>
-
-                    <Col
-                        xs={24}
-                        md={10}
-                    >
-                        <Input
-                            value={keyword}
-                            onChange={(event) =>
-                                setKeyword(
-                                    event.target.value,
-                                )
-                            }
-                            prefix={
-                                <SearchOutlined />
-                            }
-                            placeholder="Tìm theo tên hoặc mã trường"
-                            className="schools-page__search"
-                        />
-                    </Col>
-
-
-                    <Col
-                        xs={12}
-                        md={7}
-                    >
-                        <Select
-                            value={
-                                educationLevel
-                            }
-                            onChange={
-                                setEducationLevel
-                            }
-                            className="schools-page__select"
-                            options={[
-                                {
-                                    value: "all",
-                                    label: "Tất cả cấp học",
-                                },
-                                {
-                                    value: "THCS",
-                                    label: "THCS",
-                                },
-                                {
-                                    value: "THPT",
-                                    label: "THPT",
-                                },
-                                {
-                                    value: "THCS_THPT",
-                                    label: "THCS & THPT",
-                                },
-                            ]}
-                        />
-                    </Col>
-
-
-                    <Col
-                        xs={12}
-                        md={7}
-                    >
-                        <Select
-                            value={status}
-                            onChange={setStatus}
-                            className="schools-page__select"
-                            options={[
-                                {
-                                    value: "all",
-                                    label: "Tất cả trạng thái",
-                                },
-                                {
-                                    value: "active",
-                                    label: "Đang hoạt động",
-                                },
-                                {
-                                    value: "inactive",
-                                    label: "Không hoạt động",
-                                },
-                            ]}
-                        />
-                    </Col>
-
-                </Row>
-
-            </Card>
             </div>
 
-            <div className="page-kpi">
-                <StatsCard
-                    tone="blue"
-                    title="Trường học"
-                    value={statistics.schools}
-                    icon={<BankOutlined />}
-                />
-
-                <StatsCard
-                    tone="green"
-                    title="Tổng cơ sở"
-                    value={statistics.campuses}
-                    note="Cơ sở trực thuộc"
-                    icon={<EnvironmentOutlined />}
-                />
-
-                <StatsCard
-                    tone="orange"
-                    title="Đang hoạt động"
-                    value={statistics.activeSchools}
-                    icon={<SolutionOutlined />}
-                />
-
-                <StatsCard
-                    tone="purple"
-                    title="Trụ sở chính"
-                    value={statistics.mainCampuses}
-                    icon={<BankOutlined />}
-                />
-            </div>
-
-
-            {/* =========================
-                SCHOOL LIST
-            ========================= */}
-
-            <div className="schools-page__list">
-
-                {filteredSchools.length === 0 ? (
-                    <Empty
-                        description="Không tìm thấy trường phù hợp"
-                    />
-                ) : (
-                    <Row gutter={[16, 16]}>
-
-                        {filteredSchools.map(
-                            (school) => {
-                                const schoolCampuses =
-                                    campuses.filter(
-                                        (campus) =>
-                                            campus.schoolId ===
-                                            school.id,
-                                    );
-
-                                const mainCampus =
-                                    schoolCampuses.find(
-                                        (campus) =>
-                                            campus.isMainCampus,
-                                    );
-
-                                const levelConfig =
-                                    EDUCATION_LEVEL_CONFIG[
-                                        school.educationLevel
-                                    ];
-
-                                const statusConfig =
-                                    STATUS_CONFIG[
-                                        school.status
-                                    ];
-
-
-                                return (
-                                    <Col
-                                        key={school.id}
-                                        xs={24}
-                                        lg={12}
-                                        xl={8}
-                                    >
-
-                                        <Card
-                                            className="school-item"
-                                        >
-
-                                            <div
-                                                className="school-item__header"
-                                            >
-
-                                                <div
-                                                    className="school-item__icon"
-                                                >
-                                                    <BankOutlined />
-                                                </div>
-
-
-                                                <div
-                                                    className="school-item__title"
-                                                >
-
-                                                    <span>
-                                                        {school.code}
-                                                    </span>
-
-                                                    <h3>
-                                                        {school.name}
-                                                    </h3>
-
-                                                </div>
-
-                                            </div>
-
-
-                                            <div
-                                                className="school-item__tags"
-                                            >
-
-                                                <Tag
-                                                    color={
-                                                        levelConfig.color
-                                                    }
-                                                >
-                                                    {
-                                                        levelConfig.label
-                                                    }
-                                                </Tag>
-
-
-                                                <Badge
-                                                    status={
-                                                        statusConfig.status
-                                                    }
-                                                    text={
-                                                        statusConfig.label
-                                                    }
-                                                />
-
-                                            </div>
-
-
-                                            <div
-                                                className="school-item__info"
-                                            >
-
-                                                <div>
-
-                                                    <span>
-                                                        <EnvironmentOutlined />
-
-                                                        Cơ sở
-                                                    </span>
-
-                                                    <strong>
-                                                        {
-                                                            schoolCampuses.length
-                                                        }
-                                                    </strong>
-
-                                                </div>
-
-
-                                                <div>
-
-                                                    <span>
-                                                        <BankOutlined />
-
-                                                        Cơ sở chính
-                                                    </span>
-
-                                                    <strong>
-                                                        {
-                                                            mainCampus?.name ??
-                                                            "-"
-                                                        }
-                                                    </strong>
-
-                                                </div>
-
-                                            </div>
-
-
-                                            <div
-                                                className="school-item__address"
-                                            >
-
-                                                <EnvironmentOutlined />
-
-                                                <span>
-                                                    {
-                                                        mainCampus?.address ??
-                                                        "Chưa cập nhật địa chỉ"
-                                                    }
-                                                </span>
-
-                                            </div>
-
-
-                                            {/* CAMPUSES */}
-
-                                            {schoolCampuses.length > 0 && (
-
-                                                <div
-                                                    className="school-item__campuses"
-                                                >
-
-                                                    <span
-                                                        className="school-item__campuses-label"
-                                                    >
-                                                        Danh sách cơ sở
-                                                    </span>
-
-
-                                                    {schoolCampuses.map(
-                                                        (
-                                                            campus,
-                                                        ) => (
-                                                            <div
-                                                                key={
-                                                                    campus.id
-                                                                }
-                                                                className="school-campus"
-                                                            >
-
-                                                                <div>
-
-                                                                    <strong>
-                                                                        {
-                                                                            campus.name
-                                                                        }
-                                                                    </strong>
-
-                                                                    <span>
-                                                                        {
-                                                                            campus.code
-                                                                        }
-                                                                    </span>
-
-                                                                </div>
-
-
-                                                                {campus.isMainCampus && (
-
-                                                                    <Tag
-                                                                        color="blue"
-                                                                    >
-                                                                        Chính
-                                                                    </Tag>
-
-                                                                )}
-
-                                                            </div>
-                                                        ),
-                                                    )}
-
-                                                </div>
-
-                                            )}
-
-                                        </Card>
-
-                                    </Col>
-                                );
-                            },
-                        )}
-
-                    </Row>
-                )}
-
-            </div>
-
+            <Tabs
+                activeKey={activeTab}
+                onChange={handleTabChange}
+                items={items}
+                className="schools-hub"
+                tabBarStyle={{ margin: 0 }}
+            />
         </div>
     );
 }
 
 
-export default SchoolsPage;
+export default SchoolsHub;
