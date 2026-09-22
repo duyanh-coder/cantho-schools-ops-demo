@@ -112,6 +112,14 @@ export interface CrudKpi {
     note?: string;
 }
 
+export interface CrudFilterField<T extends { id: string }> {
+    field: keyof T & string;
+
+    label?: string;
+
+    multiple?: boolean;
+}
+
 export interface CrudManagerProps<T extends { id: string }> {
     eyebrow: string;
 
@@ -127,6 +135,8 @@ export interface CrudManagerProps<T extends { id: string }> {
 
     kpis?: CrudKpi[];
 
+    filters?: CrudFilterField<T>[];
+
     entityName?: string;
 
     newLabel?: string;
@@ -136,6 +146,8 @@ export interface CrudManagerProps<T extends { id: string }> {
     detail?: boolean;
 
     detailWidth?: number;
+
+    showWorkflow?: boolean;
 }
 
 
@@ -150,6 +162,21 @@ const toLabelMap = (
             ],
         ),
     );
+};
+
+
+const toFilterKey = (
+    value: unknown,
+): string => {
+    if (typeof value === "boolean") {
+        return value ? "1" : "0";
+    }
+
+    if (value === null || value === undefined) {
+        return "";
+    }
+
+    return String(value);
 };
 
 
@@ -200,11 +227,13 @@ function CrudManager<T extends { id: string }>({
     seed,
     fields,
     kpis,
+    filters,
     entityName,
     newLabel,
     compact,
     detail,
     detailWidth,
+    showWorkflow = false,
 }: CrudManagerProps<T>) {
     const {
         items,
@@ -215,6 +244,8 @@ function CrudManager<T extends { id: string }>({
     } = useCrud<T>(storageKey, seed);
 
     const [keyword, setKeyword] = useState("");
+
+    const [filterValues, setFilterValues] = useState<Record<string, unknown>>({});
 
     const [open, setOpen] = useState(false);
 
@@ -243,65 +274,150 @@ function CrudManager<T extends { id: string }>({
         [fields],
     );
 
+    const filterConfigs = useMemo(
+        () => {
+            if (!filters || filters.length === 0) {
+                return [] as Array<{
+                    name: keyof T & string;
+
+                    label: string;
+
+                    options: CrudFieldOption[];
+
+                    multiple: boolean;
+                }>;
+            }
+
+            return filters.flatMap((item) => {
+                const field = fields.find(
+                    (candidate) => candidate.name === item.field,
+                );
+
+                if (!field || !field.options || field.options.length === 0) {
+                    return [];
+                }
+
+                return [{
+                    name: field.name as keyof T & string,
+                    label: item.label ?? field.label,
+                    options: field.options,
+                    multiple: item.multiple ?? field.type === "multiselect",
+                }];
+            });
+        },
+        [filters, fields],
+    );
+
     const filtered = useMemo(
         () => {
             const kw = keyword.trim().toLowerCase();
 
-            if (!kw) {
-                return items;
-            }
-
-            return items.filter((row) =>
-                fields.some((field) => {
-                    if (field.table === false || field.name === "id") {
-                        return false;
-                    }
-
-                    const value = row[field.name];
-
-                    if (
-                        value === null ||
-                        value === undefined ||
-                        value === ""
-                    ) {
-                        return false;
-                    }
-
-                    const labelMap = labelMaps.get(field.name);
-
-                    const flatten = (input: unknown): string[] => {
-                        if (Array.isArray(input)) {
-                            return input.flatMap(flatten);
+            const keywordRows = !kw
+                ? items
+                : items.filter((row) =>
+                    fields.some((field) => {
+                        if (field.table === false || field.name === "id") {
+                            return false;
                         }
+
+                        const value = row[field.name];
 
                         if (
-                            labelMap &&
-                            input !== null &&
-                            input !== undefined
+                            value === null ||
+                            value === undefined ||
+                            value === ""
                         ) {
-                            const mapped = labelMap.get(
-                                String(input),
-                            );
-
-                            if (mapped) {
-                                return [
-                                    mapped.toLowerCase(),
-                                    String(input).toLowerCase(),
-                                ];
-                            }
+                            return false;
                         }
 
-                        return [String(input).toLowerCase()];
-                    };
+                        const labelMap = labelMaps.get(field.name);
 
-                    return flatten(value).some((part) =>
-                        part.includes(kw),
-                    );
+                        const flatten = (input: unknown): string[] => {
+                            if (Array.isArray(input)) {
+                                return input.flatMap(flatten);
+                            }
+
+                            if (
+                                labelMap &&
+                                input !== null &&
+                                input !== undefined
+                            ) {
+                                const mapped = labelMap.get(
+                                    String(input),
+                                );
+
+                                if (mapped) {
+                                    return [
+                                        mapped.toLowerCase(),
+                                        String(input).toLowerCase(),
+                                    ];
+                                }
+                            }
+
+                            return [String(input).toLowerCase()];
+                        };
+
+                        return flatten(value).some((part) =>
+                            part.includes(kw),
+                        );
+                    }),
+                );
+
+            const activeFilters = filterConfigs.filter((item) => {
+                const value = filterValues[item.name];
+
+                if (value === undefined || value === null || value === "") {
+                    return false;
+                }
+
+                if (Array.isArray(value) && value.length === 0) {
+                    return false;
+                }
+
+                return true;
+            });
+
+            if (activeFilters.length === 0) {
+                return keywordRows;
+            }
+
+            return keywordRows.filter((row) =>
+                activeFilters.every((item) => {
+                    const selected = filterValues[item.name];
+                    const rowValue = row[item.name];
+
+                    if (item.multiple) {
+                        const selectedKeys = (Array.isArray(selected) ? selected : [selected]).map(toFilterKey);
+
+                        const rowKeys = (Array.isArray(rowValue) ? rowValue : [rowValue]).map(toFilterKey);
+
+                        return rowKeys.some((key) => selectedKeys.includes(key));
+                    }
+
+                    return toFilterKey(rowValue) === toFilterKey(selected);
                 }),
             );
         },
-        [items, keyword, fields, labelMaps],
+        [items, keyword, fields, labelMaps, filterValues, filterConfigs],
     );
+
+    const hasActiveFilters = Object.values(filterValues).some((value) => {
+        if (value === undefined || value === null || value === "") {
+            return false;
+        }
+
+        if (Array.isArray(value) && value.length === 0) {
+            return false;
+        }
+
+        return true;
+    });
+
+    const handleClearFilters = () => {
+        setFilterValues({});
+
+        setKeyword("");
+    };
 
     const columns = useMemo<ColumnsType<T>>(
         () => {
@@ -916,26 +1032,28 @@ function CrudManager<T extends { id: string }>({
                 </header>
             )}
 
-            <div className="crud-panel__workflow">
-                <div className="crud-panel__workflow-title">
-                    <BulbOutlined />
+            {showWorkflow && (
+                <div className="crud-panel__workflow">
+                    <div className="crud-panel__workflow-title">
+                        <BulbOutlined />
 
-                    <strong>Cách thực hiện công việc</strong>
+                        <strong>Cách thực hiện công việc</strong>
 
-                    <span>
-                        {remainingBySelector(
-                            items,
-                            fields,
-                        )}
-                    </span>
+                        <span>
+                            {remainingBySelector(
+                                items,
+                                fields,
+                            )}
+                        </span>
+                    </div>
+
+                    <img
+                        src={workflowDiagram}
+                        alt="Lưu đồ cách thực hiện công việc"
+                        className="crud-panel__workflow-img"
+                    />
                 </div>
-
-                <img
-                    src={workflowDiagram}
-                    alt="Lưu đồ cách thực hiện công việc"
-                    className="crud-panel__workflow-img"
-                />
-            </div>
+            )}
 
             {kpis && kpis.length > 0 && (
                 <div className="page-kpi">
@@ -1020,6 +1138,39 @@ function CrudManager<T extends { id: string }>({
                     </div>
                 </div>
 
+                {filterConfigs.length > 0 && (
+                    <div className="crud-panel__filters">
+                        {filterConfigs.map((item) => (
+                            <Select
+                                key={item.name}
+                                allowClear
+                                showSearch
+                                mode={item.multiple ? "multiple" : undefined}
+                                placeholder={item.label}
+                                options={item.options}
+                                value={(filterValues[item.name] as string | string[] | undefined) ?? undefined}
+                                onChange={(value) => {
+                                    setFilterValues((prev) => ({
+                                        ...prev,
+                                        [item.name]: value,
+                                    }));
+                                }}
+                                className="crud-panel__filter"
+                            />
+                        ))}
+
+                        {(hasActiveFilters || keyword.trim()) && (
+                            <Button
+                                size="small"
+                                icon={<DeleteOutlined />}
+                                onClick={handleClearFilters}
+                            >
+                                Xóa bộ lọc
+                            </Button>
+                        )}
+                    </div>
+                )}
+
                 <div className="crud-panel__body">
                     <Table<T>
                         rowKey="id"
@@ -1036,7 +1187,7 @@ function CrudManager<T extends { id: string }>({
                             emptyText: (
                                 <Empty
                                     description={
-                                        keyword
+                                        keyword || hasActiveFilters
                                             ? "Không tìm thấy bản ghi nào"
                                             : "Chưa có dữ liệu"
                                     }

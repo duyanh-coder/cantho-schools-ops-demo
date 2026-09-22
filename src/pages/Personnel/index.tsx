@@ -224,6 +224,20 @@ const PersonnelPage = ({
             seed={canThoMockData.personnel}
             fields={personnelFields}
             kpis={personnelKpis}
+            filters={[
+                { field: "gender" },
+                { field: "teamId" },
+                {
+                    field: "subjectIds",
+                    multiple: true,
+                },
+                {
+                    field: "campusIds",
+                    multiple: true,
+                },
+                { field: "isExcellentTeacher" },
+                { field: "status" },
+            ]}
             entityName="cán bộ – giáo viên"
             newLabel="Thêm nhân sự"
             detail

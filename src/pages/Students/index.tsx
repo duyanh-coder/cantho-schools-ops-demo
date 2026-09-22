@@ -317,6 +317,12 @@ const buildItems = (
                 seed={canThoMockData.students}
                 fields={studentFields}
                 kpis={studentKpis}
+                filters={[
+                    { field: "gender" },
+                    { field: "campusId" },
+                    { field: "classId" },
+                    { field: "status" },
+                ]}
                 entityName="học sinh"
                 newLabel="Thêm học sinh"
                 detail
@@ -335,6 +341,11 @@ const buildItems = (
                 storageKey="can-tho-transcripts"
                 seed={canThoMockData.transcripts}
                 fields={transcriptFields}
+                filters={[
+                    { field: "semester" },
+                    { field: "subjectId" },
+                    { field: "conduct" },
+                ]}
                 entityName="học bạ"
                 newLabel="Thêm học bạ"
                 detail
@@ -353,6 +364,12 @@ const buildItems = (
                 storageKey="can-tho-enrolment-changes"
                 seed={canThoMockData.enrolmentChanges}
                 fields={enrolmentChangeFields}
+                filters={[
+                    { field: "classId" },
+                    { field: "campusId" },
+                    { field: "changeType" },
+                    { field: "status" },
+                ]}
                 entityName="biến động sỉ số"
                 newLabel="Thêm biến động"
                 detail

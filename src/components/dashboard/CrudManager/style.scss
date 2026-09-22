@@ -8,17 +8,17 @@
 
         flex-wrap: wrap;
 
-        gap: 12px;
+        gap: 10px;
 
         background: #f8fafc;
 
         border: 1px dashed #dbe3ec;
 
-        border-radius: 14px;
+        border-radius: 12px;
 
-        padding: 14px 18px;
+        padding: 10px 14px;
 
-        margin: 4px 0 20px;
+        margin: 0 0 14px;
     }
 
     &__workflow-title {
@@ -30,12 +30,14 @@
 
         color: #1d4ed8;
 
+        font-size: 13px;
+
         strong {
             color: #111827;
         }
 
         span {
-            font-size: 12.5px;
+            font-size: 12px;
 
             color: #64748b;
         }
@@ -44,11 +46,11 @@
     &__workflow-img {
         display: block;
 
-        width: min(880px, 100%);
+        width: min(440px, 100%);
 
         height: auto;
 
-        margin: 10px auto 4px;
+        margin: 4px auto 0;
     }
 
     &__card {
@@ -125,6 +127,22 @@
         width: 220px;
     }
 
+    &__filters {
+        display: flex;
+
+        align-items: center;
+
+        flex-wrap: wrap;
+
+        gap: 10px;
+
+        margin: -4px 0 16px;
+    }
+
+    &__filter {
+        width: 190px;
+    }
+
     &__body {
         overflow-x: auto;
 
@@ -161,6 +179,10 @@
         }
 
         &__search {
+            width: 100%;
+        }
+
+        &__filter {
             width: 100%;
         }
 

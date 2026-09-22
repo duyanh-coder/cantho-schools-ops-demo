@@ -264,6 +264,12 @@ const SectorPage = ({
             seed={canThoMockData.sectors}
             fields={sectorFields}
             kpis={kpis}
+            filters={[
+                { field: "type" },
+                { field: "grade" },
+                { field: "hasBoarding" },
+                { field: "status" },
+            ]}
             detail
             detailWidth={960}
         />

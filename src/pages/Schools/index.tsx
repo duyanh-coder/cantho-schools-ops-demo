@@ -346,6 +346,10 @@ function SchoolsHub() {
                         seed={canThoMockData.schools}
                         fields={schoolFields}
                         kpis={schoolKpis}
+                        filters={[
+                            { field: "educationLevel" },
+                            { field: "status" },
+                        ]}
                         entityName="trường"
                         newLabel="Thêm trường"
                     />
@@ -363,6 +367,11 @@ function SchoolsHub() {
                         seed={canThoMockData.campuses}
                         fields={campusFields}
                         kpis={campusKpis}
+                        filters={[
+                            { field: "schoolId" },
+                            { field: "isMainCampus" },
+                            { field: "status" },
+                        ]}
                         entityName="cơ sở"
                         newLabel="Thêm cơ sở"
                     />
