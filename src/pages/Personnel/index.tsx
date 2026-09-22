@@ -51,16 +51,16 @@ const buildPersonnelFields = (
     statusOptions: Array<{ value: string | number; label: string }>,
 ): CrudField<Personnel>[] => [
     {
-        name: "fullName",
-        label: "Họ và tên",
-        required: true,
-        tableWidth: 200,
-    },
-    {
         name: "code",
         label: "Mã CB-GV",
         required: true,
         tableWidth: 130,
+    },
+    {
+        name: "fullName",
+        label: "Họ và tên",
+        required: true,
+        tableWidth: 200,
     },
     {
         name: "gender",
@@ -69,6 +69,7 @@ const buildPersonnelFields = (
         options: genderOptions,
         tableWidth: 110,
         required: true,
+        table: false,
     },
     {
         name: "roleTitle",
@@ -81,6 +82,7 @@ const buildPersonnelFields = (
         label: "Trình độ",
         required: true,
         tableWidth: 170,
+        table: false,
     },
     {
         name: "subjectIds",
@@ -104,16 +106,19 @@ const buildPersonnelFields = (
         options: campusOptions,
         tableWidth: 230,
         required: true,
+        table: false,
     },
     {
         name: "phone",
         label: "Số điện thoại",
         tableWidth: 130,
+        table: false,
     },
     {
         name: "email",
         label: "Email",
         tableWidth: 200,
+        table: false,
     },
     {
         name: "isExcellentTeacher",
@@ -121,6 +126,7 @@ const buildPersonnelFields = (
         type: "select",
         options: yesNoOptions,
         tableWidth: 130,
+        table: false,
     },
     {
         name: "achievements",
@@ -220,6 +226,7 @@ const PersonnelPage = ({
             kpis={personnelKpis}
             entityName="cán bộ – giáo viên"
             newLabel="Thêm nhân sự"
+            detail
         />
     );
 };

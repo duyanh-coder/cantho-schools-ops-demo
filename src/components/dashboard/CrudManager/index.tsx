@@ -3,6 +3,7 @@ import {
     DeleteOutlined,
     DownloadOutlined,
     EditOutlined,
+    EyeOutlined,
     PlusOutlined,
     ReloadOutlined,
     SearchOutlined,
@@ -11,6 +12,7 @@ import {
 
 import {
     Button,
+    Descriptions,
     Empty,
     Form,
     Input,
@@ -128,6 +130,8 @@ export interface CrudManagerProps<T extends { id: string }> {
     newLabel?: string;
 
     compact?: boolean;
+
+    detail?: boolean;
 }
 
 
@@ -195,6 +199,7 @@ function CrudManager<T extends { id: string }>({
     entityName,
     newLabel,
     compact,
+    detail,
 }: CrudManagerProps<T>) {
     const {
         items,
@@ -209,6 +214,8 @@ function CrudManager<T extends { id: string }>({
     const [open, setOpen] = useState(false);
 
     const [editing, setEditing] = useState<T | null>(null);
+
+    const [detailRow, setDetailRow] = useState<T | null>(null);
 
     const [form] = Form.useForm<Record<string, unknown>>();
 
@@ -367,10 +374,22 @@ function CrudManager<T extends { id: string }>({
             columnsBuilder.push({
                 key: "__actions",
                 title: "",
-                width: 92,
+                width: detail ? 116 : 92,
                 align: "right",
                 render: (_: unknown, row: T) => (
                     <Space size={4}>
+                        {detail && (
+                            <Button
+                                type="text"
+                                size="small"
+                                icon={<EyeOutlined />}
+                                title="Xem chi tiết"
+                                onClick={() =>
+                                    setDetailRow(row)
+                                }
+                            />
+                        )}
+
                         <Button
                             type="text"
                             size="small"
@@ -391,7 +410,7 @@ function CrudManager<T extends { id: string }>({
 
             return columnsBuilder;
         },
-        [fields, labelMaps],
+        [fields, labelMaps, detail],
     );
 
     const openCreate = () => {
@@ -531,12 +550,67 @@ function CrudManager<T extends { id: string }>({
     };
 
 
+    const renderDetailValue = (
+        row: T,
+        field: CrudField<T>,
+    ): ReactNode => {
+        if (field.render) {
+            return field.render(row);
+        }
+
+        const value = row[field.name];
+
+        if (
+            value === null ||
+            value === undefined ||
+            value === ""
+        ) {
+            return (
+                <span className="crud-panel__muted">
+                    —
+                </span>
+            );
+        }
+
+        const labelMap = labelMaps.get(field.name);
+
+        if (Array.isArray(value)) {
+            return (
+                <Space
+                    size={4}
+                    wrap
+                >
+                    {value.map((entry) => (
+                        <Tag
+                            color="blue"
+                            key={String(entry)}
+                        >
+                            {labelMap?.get(String(entry)) ??
+                                String(entry)}
+                        </Tag>
+                    ))}
+                </Space>
+            );
+        }
+
+        if (typeof value === "boolean") {
+            return (
+                labelMap?.get(String(value)) ??
+                (value ? "Có" : "Không")
+            );
+        }
+
+        return (
+            labelMap?.get(String(value)) ??
+            String(value)
+        );
+    };
+
+
     const handleExport = () => {
         const exportableFields =
             fields.filter(
-                (field) =>
-                    field.hideInForm ||
-                    field.table !== false,
+                (field) => !field.hideInForm,
             );
 
         const rows =
@@ -1030,6 +1104,40 @@ function CrudManager<T extends { id: string }>({
                             </Form.Item>
                         ))}
                 </Form>
+            </Modal>
+
+            <Modal
+                open={detailRow !== null}
+                title={`Chi tiết ${entityName ?? title}`}
+                footer={null}
+                width={720}
+                destroyOnHidden
+                onCancel={() => setDetailRow(null)}
+            >
+                {detailRow && fields.length > 0 && (
+                    <Descriptions
+                        column={2}
+                        size="small"
+                        bordered
+                    >
+                        {fields.map((field) => (
+                            <Descriptions.Item
+                                key={field.name}
+                                label={field.label}
+                                span={
+                                    field.type === "textarea"
+                                        ? 2
+                                        : 1
+                                }
+                            >
+                                {renderDetailValue(
+                                    detailRow,
+                                    field,
+                                )}
+                            </Descriptions.Item>
+                        ))}
+                    </Descriptions>
+                )}
             </Modal>
         </div>
     );
