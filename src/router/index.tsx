@@ -8,6 +8,8 @@ import {
 import OperationLayout from "@/layouts/OperationLayout";
 
 import AlertsPage from "@/pages/Alerts";
+import CampusesPage from "@/pages/Campuses";
+import CampusDetail from "@/pages/Campuses/CampusDetail";
 import ChatbotPage from "@/pages/Chatbot";
 import DocumentsPage from "@/pages/Documents";
 import GISPage from "@/pages/GIS";
@@ -40,6 +42,10 @@ function AppRouter() {
           <Route path="/operations/timetable" element={<TimetablePage />} />
 
           <Route path="/operations/schools" element={<SchoolPage />} />
+
+          <Route path="/operations/campuses" element={<CampusesPage />} />
+
+          <Route path="/operations/campuses/:campusId" element={<CampusDetail />} />
 
           <Route path="/operations/gis" element={<GISPage />} />
 

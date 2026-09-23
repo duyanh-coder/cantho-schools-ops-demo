@@ -107,6 +107,9 @@ const SchoolOverview = ({
     const statusOptions =
         useCatalogOptions("status");
 
+    const campusStatusOptions =
+        useCatalogOptions("campus-status");
+
     const statusLabelMap = useMemo(
         () => new Map<string, string>(
             statusOptions.map(
@@ -114,6 +117,15 @@ const SchoolOverview = ({
             ),
         ),
         [statusOptions],
+    );
+
+    const campusStatusLabelMap = useMemo(
+        () => new Map<string, string>(
+            campusStatusOptions.map(
+                (option) => [String(option.value), option.label],
+            ),
+        ),
+        [campusStatusOptions],
     );
 
     const schoolId = school?.id;
@@ -213,12 +225,14 @@ const SchoolOverview = ({
             render: (value: string) => (
                 <Tag
                     color={
-                        value === "active"
+                        value === "ACTIVE"
                             ? "green"
-                            : "red"
+                            : value === "SUSPENDED"
+                                ? "orange"
+                                : "red"
                     }
                 >
-                    {statusLabelMap.get(value) ?? value}
+                    {campusStatusLabelMap.get(value) ?? value}
                 </Tag>
             ),
         },

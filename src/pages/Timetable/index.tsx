@@ -152,7 +152,7 @@ const TimetablePage = () => {
                 code: campus.code,
                 name: campus.name,
                 todayLessons: today,
-                isActive: campus.status === "active",
+                isActive: campus.status === "ACTIVE",
             };
         });
     }, [filteredCampuses, dayLessons]);

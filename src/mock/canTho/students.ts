@@ -1,29 +1,70 @@
 import type { Student } from "../common/types";
 
-export const canThoStudents: Student[] = [
-    { id: "can-tho-student-001", schoolId: "can-tho-school-001", campusId: "can-tho-campus-001", classId: "can-tho-class-001", code: "CT-HS-001", fullName: "Lê Minh An", gender: "male", dob: "2014-03-12", address: "Phường An Hòa, quận Ninh Kiều", guardianPhone: "0901234567", status: "studying" },
+import { canThoClasses } from "./classes";
 
-    { id: "can-tho-student-002", schoolId: "can-tho-school-001", campusId: "can-tho-campus-001", classId: "can-tho-class-002", code: "CT-HS-002", fullName: "Trần Mai Linh", gender: "female", dob: "2013-07-25", address: "Phường An Cư, quận Ninh Kiều", guardianPhone: "0913344556", status: "studying" },
+const SCHOOL_001 = "can-tho-school-001";
 
-    { id: "can-tho-student-003", schoolId: "can-tho-school-001", campusId: "can-tho-campus-002", classId: "can-tho-class-003", code: "CT-HS-003", fullName: "Nguyễn Gia Bảo", gender: "male", dob: "2014-11-08", address: "Phường An Khánh, quận Ninh Kiều", guardianPhone: "0934567890", status: "studying" },
+const SURNAMES = [
+    "Nguyễn", "Trần", "Lê", "Phạm", "Hoàng", "Phan", "Vũ", "Đặng",
+    "Bùi", "Đỗ", "Hồ", "Ngô", "Dương", "Lý", "Võ", "Trịnh", "Đinh", "Lâm",
+];
 
-    { id: "can-tho-student-004", schoolId: "can-tho-school-001", campusId: "can-tho-campus-002", classId: "can-tho-class-004", code: "CT-HS-004", fullName: "Phạm Thu Hà", gender: "female", dob: "2013-01-30", address: "Phường An Khánh, quận Ninh Kiều", guardianPhone: "0967777888", status: "studying" },
+const MALE_GIVEN_NAMES = [
+    "Minh Anh", "Quang Huy", "Gia Bảo", "Trung Kiên", "Hoàng Nam", "Minh Khang",
+    "Ngọc Đức", "Thanh Sơn", "Công Minh", "Hữu Phước", "Đức Huy", "Việt Anh",
+    "Hải Long", "Trọng Nghĩa", "Tuấn Kiệt", "Quốc Bảo", "Khánh Duy", "Phúc Thịnh",
+    "Minh Trí", "Nhật Minh",
+];
 
-    { id: "can-tho-student-005", schoolId: "can-tho-school-001", campusId: "can-tho-campus-003", classId: "can-tho-class-005", code: "CT-HS-005", fullName: "Võ Minh Khang", gender: "male", dob: "2014-05-19", address: "Phường Thới Bình, quận Ninh Kiều", guardianPhone: "0988123456", status: "studying" },
+const FEMALE_GIVEN_NAMES = [
+    "Mai Linh", "Thu Hà", "Minh Anh", "Thùy Dương", "Kim Ngân", "Ngọc Ánh",
+    "Thiên Hương", "Phương Anh", "Bảo Ngọc", "Như Quỳnh", "Thảo Vy", "Khánh Linh",
+    "Hoài An", "Yến Nhi", "Thu Trang", "Minh Tâm", "Ngọc Trâm", "Quỳnh Anh",
+    "Hồng Nhung", "Thanh Thảo",
+];
 
-    { id: "can-tho-student-006", schoolId: "can-tho-school-001", campusId: "can-tho-campus-003", classId: "can-tho-class-006", code: "CT-HS-006", fullName: "Đặng Thùy Dương", gender: "female", dob: "2013-09-02", address: "Phường Thới Bình, quận Ninh Kiều", guardianPhone: "0909988776", status: "studying" },
+const WARD_BY_CAMPUS: Record<string, string> = {
+    "campus-main": "Phường An Hòa, quận Ninh Kiều",
+    "campus-chu-van-an": "Phường An Khánh, quận Ninh Kiều",
+    "campus-thoi-binh": "Phường Thới Bình, quận Ninh Kiều",
+    "campus-an-lac": "Phường An Lạc, quận Ninh Kiều",
+    "campus-tran-hung-dao": "Phường An Hòa, quận Ninh Kiều",
+    "campus-huynh-thuc-khang": "Phường Hưng Lợi, quận Ninh Kiều",
+};
 
-    { id: "can-tho-student-007", schoolId: "can-tho-school-001", campusId: "can-tho-campus-004", classId: "can-tho-class-007", code: "CT-HS-007", fullName: "Bùi Quang Huy", gender: "male", dob: "2014-08-16", address: "Phường An Lạc, quận Ninh Kiều", guardianPhone: "0912444666", status: "studying" },
+const DOB_YEAR_BY_GRADE: Record<number, number> = {
+    6: 2014,
+    7: 2013,
+    8: 2012,
+    9: 2011,
+};
 
-    { id: "can-tho-student-008", schoolId: "can-tho-school-001", campusId: "can-tho-campus-004", classId: "can-tho-class-008", code: "CT-HS-008", fullName: "Ngô Thị Ngọc", gender: "female", dob: "2013-12-05", address: "Phường An Lạc, quận Ninh Kiều", guardianPhone: "0936789012", status: "studying" },
+const TARGET_STUDENTS_PER_CLASS = 12;
 
-    { id: "can-tho-student-009", schoolId: "can-tho-school-001", campusId: "can-tho-campus-005", classId: "can-tho-class-009", code: "CT-HS-009", fullName: "Dương Hoàng Nam", gender: "male", dob: "2014-02-27", address: "Phường An Hòa, quận Ninh Kiều", guardianPhone: "0978567890", status: "studying" },
+const existingSeed: Student[] = [
+    { id: "can-tho-student-001", schoolId: "can-tho-school-001", campusId: "campus-main", classId: "can-tho-class-001", code: "CT-HS-001", fullName: "Lê Minh An", gender: "male", dob: "2014-03-12", address: "Phường An Hòa, quận Ninh Kiều", guardianPhone: "0901234567", status: "studying" },
 
-    { id: "can-tho-student-010", schoolId: "can-tho-school-001", campusId: "can-tho-campus-005", classId: "can-tho-class-010", code: "CT-HS-010", fullName: "Hồ Ngọc Ánh", gender: "female", dob: "2013-06-14", address: "Phường Hưng Lợi, quận Ninh Kiều", guardianPhone: "0911333222", status: "studying" },
+    { id: "can-tho-student-002", schoolId: "can-tho-school-001", campusId: "campus-main", classId: "can-tho-class-002", code: "CT-HS-002", fullName: "Trần Mai Linh", gender: "female", dob: "2013-07-25", address: "Phường An Cư, quận Ninh Kiều", guardianPhone: "0913344556", status: "studying" },
 
-    { id: "can-tho-student-011", schoolId: "can-tho-school-001", campusId: "can-tho-campus-006", classId: "can-tho-class-011", code: "CT-HS-011", fullName: "Lý Minh Trí", gender: "male", dob: "2014-10-09", address: "Phường Hưng Lợi, quận Ninh Kiều", guardianPhone: "0904455667", status: "studying" },
+    { id: "can-tho-student-003", schoolId: "can-tho-school-001", campusId: "campus-chu-van-an", classId: "can-tho-class-003", code: "CT-HS-003", fullName: "Nguyễn Gia Bảo", gender: "male", dob: "2014-11-08", address: "Phường An Khánh, quận Ninh Kiều", guardianPhone: "0934567890", status: "studying" },
 
-    { id: "can-tho-student-012", schoolId: "can-tho-school-001", campusId: "can-tho-campus-006", classId: "can-tho-class-012", code: "CT-HS-012", fullName: "Đinh Kim Chi", gender: "female", dob: "2013-04-21", address: "Phường Hưng Lợi, quận Ninh Kiều", guardianPhone: "0939111222", status: "studying" },
+    { id: "can-tho-student-004", schoolId: "can-tho-school-001", campusId: "campus-chu-van-an", classId: "can-tho-class-004", code: "CT-HS-004", fullName: "Phạm Thu Hà", gender: "female", dob: "2013-01-30", address: "Phường An Khánh, quận Ninh Kiều", guardianPhone: "0967777888", status: "studying" },
+
+    { id: "can-tho-student-005", schoolId: "can-tho-school-001", campusId: "campus-thoi-binh", classId: "can-tho-class-005", code: "CT-HS-005", fullName: "Võ Minh Khang", gender: "male", dob: "2014-05-19", address: "Phường Thới Bình, quận Ninh Kiều", guardianPhone: "0988123456", status: "studying" },
+
+    { id: "can-tho-student-006", schoolId: "can-tho-school-001", campusId: "campus-thoi-binh", classId: "can-tho-class-006", code: "CT-HS-006", fullName: "Đặng Thùy Dương", gender: "female", dob: "2013-09-02", address: "Phường Thới Bình, quận Ninh Kiều", guardianPhone: "0909988776", status: "studying" },
+
+    { id: "can-tho-student-007", schoolId: "can-tho-school-001", campusId: "campus-an-lac", classId: "can-tho-class-007", code: "CT-HS-007", fullName: "Bùi Quang Huy", gender: "male", dob: "2014-08-16", address: "Phường An Lạc, quận Ninh Kiều", guardianPhone: "0912444666", status: "studying" },
+
+    { id: "can-tho-student-008", schoolId: "can-tho-school-001", campusId: "campus-an-lac", classId: "can-tho-class-008", code: "CT-HS-008", fullName: "Ngô Thị Ngọc", gender: "female", dob: "2013-12-05", address: "Phường An Lạc, quận Ninh Kiều", guardianPhone: "0936789012", status: "studying" },
+
+    { id: "can-tho-student-009", schoolId: "can-tho-school-001", campusId: "campus-tran-hung-dao", classId: "can-tho-class-009", code: "CT-HS-009", fullName: "Dương Hoàng Nam", gender: "male", dob: "2014-02-27", address: "Phường An Hòa, quận Ninh Kiều", guardianPhone: "0978567890", status: "studying" },
+
+    { id: "can-tho-student-010", schoolId: "can-tho-school-001", campusId: "campus-tran-hung-dao", classId: "can-tho-class-010", code: "CT-HS-010", fullName: "Hồ Ngọc Ánh", gender: "female", dob: "2013-06-14", address: "Phường Hưng Lợi, quận Ninh Kiều", guardianPhone: "0911333222", status: "studying" },
+
+    { id: "can-tho-student-011", schoolId: "can-tho-school-001", campusId: "campus-huynh-thuc-khang", classId: "can-tho-class-011", code: "CT-HS-011", fullName: "Lý Minh Trí", gender: "male", dob: "2014-10-09", address: "Phường Hưng Lợi, quận Ninh Kiều", guardianPhone: "0904455667", status: "studying" },
+
+    { id: "can-tho-student-012", schoolId: "can-tho-school-001", campusId: "campus-huynh-thuc-khang", classId: "can-tho-class-012", code: "CT-HS-012", fullName: "Đinh Kim Chi", gender: "female", dob: "2013-04-21", address: "Phường Hưng Lợi, quận Ninh Kiều", guardianPhone: "0939111222", status: "studying" },
 
     { id: "can-tho-student-013", schoolId: "can-tho-school-002", campusId: "can-tho-campus-007", classId: "can-tho-class-013", code: "CT-HS-013", fullName: "Lê Nhật Minh", gender: "male", dob: "2014-02-03", address: "Phường Cái Răng, quận Cái Răng", guardianPhone: "0903111333", status: "studying" },
 
@@ -44,4 +85,72 @@ export const canThoStudents: Student[] = [
     { id: "can-tho-student-021", schoolId: "can-tho-school-004", campusId: "can-tho-campus-010", classId: "can-tho-class-020", code: "CT-HS-021", fullName: "Ngô Hoàng Long", gender: "male", dob: "2010-10-15", address: "Phường Cái Khế, quận Ninh Kiều", guardianPhone: "0967111222", status: "studying" },
 
     { id: "can-tho-student-022", schoolId: "can-tho-school-004", campusId: "can-tho-campus-010", classId: "can-tho-class-021", code: "CT-HS-022", fullName: "Hồ Thùy Trâm", gender: "female", dob: "2009-07-30", address: "Phường Cái Khế, quận Ninh Kiều", guardianPhone: "0919555666", status: "studying" },
+];
+
+const padIndex = (value: number): string => String(value).padStart(3, "0");
+
+const toDob = (
+    grade: number,
+    offset: number,
+): string => {
+    const year = DOB_YEAR_BY_GRADE[grade] ?? 2014;
+
+    const month = 1 + ((offset * 5) % 12);
+
+    const day = 1 + ((offset * 7) % 26);
+
+    return `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+};
+
+const toPhone = (offset: number): string => {
+    const base = 900000000 + ((offset * 7919) % 99999999);
+
+    return `0${base}`;
+};
+
+const generatedStudents: Student[] = canThoClasses
+    .filter((classItem) => classItem.schoolId === SCHOOL_001)
+    .flatMap((classItem) => {
+        const existingInClass = existingSeed.filter(
+            (student) => student.classId === classItem.id,
+        ).length;
+
+        const roomLimit = TARGET_STUDENTS_PER_CLASS - existingInClass;
+
+        const classIndex = Number.parseInt(
+            classItem.id.slice("can-tho-class-".length),
+            10,
+        );
+
+        return Array.from({ length: roomLimit }, (_, index) => {
+            const studentIndex = classIndex * TARGET_STUDENTS_PER_CLASS + index + 1;
+
+            const surname = SURNAMES[(studentIndex * 3 + 1) % SURNAMES.length];
+
+            const isMale = studentIndex % 2 === 1;
+
+            const givenName = isMale
+                ? MALE_GIVEN_NAMES[(studentIndex * 5 + 3) % MALE_GIVEN_NAMES.length]
+                : FEMALE_GIVEN_NAMES[(studentIndex * 7 + 5) % FEMALE_GIVEN_NAMES.length];
+
+            return {
+                id: `can-tho-student-${padIndex(existingSeed.length + studentIndex)}`,
+                schoolId: SCHOOL_001,
+                campusId: classItem.campusId,
+                classId: classItem.id,
+                code: `CT-HS-${padIndex(existingSeed.length + studentIndex)}`,
+                fullName: `${surname} ${givenName}`,
+                gender: isMale ? "male" as const : "female" as const,
+                dob: toDob(classItem.grade, studentIndex),
+                address: WARD_BY_CAMPUS[classItem.campusId]
+                    ?? "Phường An Hòa, quận Ninh Kiều",
+                guardianPhone: toPhone(studentIndex),
+                status: "studying" as const,
+            };
+        });
+    });
+
+export const canThoStudents: Student[] = [
+    ...existingSeed,
+    ...generatedStudents,
 ];

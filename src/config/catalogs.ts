@@ -97,6 +97,17 @@ const yesNoOptions: CrudFieldOption[] = [
     { value: "0", label: "Không" },
 ];
 
+const campusTypeOptions: CrudFieldOption[] = [
+    { value: "HEADQUARTERS", label: "Trụ sở chính" },
+    { value: "BRANCH", label: "Phân hiệu" },
+];
+
+const campusStatusOptions: CrudFieldOption[] = [
+    { value: "ACTIVE", label: "Đang hoạt động" },
+    { value: "SUSPENDED", label: "Tạm ngưng" },
+    { value: "INACTIVE", label: "Ngừng hoạt động" },
+];
+
 const semesterOptions: CrudFieldOption[] = [
     { value: 1, label: "Học kỳ 1" },
     { value: 2, label: "Học kỳ 2" },
@@ -203,6 +214,20 @@ export const CATALOG_DEFS: CatalogDef[] = [
         description: "Danh mục nhị phân dùng cho cờ đánh dấu (bán trú, chính, giáo viên giỏi...).",
         storageKey: "can-tho-catalog-yes-no",
         seed: yesNoOptions,
+    },
+    {
+        key: "campus-type",
+        title: "Loại hình cơ sở",
+        description: "Phân loại cơ sở trực thuộc trường: trụ sở chính hay phân hiệu.",
+        storageKey: "can-tho-catalog-campus-type",
+        seed: campusTypeOptions,
+    },
+    {
+        key: "campus-status",
+        title: "Trạng thái cơ sở",
+        description: "Trạng thái hoạt động của từng cơ sở trực thuộc trường.",
+        storageKey: "can-tho-catalog-campus-status",
+        seed: campusStatusOptions,
     },
     {
         key: "semester",

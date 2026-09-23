@@ -7,7 +7,7 @@ export const canThoReports: ReportItem[] = [
     {
         id: "can-tho-report-001",
 
-        campusId: "can-tho-campus-001",
+        campusId: "campus-main",
 
         title: "Báo cáo tình hình hoạt động đầu năm học",
 
@@ -19,7 +19,7 @@ export const canThoReports: ReportItem[] = [
     {
         id: "can-tho-report-002",
 
-        campusId: "can-tho-campus-002",
+        campusId: "campus-chu-van-an",
 
         title: "Báo cáo tình hình cơ sở vật chất",
 
@@ -31,7 +31,7 @@ export const canThoReports: ReportItem[] = [
     {
         id: "can-tho-report-003",
 
-        campusId: "can-tho-campus-003",
+        campusId: "campus-thoi-binh",
 
         title: "Báo cáo tình hình giảng dạy",
 
@@ -43,7 +43,7 @@ export const canThoReports: ReportItem[] = [
     {
         id: "can-tho-report-004",
 
-        campusId: "can-tho-campus-003",
+        campusId: "campus-thoi-binh",
 
         title: "Báo cáo hoạt động chuyên môn",
 
@@ -55,7 +55,7 @@ export const canThoReports: ReportItem[] = [
     {
         id: "can-tho-report-005",
 
-        campusId: "can-tho-campus-005",
+        campusId: "campus-tran-hung-dao",
 
         title: "Báo cáo tiến độ nhiệm vụ",
 
@@ -67,7 +67,7 @@ export const canThoReports: ReportItem[] = [
     {
         id: "can-tho-report-006",
 
-        campusId: "can-tho-campus-006",
+        campusId: "campus-huynh-thuc-khang",
 
         title: "Báo cáo tình hình thực hiện chương trình",
 
@@ -79,7 +79,7 @@ export const canThoReports: ReportItem[] = [
     {
         id: "can-tho-report-007",
 
-        campusId: "can-tho-campus-002",
+        campusId: "campus-chu-van-an",
 
         title: "Báo cáo cơ sở vật chất và thiết bị",
 
@@ -91,7 +91,7 @@ export const canThoReports: ReportItem[] = [
     {
         id: "can-tho-report-008",
 
-        campusId: "can-tho-campus-003",
+        campusId: "campus-thoi-binh",
 
         title: "Báo cáo kiểm kê thiết bị dạy học",
 

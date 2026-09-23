@@ -7,7 +7,7 @@ export const canThoAlerts: AlertItem[] = [
     {
         id: "can-tho-alert-001",
 
-        campusId: "can-tho-campus-001",
+        campusId: "campus-main",
 
         title: "Chưa cập nhật lịch giảng dạy tuần mới",
 
@@ -24,7 +24,7 @@ export const canThoAlerts: AlertItem[] = [
     {
         id: "can-tho-alert-002",
 
-        campusId: "can-tho-campus-001",
+        campusId: "campus-main",
 
         title: "Giáo viên chưa hoàn thiện hồ sơ chuyên môn",
 
@@ -41,7 +41,7 @@ export const canThoAlerts: AlertItem[] = [
     {
         id: "can-tho-alert-003",
 
-        campusId: "can-tho-campus-002",
+        campusId: "campus-chu-van-an",
 
         title: "Cần cập nhật thời khóa biểu",
 
@@ -58,7 +58,7 @@ export const canThoAlerts: AlertItem[] = [
     {
         id: "can-tho-alert-004",
 
-        campusId: "can-tho-campus-003",
+        campusId: "campus-thoi-binh",
 
         title: "Văn bản mới cần xử lý",
 
@@ -75,7 +75,7 @@ export const canThoAlerts: AlertItem[] = [
     {
         id: "can-tho-alert-005",
 
-        campusId: "can-tho-campus-003",
+        campusId: "campus-thoi-binh",
 
         title: "Giáo viên vắng mặt không phép",
 
@@ -92,7 +92,7 @@ export const canThoAlerts: AlertItem[] = [
     {
         id: "can-tho-alert-006",
 
-        campusId: "can-tho-campus-005",
+        campusId: "campus-tran-hung-dao",
 
         title: "Cập nhật cơ sở vật chất",
 
@@ -109,7 +109,7 @@ export const canThoAlerts: AlertItem[] = [
     {
         id: "can-tho-alert-007",
 
-        campusId: "can-tho-campus-006",
+        campusId: "campus-huynh-thuc-khang",
 
         title: "Hoàn thành báo cáo định kỳ",
 
@@ -143,7 +143,7 @@ export const canThoAlerts: AlertItem[] = [
     {
         id: "can-tho-alert-009",
 
-        campusId: "can-tho-campus-002",
+        campusId: "campus-chu-van-an",
 
         title: "Cần cập nhật danh sách học sinh phân hiệu Chu Văn An",
 

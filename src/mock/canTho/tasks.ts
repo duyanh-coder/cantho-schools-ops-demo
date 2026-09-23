@@ -7,7 +7,7 @@ export const canThoTasks: TaskItem[] = [
     {
         id: "can-tho-task-001",
 
-        campusId: "can-tho-campus-001",
+        campusId: "campus-main",
 
         title: "Hoàn thành cập nhật thời khóa biểu",
 
@@ -24,7 +24,7 @@ export const canThoTasks: TaskItem[] = [
     {
         id: "can-tho-task-002",
 
-        campusId: "can-tho-campus-001",
+        campusId: "campus-main",
 
         title: "Kiểm tra điểm danh giảng dạy",
 
@@ -41,7 +41,7 @@ export const canThoTasks: TaskItem[] = [
     {
         id: "can-tho-task-003",
 
-        campusId: "can-tho-campus-002",
+        campusId: "campus-chu-van-an",
 
         title: "Rà soát cơ sở vật chất",
 
@@ -58,7 +58,7 @@ export const canThoTasks: TaskItem[] = [
     {
         id: "can-tho-task-004",
 
-        campusId: "can-tho-campus-003",
+        campusId: "campus-thoi-binh",
 
         title: "Hoàn thành phân công nhiệm vụ",
 
@@ -75,7 +75,7 @@ export const canThoTasks: TaskItem[] = [
     {
         id: "can-tho-task-005",
 
-        campusId: "can-tho-campus-003",
+        campusId: "campus-thoi-binh",
 
         title: "Xử lý văn bản đến",
 
@@ -92,7 +92,7 @@ export const canThoTasks: TaskItem[] = [
     {
         id: "can-tho-task-006",
 
-        campusId: "can-tho-campus-005",
+        campusId: "campus-tran-hung-dao",
 
         title: "Cập nhật danh sách lớp",
 
@@ -109,7 +109,7 @@ export const canThoTasks: TaskItem[] = [
     {
         id: "can-tho-task-007",
 
-        campusId: "can-tho-campus-006",
+        campusId: "campus-huynh-thuc-khang",
 
         title: "Hoàn thành báo cáo chuyên môn",
 

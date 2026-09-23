@@ -14,7 +14,14 @@ export type {
 
 export type {
     Campus,
+    CampusStatus,
+    CampusType,
 } from "./campus";
+
+export type {
+    CampusHistoryEntry,
+    CampusHistoryEventType,
+} from "./campusHistory";
 
 export type {
     SchoolClass,

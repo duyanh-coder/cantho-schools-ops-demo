@@ -7,7 +7,7 @@ export const canThoDocuments: DocumentItem[] = [
     {
         id: "can-tho-document-001",
 
-        campusId: "can-tho-campus-001",
+        campusId: "campus-main",
 
         code: "CV-001/2026",
 
@@ -23,7 +23,7 @@ export const canThoDocuments: DocumentItem[] = [
     {
         id: "can-tho-document-002",
 
-        campusId: "can-tho-campus-001",
+        campusId: "campus-main",
 
         code: "KH-002/2026",
 
@@ -39,7 +39,7 @@ export const canThoDocuments: DocumentItem[] = [
     {
         id: "can-tho-document-003",
 
-        campusId: "can-tho-campus-002",
+        campusId: "campus-chu-van-an",
 
         code: "TB-003/2026",
 
@@ -55,7 +55,7 @@ export const canThoDocuments: DocumentItem[] = [
     {
         id: "can-tho-document-004",
 
-        campusId: "can-tho-campus-003",
+        campusId: "campus-thoi-binh",
 
         code: "CV-004/2026",
 
@@ -71,7 +71,7 @@ export const canThoDocuments: DocumentItem[] = [
     {
         id: "can-tho-document-005",
 
-        campusId: "can-tho-campus-003",
+        campusId: "campus-thoi-binh",
 
         code: "KH-005/2026",
 
@@ -87,7 +87,7 @@ export const canThoDocuments: DocumentItem[] = [
     {
         id: "can-tho-document-006",
 
-        campusId: "can-tho-campus-005",
+        campusId: "campus-tran-hung-dao",
 
         code: "TB-006/2026",
 
@@ -103,7 +103,7 @@ export const canThoDocuments: DocumentItem[] = [
     {
         id: "can-tho-document-007",
 
-        campusId: "can-tho-campus-006",
+        campusId: "campus-huynh-thuc-khang",
 
         code: "CV-007/2026",
 

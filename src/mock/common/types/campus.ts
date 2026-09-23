@@ -3,6 +3,17 @@ import type {
 } from "./ward";
 
 
+export type CampusType =
+    | "HEADQUARTERS"
+    | "BRANCH";
+
+
+export type CampusStatus =
+    | "ACTIVE"
+    | "SUSPENDED"
+    | "INACTIVE";
+
+
 export interface Campus {
     id: string;
 
@@ -14,13 +25,25 @@ export interface Campus {
 
     name: string;
 
+    historicalName?: string;
+
+    type: CampusType;
+
     address: string;
 
     location: GeoPoint;
+
+    latitude: number;
+
+    longitude: number;
+
+    phone?: string;
+
+    email?: string;
 
     managerId?: string;
 
     isMainCampus: boolean;
 
-    status: "active" | "inactive";
+    status: CampusStatus;
 }

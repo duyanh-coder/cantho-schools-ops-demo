@@ -1,0 +1,156 @@
+.campuses-page {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+
+    &__panel {
+        background: #fff;
+        border: 1px solid var(--border-color, #e5e7eb);
+        border-radius: 12px;
+        padding: 16px 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+    }
+
+    &__header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 12px;
+        flex-wrap: wrap;
+    }
+
+    &__filters {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    &__section {
+        > header {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            margin-bottom: 10px;
+
+            span {
+                font-size: 11px;
+                letter-spacing: 0.8px;
+                color: #6b7280;
+                font-weight: 600;
+            }
+
+            strong {
+                font-size: 15px;
+                color: #111827;
+            }
+        }
+    }
+}
+
+.campus-cell {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+
+    &__history {
+        font-size: 12px;
+        color: #6b7280;
+    }
+
+    &__address {
+        font-size: 13px;
+        color: #4b5563;
+    }
+}
+
+.campus-detail {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+
+    &__tabs {
+        .ant-tabs-nav {
+            margin-bottom: 16px;
+        }
+    }
+
+    &__tab {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    &__toolbar {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+    }
+
+    &__overview {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+    }
+
+    &__descriptions {
+        background: #fff;
+        border-radius: 10px;
+        padding: 12px;
+
+        .ant-descriptions-item-label {
+            width: 180px;
+            color: #4b5563;
+        }
+    }
+
+    &__gis {
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+
+        &-meta {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+
+            p {
+                margin: 0;
+                font-size: 13px;
+                color: #6b7280;
+            }
+        }
+    }
+
+    &__map {
+        height: 460px;
+        border: 1px solid var(--border-color, #e5e7eb);
+        border-radius: 12px;
+        overflow: hidden;
+
+        .leaflet-container {
+            height: 100%;
+            width: 100%;
+        }
+    }
+}
+
+.campus-marker__pin {
+    position: relative;
+    width: 24px;
+    height: 34px;
+
+    span {
+        position: absolute;
+        left: 50%;
+        transform: translateX(-50%);
+        bottom: 0;
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        background: #1677ff;
+        border: 3px solid #fff;
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.35);
+    }
+}

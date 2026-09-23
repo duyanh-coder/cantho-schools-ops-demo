@@ -1,5 +1,6 @@
 import {
   AppstoreOutlined,
+  ApartmentOutlined,
   BarChartOutlined,
   CalendarOutlined,
   EnvironmentOutlined,
@@ -33,6 +34,11 @@ const menuItems: MenuItem[] = [
     key: "/operations/schools",
     icon: <SolutionOutlined />,
     label: "Trường & Cơ sở",
+  },
+  {
+    key: "/operations/campuses",
+    icon: <ApartmentOutlined />,
+    label: "Cơ sở trực thuộc",
   },
   {
     key: "/operations/documents",
