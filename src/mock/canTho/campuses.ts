@@ -4,8 +4,8 @@ export const canThoCampuses: Campus[] = [
     {
         id: "campus-main", schoolId: "can-tho-school-001", wardId: "can-tho-ward-nk-an-hoa", code: "NK-MAIN",
         name: "Trường THCS Ninh Kiều", historicalName: "THCS Đoàn Thị Điểm", type: "HEADQUARTERS",
-        address: "Số 15 Nguyễn Đệ, Phường An Hòa, quận Ninh Kiều, TP. Cần Thơ",
-        location: { lat: 10.0348, lng: 105.7702 }, latitude: 10.0348, longitude: 105.7702,
+        address: "56 Đ. Ngô Quyền, P. Ninh Kiều, TP Cần Thơ",
+        location: { lat: 10.03580839481783, lng: 105.78470548758524 }, latitude: 10.03580839481783, longitude: 105.78470548758524,
         phone: "02923 823 456", email: "main@ninhkieu.edu.vn", managerId: "can-tho-user-001", isMainCampus: true, status: "ACTIVE",
     },
 
@@ -21,7 +21,7 @@ export const canThoCampuses: Campus[] = [
         id: "campus-tran-hung-dao", schoolId: "can-tho-school-001", wardId: "can-tho-ward-nk-an-hoa", code: "NK-THD",
         name: "Phân hiệu Trần Hưng Đạo", type: "BRANCH",
         address: "Phường An Hòa, quận Ninh Kiều, TP. Cần Thơ",
-        location: { lat: 10.0415, lng: 105.7715 }, latitude: 10.0415, longitude: 105.7715,
+        location: { lat: 10.03484793343452, lng: 105.77695885963567 }, latitude: 10.03484793343452, longitude: 105.77695885963567,
         phone: "02923 823 460", email: "thd@ninhkieu.edu.vn", managerId: "can-tho-user-004", isMainCampus: false, status: "ACTIVE",
     },
 
@@ -44,7 +44,7 @@ export const canThoCampuses: Campus[] = [
     {
         id: "campus-chu-van-an", schoolId: "can-tho-school-001", wardId: "can-tho-ward-nk-an-cu", code: "NK-CVA",
         name: "Phân hiệu Chu Văn An", type: "BRANCH",
-        address: "Phường An Cư, quận Ninh Kiều, TP. Cần Thơ",
+        address: "9 Đại lộ Hoà Bình, P. Ninh Kiều, TP. Cần Thơ",
         location: { lat: 10.0382, lng: 105.7865 }, latitude: 10.0382, longitude: 105.7865,
         phone: "02923 823 457", email: "cva@ninhkieu.edu.vn", managerId: "can-tho-user-002", isMainCampus: false, status: "ACTIVE",
     },

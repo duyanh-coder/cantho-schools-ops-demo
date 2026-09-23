@@ -337,7 +337,7 @@ const SchoolOverview = ({
                     size="small"
                     style={{ padding: 0 }}
                     onClick={() =>
-                        navigate(`/operations/students?campusId=${row.campusId}`)}
+                        navigate(`/operations/schools?tab=students&campusId=${row.campusId}`)}
                 >
                     {campusIdToName(value)}
                 </Button>
@@ -476,7 +476,7 @@ const SchoolOverview = ({
                     <Button
                         size="small"
                         icon={<ReadOutlined />}
-                        onClick={() => navigate("/operations/students")}
+                        onClick={() => navigate("/operations/schools?tab=students")}
                     >
                         Xem tất cả
                     </Button>

@@ -24,11 +24,13 @@ import {
 
 import CampusesPage from "@/pages/Campuses";
 
+import ClassList from "@/pages/Classes/ClassList";
+
 import PersonnelList from "@/pages/Personnel/PersonnelList";
 
 import SectorPage from "@/pages/Sector";
 
-import StudentsPage from "@/pages/Students";
+import StudentList from "@/pages/Students/StudentList";
 
 import SchoolOverview from "./SchoolOverview";
 
@@ -46,6 +48,7 @@ const TAB_KEYS = [
     "campuses",
     "personnel",
     "sectors",
+    "classes",
     "students",
 ] as const;
 
@@ -91,7 +94,15 @@ function SchoolsHub() {
                 return "sectors" as TabKey;
             }
 
-            return "students" as TabKey;
+            if (next === "classes") {
+                return "classes" as TabKey;
+            }
+
+            if (next === "students") {
+                return "students" as TabKey;
+            }
+
+            return "schools" as TabKey;
         }, [searchParams]);
 
     const schoolId =
@@ -191,10 +202,17 @@ function SchoolsHub() {
                 ),
             },
             {
+                key: "classes",
+                label: "Lớp học",
+                children: (
+                    <ClassList compact schoolId={schoolId} />
+                ),
+            },
+            {
                 key: "students",
                 label: "Học sinh",
                 children: (
-                    <StudentsPage schoolId={schoolId} />
+                    <StudentList compact schoolId={schoolId} />
                 ),
             },
         ];
@@ -212,7 +230,7 @@ function SchoolsHub() {
 
                         <p>
                             Quản lý tập trung trường học, cơ sở trực thuộc cùng
-                            nhân sự, khối tổ và học sinh trong hệ thống.
+                            nhân sự, khối tổ, lớp học và học sinh trong hệ thống.
                         </p>
                     </div>
                 </header>

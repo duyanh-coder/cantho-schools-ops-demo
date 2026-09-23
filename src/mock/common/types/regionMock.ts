@@ -4,7 +4,7 @@ import type { School } from "./school";
 import type { Campus } from "./campus";
 import type { SchoolClass } from "./class";
 import type { Teacher } from "./teacher";
-import type { TimetableItem } from "./timetable";
+import type { TimetableEntry } from "./timetable";
 import type { DocumentItem } from "./document";
 import type { AlertItem } from "./alert";
 import type { TaskItem } from "./task";
@@ -38,7 +38,7 @@ export interface RegionMockData {
 
     teachers: Teacher[];
 
-    timetables: TimetableItem[];
+    timetables: TimetableEntry[];
 
     documents: DocumentItem[];
 

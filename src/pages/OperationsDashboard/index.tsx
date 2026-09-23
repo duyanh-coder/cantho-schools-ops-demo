@@ -104,10 +104,17 @@ const moduleSummaryDefs:
             catalog: "sector-type",
         },
         {
-            title: "Học sinh",
-            path: "/operations/students",
+            title: "Lớp học",
+            path: "/operations/schools?tab=classes",
             tone: "purple",
             icon: <ReadOutlined />,
+            catalog: "class-status",
+        },
+        {
+            title: "Học sinh",
+            path: "/operations/schools?tab=students",
+            tone: "orange",
+            icon: <SolutionOutlined />,
             catalog: "student-status",
         },
     ];
@@ -232,7 +239,12 @@ const OperationsDashboard = () => {
                     "can-tho-sectors",
                     regionMock.sectors,
                 ).length,
-            "/operations/students":
+            "/operations/schools?tab=classes":
+                readCrudItems(
+                    "can-tho-classes",
+                    regionMock.classes,
+                ).length,
+            "/operations/schools?tab=students":
                 readCrudItems(
                     "can-tho-students",
                     regionMock.students,

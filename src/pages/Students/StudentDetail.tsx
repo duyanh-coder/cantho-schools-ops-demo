@@ -65,8 +65,12 @@ import type {
     StudentHistoryEntry,
     StudentMovement,
     StudentMovementType,
-    TimetableItem,
+    TimetableEntry,
 } from "@/mock/common/types";
+
+import {
+    periodTimes,
+} from "@/mock/common";
 
 import {
     useAcademicYears,
@@ -92,6 +96,10 @@ import {
 import {
     usePersonnel,
 } from "@/store/usePersonnel";
+
+import {
+    useRooms,
+} from "@/store/useRooms";
 
 import {
     useStudentAchievements,
@@ -221,6 +229,8 @@ const StudentDetail = () => {
 
     const historyApi = useStudentHistory(studentId);
 
+    const roomsApi = useRooms();
+
     const statusOptions = useCatalogOptions("student-status");
 
     const [movementModal, setMovementModal] = useState<boolean>(false);
@@ -256,7 +266,7 @@ const StudentDetail = () => {
 
     useEffect(() => {
         if (!student && studentsApi.items.length > 0) {
-            navigate("/operations/students", { replace: true });
+            navigate("/operations/schools?tab=students", { replace: true });
         }
     }, [student, studentsApi.items.length, navigate]);
 
@@ -833,10 +843,10 @@ const StudentDetail = () => {
         movementForm.resetFields();
     };
 
-    const timetableColumns: ColumnsType<TimetableItem> = [
+    const timetableColumns: ColumnsType<TimetableEntry> = [
         {
             title: "Ngày",
-            dataIndex: "day",
+            dataIndex: "dayOfWeek",
             width: 110,
             render: (value: string) => DAY_LABEL[value] ?? value,
         },
@@ -865,14 +875,28 @@ const StudentDetail = () => {
         },
         {
             title: "Phòng",
-            dataIndex: "room",
+            dataIndex: "roomId",
             width: 90,
+            render: (value: string) =>
+                roomsApi.byId.get(value)?.code ?? value,
         },
         {
             title: "Thời gian",
             width: 150,
-            render: (_: unknown, row: TimetableItem) => (
-                <span>{row.startTime} – {row.endTime}</span>
+            render: (_: unknown, row: TimetableEntry) => {
+                const time = periodTimes(row.period);
+
+                return <span>{time.startTime} – {time.endTime}</span>;
+            },
+        },
+        {
+            title: "Trạng thái",
+            dataIndex: "status",
+            width: 130,
+            render: (value: string) => (
+                <Tag color={value === "PUBLISHED" ? "green" : value === "APPROVED" ? "blue" : value === "CONFLICT" ? "red" : "default"}>
+                    {STATUS_LABELS[value as keyof typeof STATUS_LABELS] ?? value}
+                </Tag>
             ),
         },
     ];
@@ -1277,6 +1301,10 @@ const StudentDetail = () => {
         },
     ];
 
+    const backPath = classItem?.id
+        ? `/operations/classes/${classItem.id}?tab=students`
+        : "/operations/schools?tab=students";
+
     return (
         <div className="students-detail-page">
             <div className="page-sticky">
@@ -1284,16 +1312,19 @@ const StudentDetail = () => {
                     <div className="page-head__title">
                         <span
                             className="personnel-detail__breadcrumb"
-                            onClick={() => navigate("/operations/students")}
+                            onClick={() => navigate(backPath)}
                             role="button"
                             tabIndex={0}
                             onKeyDown={(event) => {
                                 if (event.key === "Enter") {
-                                    navigate("/operations/students");
+                                    navigate(backPath);
                                 }
                             }}
                         >
-                            <ArrowLeftOutlined /> Danh sách học sinh
+                            <ArrowLeftOutlined />
+                            {classItem
+                                ? <>Lớp {classItem.name} · Học sinh</>
+                                : "Danh sách lớp học"}
                         </span>
 
                         <div className="personnel-detail__identity">

@@ -14,7 +14,9 @@ export type {
     SchoolClass,
     Teacher,
     WeekDay,
-    TimetableItem,
+    TimetableEntry,
+    TimetableEntryStatus,
+    TimetablePeriod,
     DocumentItem,
     AlertItem,
     TaskItem,
@@ -48,4 +50,13 @@ export type {
     StudentHistoryEntry,
     StudentHistoryEventType,
     BoardingRecord,
+} from "./types";
+
+export {
+    PERIOD_TIME,
+    DAY_LABELS,
+    STATUS_LABELS,
+    STATUS_TONES,
+    WEEKDAY_ORDER,
+    periodTimes,
 } from "./types";

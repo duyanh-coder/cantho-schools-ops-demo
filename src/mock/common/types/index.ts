@@ -46,7 +46,18 @@ export type {
 
 export type {
     WeekDay,
-    TimetableItem,
+    TimetableEntry,
+    TimetableEntryStatus,
+    TimetablePeriod,
+} from "./timetable";
+
+export {
+    PERIOD_TIME,
+    DAY_LABELS,
+    STATUS_LABELS,
+    STATUS_TONES,
+    WEEKDAY_ORDER,
+    periodTimes,
 } from "./timetable";
 
 export type {

@@ -10,19 +10,32 @@ import {
     canThoRooms,
     canThoSemesters,
     canThoStudents,
-    canThoTeachers,
     canThoTeachingAttendance,
     canThoTimetables,
 } from "@/mock/canTho";
+
+import {
+    WEEKDAY_ORDER,
+} from "@/mock/common/types";
 
 const campusIds = new Set(canThoCampuses.map((c) => c.id));
 const personnelIds = new Set(canThoPersonnel.map((p) => p.id));
 const classIds = new Set(canThoClasses.map((c) => c.id));
 const roomIds = new Set(canThoRooms.map((r) => r.id));
 const yearIds = new Set(canThoAcademicYears.map((y) => y.id));
+const semesterIds = new Set(canThoSemesters.map((s) => s.id));
 const timetableIds = new Set(canThoTimetables.map((t) => t.id));
+const assignmentIds = new Set(canThoPersonnelAssignments.map((a) => a.id));
 
-const teacherIds = new Set(canThoTeachers.map((t) => t.id));
+const validStatuses = new Set([
+    "DRAFT",
+    "CHECKING",
+    "CONFLICT",
+    "ADJUSTING",
+    "PENDING_APPROVAL",
+    "APPROVED",
+    "PUBLISHED",
+]);
 
 describe("PHASE 04 feature integrity", () => {
     it("academic years and semesters are internally consistent", () => {
@@ -76,29 +89,62 @@ describe("PHASE 04 feature integrity", () => {
         }
     });
 
-    it("timetables reference valid classes, teachers, rooms", () => {
+    it("timetables reference valid classes, teachers, rooms, year, semester", () => {
         for (const timetable of canThoTimetables) {
             expect(classIds.has(timetable.classId)).toBe(true);
-            expect(teacherIds.has(timetable.teacherId)).toBe(true);
-            if (timetable.room) {
-                const inRoomIds = canThoTimetables.some((t) =>
-                    t !== timetable &&
-                    t.room === timetable.room &&
-                    t.day === timetable.day &&
-                    t.period === timetable.period &&
-                    t.classId !== timetable.classId,
-                );
-
-                expect(inRoomIds).toBe(false);
+            expect(personnelIds.has(timetable.teacherId)).toBe(true);
+            expect(campusIds.has(timetable.campusId)).toBe(true);
+            expect(roomIds.has(timetable.roomId)).toBe(true);
+            expect(yearIds.has(timetable.academicYearId)).toBe(true);
+            expect(semesterIds.has(timetable.semesterId)).toBe(true);
+            expect(WEEKDAY_ORDER).toContain(timetable.dayOfWeek);
+            expect(timetable.period).toBeGreaterThan(0);
+            expect(timetable.period).toBeLessThanOrEqual(10);
+            expect(validStatuses.has(timetable.status)).toBe(true);
+            if (timetable.assignmentId) {
+                expect(assignmentIds.has(timetable.assignmentId)).toBe(true);
             }
         }
     });
 
-    it("teaching attendance references valid class and timetable", () => {
+    it("no class is scheduled twice in the same day/period/week", () => {
+        const keyed = new Map<
+            string,
+            typeof canThoTimetables[number][]
+        >();
+
+        for (const timetable of canThoTimetables) {
+            const key = [
+                timetable.classId,
+                timetable.dayOfWeek,
+                timetable.period,
+            ].join("|");
+
+            const bucket = keyed.get(key) ?? [];
+
+            bucket.push(timetable);
+
+            keyed.set(key, bucket);
+        }
+
+        for (const bucket of keyed.values()) {
+            for (let i = 0; i < bucket.length; i += 1) {
+                for (let j = i + 1; j < bucket.length; j += 1) {
+                    const [a, b] = [bucket[i], bucket[j]];
+
+                    const overlaps = a.week === 0 || b.week === 0 || a.week === b.week;
+
+                    expect(overlaps).toBe(false);
+                }
+            }
+        }
+    });
+
+    it("teaching attendance references valid class, personnel, timetable", () => {
         for (const record of canThoTeachingAttendance) {
             expect(classIds.has(record.classId)).toBe(true);
             expect(timetableIds.has(record.timetableId)).toBe(true);
-            expect(teacherIds.has(record.teacherId)).toBe(true);
+            expect(personnelIds.has(record.teacherId)).toBe(true);
         }
     });
 });

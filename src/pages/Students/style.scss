@@ -5,6 +5,48 @@
         font-size: 12.5px;
     }
 
+    .students-list__context {
+        background: #fff;
+
+        border: 1px solid #eef1f5;
+
+        border-radius: 10px;
+
+        padding: 10px 14px;
+
+        display: flex;
+
+        flex-direction: column;
+
+        gap: 2px;
+
+        strong {
+            color: #1f2937;
+
+            font-size: 13px;
+
+            letter-spacing: 1px;
+        }
+
+        span {
+            color: #6b7280;
+
+            font-size: 13px;
+        }
+    }
+
+    .students-list-empty {
+        display: flex;
+
+        flex-direction: column;
+
+        gap: 12px;
+
+        align-items: flex-start;
+
+        padding: 8px 4px;
+    }
+
     .personnel-form-section {
         .ant-divider {
             font-size: 12px;

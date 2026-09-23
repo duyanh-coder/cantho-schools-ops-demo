@@ -86,6 +86,12 @@ import {
     useRooms,
 } from "@/store/useRooms";
 
+import {
+    useStudents,
+} from "@/store/useStudents";
+
+import StudentList from "@/pages/Students/StudentList";
+
 import "./style.scss";
 
 
@@ -179,11 +185,15 @@ const ClassDetail = () => {
 
     const classStatusOptions = useCatalogOptions("class-status");
 
-    const studentStatusOptions = useCatalogOptions("student-status");
-
     const classItem = classesApi.byId.get(classId);
 
     const roomsApi = useRooms(classItem?.campusId);
+
+    const studentsApi = useStudents(
+        classItem?.schoolId,
+        classItem?.campusId,
+        classId,
+    );
 
     const campusesById = campusesApi.byId;
 
@@ -199,17 +209,15 @@ const ClassDetail = () => {
 
     useEffect(() => {
         if (!classItem && classesApi.items.length > 0) {
-            navigate("/operations/classes", { replace: true });
+            navigate("/operations/schools?tab=classes", { replace: true });
         }
     }, [classItem, classesApi.items.length, navigate]);
 
     const students = useMemo(
-        () => canThoMockData.students.filter(
-            (student) =>
-                student.classId === classId &&
-                student.campusId === classItem?.campusId,
-        ),
-        [classId, classItem?.campusId],
+        () => classId
+            ? studentsApi.byClass
+            : [],
+        [classId, studentsApi.byClass],
     );
 
     const studyingStudents = useMemo(
@@ -338,59 +346,6 @@ const ClassDetail = () => {
             tone: "blue" as const,
             note: "lượt ghi nhận",
             tab: "activities" as TabKey,
-        },
-    ];
-
-    const studentColumns: ColumnsType<typeof students[number]> = [
-        {
-            title: "Mã HS",
-            dataIndex: "code",
-            width: 110,
-            render: (value: string) => <Tag>{value}</Tag>,
-        },
-        {
-            title: "Họ và tên",
-            dataIndex: "fullName",
-            width: 220,
-            render: (value: string, row) => (
-                <Button
-                    type="link"
-                    size="small"
-                    style={{ padding: 0, fontWeight: 600 }}
-                    onClick={() => navigate(`/operations/students/${row.id}`)}
-                >
-                    {value}
-                </Button>
-            ),
-        },
-        {
-            title: "Giới tính",
-            dataIndex: "gender",
-            width: 100,
-            render: (value: string) =>
-                value === "male" ? "Nam" : "Nữ",
-        },
-        {
-            title: "Năm sinh",
-            dataIndex: "dob",
-            width: 120,
-            render: (value: string) => {
-                const year = new Date(`${value}T00:00:00`).getFullYear();
-
-                return Number.isNaN(year) ? value : String(year);
-            },
-        },
-        {
-            title: "Tình trạng",
-            dataIndex: "status",
-            width: 140,
-            render: (value: string) => (
-                <Tag color={value === "studying" ? "green" : "orange"}>
-                    {studentStatusOptions.find(
-                        (option) => String(option.value) === value,
-                    )?.label ?? value}
-                </Tag>
-            ),
         },
     ];
 
@@ -744,38 +699,14 @@ const ClassDetail = () => {
         {
             key: "students",
             label: "Học sinh",
-            children: students.length > 0 ? (
+            children: (
                 <div className="classes-detail__tab">
-                    <div className="students-detail__toolbar">
-                        <Button
-                            icon={<TeamOutlined />}
-                            onClick={() =>
-                                navigate(
-                                    `/operations/students?classId=${classItem.id}`,
-                                )}
-                        >
-                            Xem tất cả học sinh
-                        </Button>
-                    </div>
-
-                    <Table
-                        rowKey="id"
-                        columns={studentColumns}
-                        dataSource={students}
-                        pagination={{
-                            ...PAGINATION,
-                            pageSize: 10,
-                        }}
-                        size="small"
-                        scroll={{ x: true }}
+                    <StudentList
+                        compact
+                        schoolId={classItem.schoolId}
+                        classId={classItem.id}
                     />
                 </div>
-            ) : (
-                <Alert
-                    type="info"
-                    showIcon
-                    message="Chưa có học sinh trong lớp."
-                />
             ),
         },
         {
@@ -1041,12 +972,12 @@ const ClassDetail = () => {
                     <div className="page-head__title">
                         <span
                             className="personnel-detail__breadcrumb"
-                            onClick={() => navigate("/operations/classes")}
+                            onClick={() => navigate("/operations/schools?tab=classes")}
                             role="button"
                             tabIndex={0}
                             onKeyDown={(event) => {
                                 if (event.key === "Enter") {
-                                    navigate("/operations/classes");
+                                    navigate("/operations/schools?tab=classes");
                                 }
                             }}
                         >

@@ -76,10 +76,10 @@ const normalizeCampus = (input: Campus): Campus => {
         : {
             lat: Number.isFinite(input.latitude)
                 ? input.latitude
-                : 10.0348,
+                : 10.03580839481783,
             lng: Number.isFinite(input.longitude)
                 ? input.longitude
-                : 105.7702,
+                : 105.78470548758524,
         };
 
     return {

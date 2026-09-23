@@ -45,6 +45,7 @@ import type {
 } from "react";
 
 import {
+    useLocation,
     useNavigate,
     useSearchParams,
 } from "react-router-dom";
@@ -149,6 +150,8 @@ const ClassList = ({
     schoolId?: string;
 }) => {
     const navigate = useNavigate();
+
+    const location = useLocation();
 
     const classesApi = useClasses(schoolId);
 
@@ -304,7 +307,7 @@ const ClassList = ({
             params.delete(key);
         }
 
-        navigate(`/operations/classes?${params.toString()}`, { replace: true });
+        navigate(`${location.pathname}?${params.toString()}`, { replace: true });
     };
 
     const filtered = useMemo(() => {
@@ -451,7 +454,21 @@ const ClassList = ({
 
         setGvcnFilter(undefined);
 
-        navigate("/operations/classes", { replace: true });
+        const params = new URLSearchParams();
+
+        const rawTab = searchParams.get("tab");
+
+        const rawSchool = searchParams.get("school");
+
+        if (rawTab) {
+            params.set("tab", rawTab);
+        }
+
+        if (rawSchool) {
+            params.set("school", rawSchool);
+        }
+
+        navigate(`${location.pathname}?${params.toString()}`, { replace: true });
     };
 
     const openCreate = () => {
@@ -753,7 +770,7 @@ const ClassList = ({
                         style={{ padding: 0 }}
                         onClick={() =>
                             navigate(
-                                `/operations/students?classId=${item.id}`,
+                                `/operations/classes/${item.id}?tab=students`,
                             )}
                     >
                         <Tag color={count > (item.capacity ?? 40) ? "red" : "blue"}>

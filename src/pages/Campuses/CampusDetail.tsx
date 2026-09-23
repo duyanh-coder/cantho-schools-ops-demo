@@ -924,7 +924,8 @@ const CampusDetail = () => {
                             icon={<ReadOutlined />}
                             onClick={() =>
                                 navigate(
-                                    `/operations/classes?campusId=${campus.id}`)}
+                                    `/operations/schools?tab=classes&campusId=${campus.id}`,
+                                )}
                         >
                             Mở danh sách lớp theo cơ sở này
                         </Button>
@@ -987,7 +988,7 @@ const CampusDetail = () => {
                             icon={<ReadOutlined />}
                             onClick={() =>
                                 navigate(
-                                    `/operations/students?campusId=${campus.id}`,
+                                    `/operations/schools?tab=students&campusId=${campus.id}`,
                                 )}
                         >
                             Xem tất cả học sinh

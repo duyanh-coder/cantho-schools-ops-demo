@@ -38,6 +38,7 @@ import {
 } from "react";
 
 import {
+    useLocation,
     useNavigate,
     useSearchParams,
 } from "react-router-dom";
@@ -171,12 +172,17 @@ type TabKey = (typeof TAB_KEYS)[number];
 const StudentList = ({
     compact = false,
     schoolId = SCHOOL_ID,
+    classId,
 }: {
     compact?: boolean;
 
     schoolId?: string;
+
+    classId?: string;
 }) => {
     const navigate = useNavigate();
+
+    const location = useLocation();
 
     const studentsApi = useStudents(schoolId);
 
@@ -200,7 +206,22 @@ const StudentList = ({
 
     const [searchParams] = useSearchParams();
 
-    const items = studentsApi.bySchool;
+    const scopedClass = classId
+        ? classesApi.byId.get(classId)
+        : undefined;
+
+    const items = useMemo(
+        () => classId
+            ? studentsApi.bySchool.filter(
+                (row) =>
+                    row.classId === classId &&
+                    (scopedClass
+                        ? row.academicYear === scopedClass.academicYear
+                        : true),
+            )
+            : studentsApi.bySchool,
+        [studentsApi.bySchool, classId, scopedClass],
+    );
 
     const campuses = campusesApi.bySchool;
 
@@ -234,16 +255,27 @@ const StudentList = ({
 
     const [academicYear, setAcademicYear] =
         useState<string>(() =>
-            readDeepParam("academicYear") ?? CURRENT_ACADEMIC_YEAR);
+            classId
+                ? (scopedClass?.academicYear ?? CURRENT_ACADEMIC_YEAR)
+                : (readDeepParam("academicYear") ?? CURRENT_ACADEMIC_YEAR));
 
     const [campusFilter, setCampusFilter] =
-        useState<string | undefined>(() => readDeepParam("campusId"));
+        useState<string | undefined>(() =>
+            classId
+                ? scopedClass?.campusId
+                : readDeepParam("campusId"));
 
     const [gradeFilter, setGradeFilter] =
-        useState<string | undefined>(() => readDeepParam("grade"));
+        useState<string | undefined>(() =>
+            classId
+                ? (scopedClass?.grade !== undefined
+                    ? String(scopedClass.grade)
+                    : undefined)
+                : readDeepParam("grade"));
 
     const [classFilter, setClassFilter] =
-        useState<string | undefined>(() => readDeepParam("classId"));
+        useState<string | undefined>(() =>
+            classId ? classId : readDeepParam("classId"));
 
     const [wardFilter, setWardFilter] =
         useState<string | undefined>(() => readDeepParam("wardId"));
@@ -258,7 +290,7 @@ const StudentList = ({
 
     const [activeTab, setActiveTab] = useState<TabKey>(
         () => {
-            const raw = searchParams.get("tab");
+            const raw = searchParams.get("view");
 
             return (TAB_KEYS as readonly string[]).includes(raw ?? "")
                 ? raw as TabKey
@@ -337,7 +369,7 @@ const StudentList = ({
             params.delete(key);
         }
 
-        navigate(`/operations/students?${params.toString()}`, { replace: true });
+        navigate(`${location.pathname}?${params.toString()}`, { replace: true });
     };
 
     const filtered = useMemo(() => {
@@ -481,13 +513,21 @@ const StudentList = ({
     const handleClearFilters = () => {
         setKeyword("");
 
-        setAcademicYear(CURRENT_ACADEMIC_YEAR);
+        if (!classId) {
+            setAcademicYear(CURRENT_ACADEMIC_YEAR);
+        }
 
-        setCampusFilter(undefined);
+        if (!classId) {
+            setCampusFilter(undefined);
+        }
 
-        setGradeFilter(undefined);
+        if (!classId) {
+            setGradeFilter(undefined);
+        }
 
-        setClassFilter(undefined);
+        if (!classId) {
+            setClassFilter(undefined);
+        }
 
         setWardFilter(undefined);
 
@@ -495,7 +535,21 @@ const StudentList = ({
 
         setStatusFilter(undefined);
 
-        navigate("/operations/students", { replace: true });
+        const params = new URLSearchParams();
+
+        const rawTab = searchParams.get("tab");
+
+        const rawSchool = searchParams.get("school");
+
+        if (rawTab) {
+            params.set("tab", rawTab);
+        }
+
+        if (rawSchool) {
+            params.set("school", rawSchool);
+        }
+
+        navigate(`${location.pathname}?${params.toString()}`, { replace: true });
     };
 
     const openCreate = () => {
@@ -504,8 +558,11 @@ const StudentList = ({
         form.resetFields();
 
         form.setFieldsValue({
-            academicYear,
-            campusId: campusFilter ?? campuses[0]?.id ?? "campus-main",
+            academicYear: scopedClass?.academicYear ?? academicYear,
+            campusId: scopedClass?.campusId ?? campusFilter ?? campuses[0]?.id ?? "campus-main",
+            grade: scopedClass?.grade !== undefined
+                ? String(scopedClass.grade)
+                : undefined,
             gender: "male",
             status: "studying",
         });
@@ -679,58 +736,82 @@ const StudentList = ({
             width: 80,
             render: (value: string) => (value === "male" ? "Nam" : "Nữ"),
         },
-        {
-            title: "Khối",
-            dataIndex: "grade",
-            width: 70,
-            render: (value: number | undefined) => value ? `Khối ${value}` : "—",
-        },
-        {
-            title: "Lớp",
-            dataIndex: "classId",
-            width: 110,
-            render: (value: string | undefined) => {
-                const classItem = value
-                    ? classesApi.byId.get(value)
-                    : undefined;
+        ...(classId
+            ? [
+                {
+                    title: "Ngày sinh",
+                    dataIndex: "dob",
+                    width: 130,
+                    render: (value: string) =>
+                        new Date(`${value}T00:00:00`).toLocaleDateString("vi-VN"),
+                },
+                {
+                    title: "Phường / xã",
+                    key: "__ward",
+                    width: 160,
+                    render: (_: unknown, student: Student) => {
+                        const ward = student.wardId
+                            ? canThoWards.find((item) => item.id === student.wardId)
+                            : undefined;
 
-                if (!classItem) {
-                    return <span className="students-muted">Chưa có</span>;
-                }
+                        return ward?.name ?? <span className="students-muted">—</span>;
+                    },
+                },
+            ]
+            : [
+                {
+                    title: "Khối",
+                    dataIndex: "grade",
+                    width: 70,
+                    render: (value: number | undefined) => value ? `Khối ${value}` : "—",
+                },
+                {
+                    title: "Lớp",
+                    dataIndex: "classId",
+                    width: 110,
+                    render: (value: string | undefined) => {
+                        const classItem = value
+                            ? classesApi.byId.get(value)
+                            : undefined;
 
-                return (
-                    <a
-                        onClick={() =>
-                            navigate(`/operations/classes/${classItem.id}`)}
-                    >
-                        {classItem.name}
-                    </a>
-                );
-            },
-        },
-        {
-            title: "Cơ sở",
-            dataIndex: "campusId",
-            width: 200,
-            render: (value: string) => campusName(campusesById, value),
-        },
-        {
-            title: "GVCN",
-            key: "__gvcn",
-            width: 160,
-            render: (_: unknown, student: Student) => {
-                const classItem = student.classId
-                    ? classesApi.byId.get(student.classId)
-                    : undefined;
+                        if (!classItem) {
+                            return <span className="students-muted">Chưa có</span>;
+                        }
 
-                const teacher = classItem?.homeroomTeacherId
-                    ? personnelApi.byId.get(classItem.homeroomTeacherId)
-                    : undefined;
+                        return (
+                            <a
+                                onClick={() =>
+                                    navigate(`/operations/classes/${classItem.id}`)}
+                            >
+                                {classItem.name}
+                            </a>
+                        );
+                    },
+                },
+                {
+                    title: "Cơ sở",
+                    dataIndex: "campusId",
+                    width: 200,
+                    render: (value: string) => campusName(campusesById, value),
+                },
+                {
+                    title: "GVCN",
+                    key: "__gvcn",
+                    width: 160,
+                    render: (_: unknown, student: Student) => {
+                        const classItem = student.classId
+                            ? classesApi.byId.get(student.classId)
+                            : undefined;
 
-                return teacher?.fullName
-                    ?? <span className="students-muted">—</span>;
-            },
-        },
+                        const teacher = classItem?.homeroomTeacherId
+                            ? personnelApi.byId.get(classItem.homeroomTeacherId)
+                            : undefined;
+
+                        return teacher?.fullName
+                            ?? <span className="students-muted">—</span>;
+                    },
+                },
+            ]),
         {
             title: "Trạng thái",
             dataIndex: "status",
@@ -972,21 +1053,40 @@ const StudentList = ({
             label: "Danh sách học sinh",
             children: (
                 <div className="crud-panel__body">
-                    <Table<Student>
-                        rowKey="id"
-                        columns={studentColumns}
-                        dataSource={filtered}
-                        scroll={{ x: "max-content" }}
-                        pagination={{
-                            pageSize: 10,
-                            showSizeChanger: true,
-                            showTotal: (total: number) => `Tổng ${total} học sinh`,
-                        }}
-                        onRow={(student) => ({
-                            onDoubleClick: () =>
-                                navigate(`/operations/students/${student.id}`),
-                        })}
-                    />
+                    {classId && filtered.length === 0 ? (
+                        <div className="students-list-empty">
+                            <Alert
+                                type="info"
+                                showIcon
+                                message="Lớp chưa có học sinh."
+                                description="Thêm học sinh mới hoặc điều chỉnh bộ lọc để hiển thị."
+                            />
+
+                            <Button
+                                type="primary"
+                                icon={<PlusOutlined />}
+                                onClick={openCreate}
+                            >
+                                Thêm học sinh
+                            </Button>
+                        </div>
+                    ) : (
+                        <Table<Student>
+                            rowKey="id"
+                            columns={studentColumns}
+                            dataSource={filtered}
+                            scroll={{ x: "max-content" }}
+                            pagination={{
+                                pageSize: 10,
+                                showSizeChanger: true,
+                                showTotal: (total: number) => `Tổng ${total} học sinh`,
+                            }}
+                            onRow={(student) => ({
+                                onDoubleClick: () =>
+                                    navigate(`/operations/students/${student.id}`),
+                            })}
+                        />
+                    )}
                 </div>
             ),
         },
@@ -1063,6 +1163,16 @@ const StudentList = ({
                 </header>
             )}
 
+            {scopedClass && (
+                <div className="students-list__context">
+                    <strong>HỌC SINH</strong>
+
+                    <span>Lớp {scopedClass.name} · Khối {scopedClass.grade} ·{" "}
+                        {campusName(campusesById, scopedClass.campusId)} —{" "}
+                        Năm học {scopedClass.academicYear}</span>
+                </div>
+            )}
+
             {kpis.length > 0 && (
                 <div className="page-kpi">
                     {kpis.map((kpi) => (
@@ -1118,72 +1228,80 @@ const StudentList = ({
                 </div>
 
                 <div className="crud-panel__filters">
-                    <Select
-                        allowClear
-                        showSearch
-                        optionFilterProp="label"
-                        placeholder="Năm học"
-                        options={studentYearOptions}
-                        value={academicYear}
-                        onChange={(value) => {
-                            setAcademicYear(value);
+                    {!classId && (
+                        <Select
+                            allowClear
+                            showSearch
+                            optionFilterProp="label"
+                            placeholder="Năm học"
+                            options={studentYearOptions}
+                            value={academicYear}
+                            onChange={(value) => {
+                                setAcademicYear(value);
 
-                            syncParam("academicYear", value);
-                        }}
-                        className="crud-panel__filter"
-                    />
+                                syncParam("academicYear", value);
+                            }}
+                            className="crud-panel__filter"
+                        />
+                    )}
 
-                    <Select
-                        allowClear
-                        showSearch
-                        optionFilterProp="label"
-                        placeholder="Cơ sở"
-                        options={campusOptions}
-                        value={campusFilter}
-                        onChange={(value) => {
-                            setCampusFilter(value);
+                    {!classId && (
+                        <Select
+                            allowClear
+                            showSearch
+                            optionFilterProp="label"
+                            placeholder="Cơ sở"
+                            options={campusOptions}
+                            value={campusFilter}
+                            onChange={(value) => {
+                                setCampusFilter(value);
 
-                            setGradeFilter(undefined);
+                                setGradeFilter(undefined);
 
-                            setClassFilter(undefined);
+                                setClassFilter(undefined);
 
-                            syncParam("campusId", value);
-                        }}
-                        className="crud-panel__filter"
-                    />
+                                syncParam("campusId", value);
+                            }}
+                            className="crud-panel__filter"
+                        />
+                    )}
 
-                    <Select
-                        allowClear
-                        placeholder="Khối"
-                        options={gradesOfCampus}
-                        value={gradeFilter}
-                        onChange={(value) => {
-                            const next = value ? String(value) : undefined;
+                    {!classId && (
+                        <Select
+                            allowClear
+                            placeholder="Khối"
+                            options={gradesOfCampus}
+                            value={gradeFilter}
+                            onChange={(value) => {
+                                const next = value ? String(value) : undefined;
 
-                            setGradeFilter(next);
+                                setGradeFilter(next);
 
-                            setClassFilter(undefined);
+                                setClassFilter(undefined);
 
-                            syncParam("grade", next);
-                        }}
-                        className="crud-panel__filter"
-                    />
+                                syncParam("grade", next);
+                            }}
+                            className="crud-panel__filter"
+                        />
+                    )}
 
-                    <Select
-                        allowClear
-                        placeholder="Lớp"
-                        options={classesOfCampusGrade.map((classItem) => ({
-                            value: classItem.id,
-                            label: classItem.name,
-                        }))}
-                        value={classFilter}
-                        onChange={(value) => {
-                            setClassFilter(value);
+                    {!classId && (
+                        <Select
+                            allowClear
+                            placeholder="Lớp"
+                            options={classesOfCampusGrade.map((classItem) => ({
+                                value: classItem.id,
+                                label: classItem.name,
+                            }))}
+                            value={classFilter}
+                            onChange={(value) => {
+                                setClassFilter(value);
 
-                            syncParam("classId", value);
-                        }}
-                        className="crud-panel__filter"
-                    />
+                                syncParam("classId", value);
+                            }}
+                            className="crud-panel__filter"
+                        />
+                    )}
 
                     <Select
                         allowClear
@@ -1234,7 +1352,7 @@ const StudentList = ({
                     onChange={(key) => {
                         setActiveTab(key as TabKey);
 
-                        syncParam("tab", key);
+                        syncParam("view", key);
                     }}
                     items={tabItems}
                 />
@@ -1324,18 +1442,22 @@ const StudentList = ({
                             <Select options={yearOptions} />
                         </Form.Item>
 
-                        <Form.Item
-                            name="campusId"
-                            label="Cơ sở"
-                            required
-                            rules={[{ required: true, message: "Vui lòng chọn cơ sở" }]}
-                        >
-                            <Select options={campusOptions} />
-                        </Form.Item>
+                        {!classId && (
+                            <Form.Item
+                                name="campusId"
+                                label="Cơ sở"
+                                required
+                                rules={[{ required: true, message: "Vui lòng chọn cơ sở" }]}
+                            >
+                                <Select options={campusOptions} />
+                            </Form.Item>
+                        )}
 
-                        <Form.Item name="grade" label="Khối">
-                            <Select options={gradeOptionsForStats} allowClear />
-                        </Form.Item>
+                        {!classId && (
+                            <Form.Item name="grade" label="Khối">
+                                <Select options={gradeOptionsForStats} allowClear />
+                            </Form.Item>
+                        )}
 
                         <Form.Item
                             name="status"

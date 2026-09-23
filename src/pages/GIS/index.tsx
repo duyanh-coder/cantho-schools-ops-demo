@@ -118,8 +118,15 @@ function GisPage() {
     [campuses, presetCampusId],
   );
 
+  const DEFAULT_WARD_ID = "can-tho-31135";
+
+  const defaultWard = useMemo(
+    () => wards.find((ward) => ward.id === DEFAULT_WARD_ID) ?? null,
+    [wards],
+  );
+
   const [selectedWardId, setSelectedWardId] = useState(
-    presetCampus?.wardId ?? "all",
+    presetCampus?.wardId ?? DEFAULT_WARD_ID,
   );
 
   const [selectedCampusId, setSelectedCampusId] = useState<string>(
@@ -132,6 +139,10 @@ function GisPage() {
         return L.latLngBounds([
           [presetCampus.position[0], presetCampus.position[1]],
         ]);
+      }
+
+      if (defaultWard) {
+        return L.latLngBounds(defaultWard.polygon.flat(2));
       }
 
       return L.latLngBounds(province.polygons.flat(2));
@@ -242,6 +253,8 @@ function GisPage() {
     setSelectedCampusId(campusId);
 
     if (campusId === "all") {
+      setMapBounds(L.latLngBounds(province.polygons.flat(2)));
+
       return;
     }
 
@@ -249,15 +262,21 @@ function GisPage() {
 
     if (campus) {
       setSelectedWardId(campus.wardId);
+
+      setMapBounds(L.latLngBounds([[campus.position[0], campus.position[1]]]));
     }
   };
 
   const handleReset = () => {
-    setSelectedWardId("all");
+    setSelectedWardId(DEFAULT_WARD_ID);
 
     setSelectedCampusId("all");
 
-    setMapBounds(L.latLngBounds(province.polygons.flat(2)));
+    setMapBounds(
+      defaultWard
+        ? L.latLngBounds(defaultWard.polygon.flat(2))
+        : L.latLngBounds(province.polygons.flat(2)),
+    );
   };
 
   return (
