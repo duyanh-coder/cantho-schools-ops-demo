@@ -4,6 +4,29 @@ import { canThoClasses } from "./classes";
 
 const SCHOOL_001 = "can-tho-school-001";
 
+const CAMPUS_WARD: Record<string, string> = {
+    "campus-main": "can-tho-ward-nk-an-hoa",
+    "campus-chu-van-an": "can-tho-ward-nk-an-cu",
+    "campus-thoi-binh": "can-tho-ward-nk-thoi-binh",
+    "campus-an-lac": "can-tho-ward-nk-an-lac",
+    "campus-tran-hung-dao": "can-tho-ward-nk-an-hoa",
+    "campus-huynh-thuc-khang": "can-tho-ward-nk-hung-loi",
+    "can-tho-campus-007": "can-tho-ward-005",
+    "can-tho-campus-008": "can-tho-ward-006",
+    "can-tho-campus-009": "can-tho-ward-004",
+    "can-tho-campus-010": "can-tho-ward-002",
+};
+
+const CLASS_BY_ID = ((): Map<string, { grade: number; academicYear: string }> => {
+    const map = new Map<string, { grade: number; academicYear: string }>();
+
+    for (const classItem of canThoClasses) {
+        map.set(classItem.id, { grade: classItem.grade, academicYear: classItem.academicYear });
+    }
+
+    return map;
+})();
+
 const SURNAMES = [
     "Nguyễn", "Trần", "Lê", "Phạm", "Hoàng", "Phan", "Vũ", "Đặng",
     "Bùi", "Đỗ", "Hồ", "Ngô", "Dương", "Lý", "Võ", "Trịnh", "Đinh", "Lâm",
@@ -150,7 +173,149 @@ const generatedStudents: Student[] = canThoClasses
         });
     });
 
+const specialStudents: Student[] = [
+    {
+        id: "can-tho-student-special-001",
+        schoolId: SCHOOL_001,
+        campusId: "campus-main",
+        classId: "can-tho-class-026",
+        code: "CT-HS-S001",
+        fullName: "Nguyễn Quốc Bảo",
+        gender: "male",
+        dob: "2011-05-14",
+        address: "Phường An Hòa, quận Ninh Kiều",
+        wardId: "can-tho-ward-nk-an-hoa",
+        guardianName: "Nguyễn Văn Bình",
+        guardianPhone: "0901112233",
+        email: "quocbao.nk@email.com",
+        ethnicity: "Kinh",
+        status: "graduated",
+    },
+
+    {
+        id: "can-tho-student-special-002",
+        schoolId: SCHOOL_001,
+        campusId: "campus-thoi-binh",
+        classId: "can-tho-class-038",
+        code: "CT-HS-S002",
+        fullName: "Trần Thanh Thảo",
+        gender: "female",
+        dob: "2011-09-28",
+        address: "Phường Thới Bình, quận Ninh Kiều",
+        wardId: "can-tho-ward-nk-thoi-binh",
+        guardianName: "Trần Minh Châu",
+        guardianPhone: "0902223344",
+        email: "thanhthao.tb@email.com",
+        ethnicity: "Kinh",
+        status: "graduated",
+    },
+
+    {
+        id: "can-tho-student-special-003",
+        schoolId: SCHOOL_001,
+        campusId: "campus-main",
+        classId: "can-tho-class-001",
+        code: "CT-HS-S003",
+        fullName: "Lê Anh Tuấn",
+        gender: "male",
+        dob: "2014-02-10",
+        address: "Phường An Hòa, quận Ninh Kiều",
+        wardId: "can-tho-ward-nk-an-hoa",
+        guardianName: "Lê Quang Minh",
+        guardianPhone: "0903334455",
+        email: "anhtuan.nk@email.com",
+        ethnicity: "Kinh",
+        status: "transferred",
+    },
+
+    {
+        id: "can-tho-student-special-004",
+        schoolId: SCHOOL_001,
+        campusId: "campus-chu-van-an",
+        classId: "can-tho-class-003",
+        code: "CT-HS-S004",
+        fullName: "Phạm Hà My",
+        gender: "female",
+        dob: "2014-07-22",
+        address: "Phường An Khánh, quận Ninh Kiều",
+        wardId: "can-tho-ward-nk-an-cu",
+        guardianName: "Phạm Đức Hải",
+        guardianPhone: "0904445566",
+        email: "hamy.cva@email.com",
+        ethnicity: "Kinh",
+        status: "suspended",
+    },
+
+    {
+        id: "can-tho-student-special-005",
+        schoolId: SCHOOL_001,
+        campusId: "campus-an-lac",
+        classId: "can-tho-class-044",
+        code: "CT-HS-S005",
+        fullName: "Võ Đình Khôi",
+        gender: "male",
+        dob: "2011-04-05",
+        address: "Phường An Lạc, quận Ninh Kiều",
+        wardId: "can-tho-ward-nk-an-lac",
+        guardianName: "Võ Thanh Tùng",
+        guardianPhone: "0905556677",
+        email: "dinhkhoi.al@email.com",
+        ethnicity: "Khmer",
+        status: "dropped_out",
+    },
+
+    {
+        id: "can-tho-student-special-006",
+        schoolId: SCHOOL_001,
+        campusId: "campus-tran-hung-dao",
+        classId: "can-tho-class-046",
+        code: "CT-HS-S006",
+        fullName: "Đặng Thu Hà",
+        gender: "female",
+        dob: "2014-11-18",
+        address: "Phường An Hòa, quận Ninh Kiều",
+        wardId: "can-tho-ward-nk-an-hoa",
+        guardianName: "Đặng Văn Sơn",
+        guardianPhone: "0906667788",
+        email: "thuha.thd@email.com",
+        ethnicity: "Kinh",
+        status: "dropped_out",
+    },
+];
+
+const enrichStudent = (student: Student): Student => {
+    const classMeta = student.classId
+        ? CLASS_BY_ID.get(student.classId)
+        : undefined;
+
+    const academicYear = student.academicYear
+        ?? classMeta?.academicYear
+        ?? "2026-2027";
+
+    const grade = student.grade ?? classMeta?.grade;
+
+    const wardId = student.wardId
+        ?? CAMPUS_WARD[student.campusId];
+
+    const ethnicity = student.ethnicity ?? "Kinh";
+
+    const birthPlace = student.birthPlace ?? student.address;
+
+    return {
+        ...student,
+        academicYear,
+        grade,
+        wardId,
+        ethnicity,
+        birthPlace,
+    };
+};
+
 export const canThoStudents: Student[] = [
     ...existingSeed,
+    ...specialStudents,
     ...generatedStudents,
-];
+].map(enrichStudent);
+
+export const canThoActiveStudents = (): Student[] =>
+    canThoStudents.filter((student) => student.status === "studying");

@@ -28,6 +28,19 @@ export type {
 } from "./class";
 
 export type {
+    AcademicYear,
+    AcademicYearStatus,
+    ClassHistoryEntry,
+    ClassHistoryEventType,
+    ClassStatus,
+    ClassType,
+    Grade,
+    SchoolRoom,
+    Semester,
+    SemesterStatus,
+} from "./classModel";
+
+export type {
     Teacher,
 } from "./teacher";
 
@@ -84,9 +97,18 @@ export type {
 
 export type {
     Student,
+    StudentStatus,
     Transcript,
     EnrolmentChange,
     EnrolmentChangeType,
+    StudentMovement,
+    StudentMovementType,
+    StudentAchievement,
+    StudentAchievementCategory,
+    StudentAchievementLevel,
+    BoardingProfile,
+    StudentHistoryEntry,
+    StudentHistoryEventType,
 } from "./student";
 
 export type {

@@ -1,3 +1,9 @@
+import type {
+    ClassStatus,
+    ClassType,
+} from "./classModel";
+
+
 export interface SchoolClass {
     id: string;
 
@@ -11,5 +17,15 @@ export interface SchoolClass {
 
     academicYear: string;
 
-    status: "active" | "inactive";
+    homeroomTeacherId?: string;
+
+    roomId?: string;
+
+    classType?: ClassType;
+
+    capacity?: number;
+
+    note?: string;
+
+    status: ClassStatus;
 }

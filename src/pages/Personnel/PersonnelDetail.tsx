@@ -419,7 +419,17 @@ const PersonnelDetail = () => {
             title: "Lớp",
             dataIndex: "classId",
             width: 170,
-            render: (value: string) => className(value),
+            render: (value: string) => (
+                <Button
+                    type="link"
+                    size="small"
+                    style={{ padding: 0 }}
+                    onClick={() =>
+                        navigate(`/operations/classes/${value}`)}
+                >
+                    {className(value)}
+                </Button>
+            ),
         },
         {
             title: "Môn",

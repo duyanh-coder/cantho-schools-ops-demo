@@ -109,8 +109,8 @@ export const ROLE_GUIDES: RoleGuide[] = [
             {
                 key: "students",
                 title: "Học sinh",
-                path: "/operations/schools?tab=students",
-                flow: "Vào Trường & Phân hiệu → tab Học sinh → tìm theo lớp/tên → xem hồ sơ và điểm.",
+                path: "/operations/students",
+                flow: "Vào Học sinh → chọn cơ sở/khối/lớp → tìm theo tên → xem hồ sơ, học bạ và quá trình học tập.",
                 iconKey: "student",
             },
             {

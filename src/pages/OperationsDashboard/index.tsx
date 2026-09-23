@@ -105,7 +105,7 @@ const moduleSummaryDefs:
         },
         {
             title: "Học sinh",
-            path: "/operations/schools?tab=students",
+            path: "/operations/students",
             tone: "purple",
             icon: <ReadOutlined />,
             catalog: "student-status",
@@ -232,7 +232,7 @@ const OperationsDashboard = () => {
                     "can-tho-sectors",
                     regionMock.sectors,
                 ).length,
-            "/operations/schools?tab=students":
+            "/operations/students":
                 readCrudItems(
                     "can-tho-students",
                     regionMock.students,

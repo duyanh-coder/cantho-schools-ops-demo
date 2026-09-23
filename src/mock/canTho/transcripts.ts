@@ -1,6 +1,13 @@
 import type { Transcript } from "../common/types";
 
-export const canThoTranscripts: Transcript[] = [
+const teacherBySubject: Record<string, string> = {
+    math: "can-tho-teacher-001",
+    literature: "can-tho-teacher-002",
+    english: "can-tho-teacher-003",
+    physics: "can-tho-teacher-004",
+};
+
+const base: Array<Omit<Transcript, "semesterId" | "teacherId" | "comment" | "result">> = [
     { id: "can-tho-transcript-001", studentId: "can-tho-student-001", subjectId: "math", semester: 1, academicYear: "2026-2027", score: 8.5, conduct: "Tốt" },
     { id: "can-tho-transcript-002", studentId: "can-tho-student-001", subjectId: "literature", semester: 1, academicYear: "2026-2027", score: 7.8, conduct: "Tốt" },
     { id: "can-tho-transcript-003", studentId: "can-tho-student-002", subjectId: "math", semester: 1, academicYear: "2026-2027", score: 9.0, conduct: "Tốt" },
@@ -37,3 +44,16 @@ export const canThoTranscripts: Transcript[] = [
     { id: "can-tho-transcript-033", studentId: "can-tho-student-021", subjectId: "physics", semester: 1, academicYear: "2026-2027", score: 7.4, conduct: "Khá" },
     { id: "can-tho-transcript-034", studentId: "can-tho-student-022", subjectId: "math", semester: 1, academicYear: "2026-2027", score: 8.2, conduct: "Tốt" },
 ];
+
+export const canThoTranscripts: Transcript[] = base.map((record) => ({
+    ...record,
+    semesterId: `${record.academicYear}-HK${record.semester}`,
+    teacherId: teacherBySubject[record.subjectId] ?? "can-tho-teacher-001",
+    result: record.score >= 8 ? "Đạt" : "Đạt",
+    comment:
+        record.score >= 8.5
+            ? "Hoàn thành học phần với kết quả xuất sắc."
+            : record.score >= 7
+                ? "Hoàn thành học phần với kết quả tốt."
+                : "Hoàn thành học phần, cần rèn luyện thêm.",
+}));

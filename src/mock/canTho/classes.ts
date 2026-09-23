@@ -1,6 +1,86 @@
-import type { SchoolClass } from "../common/types";
+import type {
+    ClassType,
+    SchoolClass,
+} from "../common/types";
 
-export const canThoClasses: SchoolClass[] = [
+const TEACHER_BY_CAMPUS: Record<string, string[]> = {
+    "campus-main": [
+        "can-tho-personnel-002",
+        "can-tho-personnel-003",
+        "can-tho-personnel-004",
+        "can-tho-personnel-006",
+    ],
+    "campus-chu-van-an": [
+        "can-tho-personnel-003",
+        "can-tho-personnel-006",
+        "can-tho-personnel-002",
+    ],
+    "campus-thoi-binh": [
+        "can-tho-personnel-004",
+        "can-tho-personnel-007",
+    ],
+    "campus-an-lac": [
+        "can-tho-personnel-005",
+        "can-tho-personnel-007",
+    ],
+    "campus-tran-hung-dao": [
+        "can-tho-personnel-008",
+        "can-tho-personnel-005",
+    ],
+    "campus-huynh-thuc-khang": [
+        "can-tho-personnel-008",
+        "can-tho-personnel-007",
+    ],
+};
+
+const ROOM_BY_CAMPUS: Record<string, string[]> = {
+    "campus-main": ["room-main-01", "room-main-02", "room-main-03"],
+    "campus-chu-van-an": ["room-b-01", "room-b-02"],
+    "campus-thoi-binh": ["room-c-01", "room-c-02"],
+    "campus-an-lac": ["room-d-01", "room-d-02"],
+    "campus-tran-hung-dao": ["room-e-01", "room-e-02"],
+    "campus-huynh-thuc-khang": ["room-f-01", "room-f-02"],
+};
+
+const CLASS_TYPE_BY_ID = new Map<string, ClassType>([
+    ["can-tho-class-026", "TWO_SESSION"],
+    ["can-tho-class-027", "TWO_SESSION"],
+    ["can-tho-class-024", "BOARDING"],
+    ["can-tho-class-025", "BOARDING"],
+    ["can-tho-class-039", "SPECIAL"],
+    ["can-tho-class-045", "SPECIAL"],
+]);
+
+const CLASS_CAPACITY_BY_ID = new Map<string, number>([
+    ["can-tho-class-024", 45],
+    ["can-tho-class-025", 45],
+    ["can-tho-class-026", 42],
+    ["can-tho-class-027", 42],
+    ["can-tho-class-039", 36],
+    ["can-tho-class-045", 36],
+]);
+
+const enrichClass = (
+    classItem: SchoolClass,
+    index: number,
+): SchoolClass => {
+    const teachers = TEACHER_BY_CAMPUS[classItem.campusId] ?? [];
+    const rooms = ROOM_BY_CAMPUS[classItem.campusId] ?? [];
+
+    return {
+        ...classItem,
+        homeroomTeacherId: teachers.length > 0
+            ? teachers[index % teachers.length]
+            : undefined,
+        roomId: rooms.length > 0
+            ? rooms[index % rooms.length]
+            : undefined,
+        classType: CLASS_TYPE_BY_ID.get(classItem.id) ?? "REGULAR",
+        capacity: CLASS_CAPACITY_BY_ID.get(classItem.id) ?? 40,
+    };
+};
+
+const baseClasses: SchoolClass[] = [
     { id: "can-tho-class-001", schoolId: "can-tho-school-001", campusId: "campus-main", code: "6A1", name: "6A1", grade: 6, academicYear: "2026-2027", status: "active" },
     { id: "can-tho-class-002", schoolId: "can-tho-school-001", campusId: "campus-main", code: "7A1", name: "7A1", grade: 7, academicYear: "2026-2027", status: "active" },
     { id: "can-tho-class-003", schoolId: "can-tho-school-001", campusId: "campus-chu-van-an", code: "6A1", name: "6A1", grade: 6, academicYear: "2026-2027", status: "active" },
@@ -68,3 +148,5 @@ export const canThoClasses: SchoolClass[] = [
     { id: "can-tho-class-056", schoolId: "can-tho-school-001", campusId: "campus-huynh-thuc-khang", code: "9A1", name: "9A1", grade: 9, academicYear: "2026-2027", status: "active" },
     { id: "can-tho-class-057", schoolId: "can-tho-school-001", campusId: "campus-huynh-thuc-khang", code: "9A2", name: "9A2", grade: 9, academicYear: "2026-2027", status: "active" },
 ];
+
+export const canThoClasses: SchoolClass[] = baseClasses.map(enrichClass);

@@ -13,7 +13,7 @@ const moduleByTitle:
         "trường & cơ sở": "/operations/schools",
         "nhân sự": "/operations/schools?tab=personnel",
         "khối & tổ": "/operations/schools?tab=sectors",
-        "học sinh": "/operations/schools?tab=students",
+        "học sinh": "/operations/students",
         "báo cáo": "/operations/reports",
         "cảnh báo": "/operations/alerts",
         "trợ lý ai": "/operations/chatbot",

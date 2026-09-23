@@ -198,7 +198,9 @@ const buildStats = (campusId: string, allPersonnel: Personnel[]) => {
     ).length;
 
     const studentCount = canThoMockData.students.filter(
-        (item) => item.campusId === campusId,
+        (item) =>
+            item.campusId === campusId &&
+            item.status === "studying",
     ).length;
 
     const teacherCount = allPersonnel.filter(
@@ -243,6 +245,9 @@ const CampusDetail = () => {
     const campusStatusOptions =
         useCatalogOptions("campus-status");
 
+    const studentStatusOptions =
+        useCatalogOptions("student-status");
+
     const campusTypeOptions =
         useCatalogOptions("campus-type");
 
@@ -253,6 +258,15 @@ const CampusDetail = () => {
             ),
         ),
         [campusStatusOptions],
+    );
+
+    const studentStatusLabelMap = useMemo(
+        () => new Map<string, string>(
+            studentStatusOptions.map(
+                (option) => [String(option.value), option.label],
+            ),
+        ),
+        [studentStatusOptions],
     );
 
     const typeLabelMap = useMemo(
@@ -348,16 +362,43 @@ const CampusDetail = () => {
             title: "Mã lớp",
             dataIndex: "code",
             width: 110,
+            render: (value: string) => <Tag>{value}</Tag>,
         },
         {
             title: "Tên lớp",
             dataIndex: "name",
+            render: (value: string, row) => (
+                <Button
+                    type="link"
+                    size="small"
+                    style={{ padding: 0, fontWeight: 600 }}
+                    onClick={() =>
+                        navigate(`/operations/classes/${row.id}`)}
+                >
+                    {value}
+                </Button>
+            ),
         },
         {
             title: "Khối",
             dataIndex: "grade",
             width: 80,
             render: (value: number) => `Khối ${value}`,
+        },
+        {
+            title: "Loại lớp",
+            dataIndex: "classType",
+            width: 120,
+            render: (value: string) =>
+                value === "REGULAR"
+                    ? "Lớp đại trà"
+                    : value === "TWO_SESSION"
+                        ? "Lớp 2 buổi"
+                        : value === "BOARDING"
+                            ? "Lớp nội trú"
+                            : value === "SPECIAL"
+                                ? "Lớp chuyên biệt"
+                                : value,
         },
         {
             title: "Năm học",
@@ -367,12 +408,28 @@ const CampusDetail = () => {
         {
             title: "Trạng thái",
             dataIndex: "status",
-            width: 110,
-            render: (value: string) => (
-                <Tag color={value === "active" ? "green" : "red"}>
-                    {value === "active" ? "Đang hoạt động" : "Ngừng"}
-                </Tag>
-            ),
+            width: 140,
+            render: (value: string) => {
+                const tone: Record<string, string> = {
+                    active: "green",
+                    inactive: "orange",
+                    suspended: "orange",
+                    closed: "red",
+                };
+
+                const labelMap: Record<string, string> = {
+                    active: "Đang hoạt động",
+                    inactive: "Ngừng",
+                    suspended: "Tạm đình chỉ",
+                    closed: "Kết thúc",
+                };
+
+                return (
+                    <Tag color={tone[value] ?? "default"}>
+                        {labelMap[value] ?? value}
+                    </Tag>
+                );
+            },
         },
     ];
 
@@ -442,14 +499,38 @@ const CampusDetail = () => {
             title: "Họ và tên",
             dataIndex: "fullName",
             width: 200,
+            render: (value: string, row) => (
+                <Button
+                    type="link"
+                    size="small"
+                    style={{ padding: 0, fontWeight: 600 }}
+                    onClick={() => navigate(`/operations/students/${row.id}`)}
+                >
+                    {value}
+                </Button>
+            ),
         },
         {
             title: "Lớp",
             dataIndex: "classId",
             width: 100,
-            render: (value: string | undefined) =>
-                canThoMockData.classes.find((item) => item.id === value)?.name
-                ?? value,
+            render: (value: string | undefined) => {
+                const classItem =
+                    canThoMockData.classes.find((item) => item.id === value);
+
+                return classItem ? (
+                    <Button
+                        type="link"
+                        size="small"
+                        style={{ padding: 0 }}
+                        onClick={() => navigate(`/operations/classes/${classItem.id}`)}
+                    >
+                        {classItem.name}
+                    </Button>
+                ) : (
+                    value ?? "—"
+                );
+            },
         },
         {
             title: "Khối",
@@ -461,18 +542,34 @@ const CampusDetail = () => {
                     : "—",
         },
         {
-            title: "Năm sinh",
-            dataIndex: "birthDate",
+            title: "Ngày sinh",
+            dataIndex: "dob",
             width: 110,
+            render: (value: string) =>
+                new Date(`${value}T00:00:00`).toLocaleDateString("vi-VN"),
         },
         {
             title: "Tình trạng",
             dataIndex: "status",
-            width: 120,
+            width: 130,
             render: (value: string) => (
                 <Tag color={value === "studying" ? "green" : "orange"}>
-                    {value === "studying" ? "Đang học" : "Tạm nghỉ"}
+                    {studentStatusLabelMap.get(value) ?? value}
                 </Tag>
+            ),
+        },
+        {
+            title: "",
+            width: 70,
+            render: (_: unknown, row: typeof canThoMockData.students[number]) => (
+                <Button
+                    type="link"
+                    size="small"
+                    style={{ padding: 0 }}
+                    onClick={() => navigate(`/operations/students/${row.id}`)}
+                >
+                    Xem
+                </Button>
             ),
         },
     ];
@@ -820,6 +917,17 @@ const CampusDetail = () => {
                             value={classGrade}
                             onChange={setClassGrade}
                         />
+
+                        <Button
+                            type="link"
+                            size="small"
+                            icon={<ReadOutlined />}
+                            onClick={() =>
+                                navigate(
+                                    `/operations/classes?campusId=${campus.id}`)}
+                        >
+                            Mở danh sách lớp theo cơ sở này
+                        </Button>
                     </div>
 
                     <Table
@@ -837,6 +945,10 @@ const CampusDetail = () => {
                         }}
                         size="small"
                         scroll={{ x: true }}
+                        onRow={(classItem) => ({
+                            onDoubleClick: () =>
+                                navigate(`/operations/classes/${classItem.id}`),
+                        })}
                     />
                 </div>
             ),
@@ -870,6 +982,16 @@ const CampusDetail = () => {
                             value={studentGrade}
                             onChange={setStudentGrade}
                         />
+
+                        <Button
+                            icon={<ReadOutlined />}
+                            onClick={() =>
+                                navigate(
+                                    `/operations/students?campusId=${campus.id}`,
+                                )}
+                        >
+                            Xem tất cả học sinh
+                        </Button>
                     </div>
 
                     <Table

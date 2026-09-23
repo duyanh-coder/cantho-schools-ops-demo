@@ -4,8 +4,10 @@ import {
   CalendarOutlined,
   EnvironmentOutlined,
   FileTextOutlined,
+  ReadOutlined,
   RobotOutlined,
   SolutionOutlined,
+  TeamOutlined,
   WarningOutlined,
 } from "@ant-design/icons";
 
@@ -33,6 +35,16 @@ const menuItems: MenuItem[] = [
     key: "/operations/schools",
     icon: <SolutionOutlined />,
     label: "Trường & Phân hiệu",
+  },
+  {
+    key: "/operations/classes",
+    icon: <ReadOutlined />,
+    label: "Lớp học",
+  },
+  {
+    key: "/operations/students",
+    icon: <TeamOutlined />,
+    label: "Học sinh",
   },
   {
     key: "/operations/documents",

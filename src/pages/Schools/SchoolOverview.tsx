@@ -7,6 +7,7 @@ import {
 } from "@ant-design/icons";
 
 import {
+    Button,
     Table,
     Tag,
 } from "antd";
@@ -18,6 +19,10 @@ import type {
 import {
     useMemo,
 } from "react";
+
+import {
+    useNavigate,
+} from "react-router-dom";
 
 import StatCard from "@/components/dashboard/StatCard";
 
@@ -104,6 +109,9 @@ const SchoolOverview = ({
 }: {
     school: School | undefined;
 }) => {
+    const navigate =
+        useNavigate();
+
     const statusOptions =
         useCatalogOptions("status");
 
@@ -177,7 +185,9 @@ const SchoolOverview = ({
         },
         {
             title: "Học sinh",
-            value: scope.students.length,
+            value: scope.students.filter(
+                (item) => item.status === "studying",
+            ).length,
             icon: <ReadOutlined />,
             tone: "orange" as const,
             note: "đang theo học",
@@ -276,22 +286,62 @@ const SchoolOverview = ({
             title: "Mã HS",
             dataIndex: "code",
             width: 100,
+            render: (value: string) => <Tag>{value}</Tag>,
         },
         {
             title: "Họ và tên",
             dataIndex: "fullName",
             width: 180,
+            render: (value: string, row) => (
+                <Button
+                    type="link"
+                    size="small"
+                    style={{ padding: 0, fontWeight: 600 }}
+                    onClick={() => navigate(`/operations/students/${row.id}`)}
+                >
+                    {value}
+                </Button>
+            ),
         },
         {
             title: "Lớp",
             dataIndex: "classId",
-            width: 80,
-            render: (value: string | undefined) => classIdToName(value),
+            width: 90,
+            render: (value: string | undefined) => {
+                const classItem = canThoMockData.classes.find(
+                    (item) => item.id === value,
+                );
+
+                return classItem ? (
+                    <Button
+                        type="link"
+                        size="small"
+                        style={{ padding: 0 }}
+                        onClick={() =>
+                            navigate(`/operations/classes/${classItem.id}`)}
+                    >
+                        {classItem.name}
+                    </Button>
+                ) : (
+                    classIdToName(value)
+                );
+            },
         },
         {
             title: "Cơ sở",
             dataIndex: "campusId",
-            render: (value: string) => campusIdToName(value),
+            width: 180,
+            render: (value: string, row) => (
+                <Button
+                    type="link"
+                    size="small"
+                    style={{ padding: 0 }}
+                    onClick={() =>
+                        navigate(`/operations/students?campusId=${row.campusId}`)}
+                >
+                    {campusIdToName(value)}
+                </Button>
+            ),
         },
         {
             title: "Giới tính",
@@ -422,6 +472,14 @@ const SchoolOverview = ({
                     <span>HỌC SINH</span>
 
                     <strong>Học sinh theo lớp & cơ sở</strong>
+
+                    <Button
+                        size="small"
+                        icon={<ReadOutlined />}
+                        onClick={() => navigate("/operations/students")}
+                    >
+                        Xem tất cả
+                    </Button>
                 </header>
 
                 <Table

@@ -10,12 +10,16 @@ import OperationLayout from "@/layouts/OperationLayout";
 import AlertsPage from "@/pages/Alerts";
 import CampusDetail from "@/pages/Campuses/CampusDetail";
 import ChatbotPage from "@/pages/Chatbot";
+import ClassList from "@/pages/Classes/ClassList";
+import ClassDetail from "@/pages/Classes/ClassDetail";
 import DocumentsPage from "@/pages/Documents";
 import GISPage from "@/pages/GIS";
 import HomePage from "@/pages/Home";
 import ReportsPage from "@/pages/Reports";
 import SchoolPage from "@/pages/Schools";
 import PersonnelDetail from "@/pages/Personnel/PersonnelDetail";
+import StudentList from "@/pages/Students/StudentList";
+import StudentDetail from "@/pages/Students/StudentDetail";
 import TimetablePage from "@/pages/Timetable";
 
 import OperationsDashboardPage from "@/pages/OperationsDashboard";
@@ -47,6 +51,10 @@ function AppRouter() {
 
           <Route path="/operations/campuses/:campusId" element={<CampusDetail />} />
 
+          <Route path="/operations/classes" element={<ClassList />} />
+
+          <Route path="/operations/classes/:classId" element={<ClassDetail />} />
+
           <Route path="/operations/gis" element={<GISPage />} />
 
           <Route path="/operations/reports" element={<ReportsPage />} />
@@ -57,7 +65,9 @@ function AppRouter() {
 
           <Route path="/operations/sectors" element={<Navigate to="/operations/schools?tab=sectors" replace />} />
 
-          <Route path="/operations/students" element={<Navigate to="/operations/schools?tab=students" replace />} />
+          <Route path="/operations/students" element={<StudentList />} />
+
+          <Route path="/operations/students/:studentId" element={<StudentDetail />} />
 
           <Route path="/operations/alerts" element={<AlertsPage />} />
 

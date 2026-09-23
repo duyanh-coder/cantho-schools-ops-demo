@@ -78,8 +78,10 @@ const personnelStatusOptions: CrudFieldOption[] = [
 
 const studentStatusOptions: CrudFieldOption[] = [
     { value: "studying", label: "Đang học" },
-    { value: "suspended", label: "Tạm nghỉ" },
+    { value: "transferred", label: "Chuyển trường" },
+    { value: "dropped_out", label: "Nghỉ học" },
     { value: "graduated", label: "Đã tốt nghiệp" },
+    { value: "suspended", label: "Tạm nghỉ" },
 ];
 
 const genderOptions: CrudFieldOption[] = [
@@ -111,6 +113,26 @@ const campusStatusOptions: CrudFieldOption[] = [
 const semesterOptions: CrudFieldOption[] = [
     { value: 1, label: "Học kỳ 1" },
     { value: 2, label: "Học kỳ 2" },
+];
+
+const classTypeOptions: CrudFieldOption[] = [
+    { value: "REGULAR", label: "Lớp đại trà" },
+    { value: "TWO_SESSION", label: "Lớp 2 buổi" },
+    { value: "BOARDING", label: "Lớp bán trú" },
+    { value: "SPECIAL", label: "Lớp đặc thù" },
+];
+
+const classStatusOptions: CrudFieldOption[] = [
+    { value: "active", label: "Đang hoạt động" },
+    { value: "inactive", label: "Tạm ngưng" },
+    { value: "suspended", label: "Tạm đình chỉ" },
+    { value: "closed", label: "Đã kết thúc" },
+];
+
+const academicYearStatusOptions: CrudFieldOption[] = [
+    { value: "DRAFT", label: "Nháp" },
+    { value: "ACTIVE", label: "Đang áp dụng" },
+    { value: "CLOSED", label: "Đã kết thúc" },
 ];
 
 const conductOptions: CrudFieldOption[] = [
@@ -235,6 +257,27 @@ export const CATALOG_DEFS: CatalogDef[] = [
         description: "Học kỳ trong năm học, dùng cho bảng điểm học sinh.",
         storageKey: "can-tho-catalog-semester",
         seed: semesterOptions,
+    },
+    {
+        key: "class-type",
+        title: "Loại lớp",
+        description: "Phân loại lớp học theo hình thức tổ chức dạy học.",
+        storageKey: "can-tho-catalog-class-type",
+        seed: classTypeOptions,
+    },
+    {
+        key: "class-status",
+        title: "Trạng thái lớp học",
+        description: "Trạng thái hoạt động của từng lớp học trong năm học.",
+        storageKey: "can-tho-catalog-class-status",
+        seed: classStatusOptions,
+    },
+    {
+        key: "academic-year-status",
+        title: "Trạng thái năm học",
+        description: "Trạng thái năm học: nháp, đang áp dụng hay đã kết thúc.",
+        storageKey: "can-tho-catalog-academic-year-status",
+        seed: academicYearStatusOptions,
     },
     {
         key: "conduct",
