@@ -14,8 +14,11 @@ import GISPage from "@/pages/GIS";
 import HomePage from "@/pages/Home";
 import ReportsPage from "@/pages/Reports";
 import SchoolPage from "@/pages/Schools";
-import TeachingPage from "@/pages/Teaching";
 import TimetablePage from "@/pages/Timetable";
+
+import OperationsDashboardPage from "@/pages/OperationsDashboard";
+import CatalogsPage from "@/pages/Catalogs";
+import TasksPage from "@/pages/Tasks";
 
 
 
@@ -28,11 +31,13 @@ function AppRouter() {
 
         {/* Operations */}
         <Route element={<OperationLayout />}>
+          <Route path="/operations" element={<Navigate to="/operations/schools" replace />} />
+
+          <Route path="/operations/dashboard" element={<OperationsDashboardPage />} />
+
           <Route path="/operations/documents" element={<DocumentsPage />} />
 
           <Route path="/operations/timetable" element={<TimetablePage />} />
-
-          <Route path="/operations/teaching" element={<TeachingPage />} />
 
           <Route path="/operations/schools" element={<SchoolPage />} />
 
@@ -40,9 +45,19 @@ function AppRouter() {
 
           <Route path="/operations/reports" element={<ReportsPage />} />
 
+          <Route path="/operations/personnel" element={<Navigate to="/operations/schools?tab=personnel" replace />} />
+
+          <Route path="/operations/sectors" element={<Navigate to="/operations/schools?tab=sectors" replace />} />
+
+          <Route path="/operations/students" element={<Navigate to="/operations/schools?tab=students" replace />} />
+
           <Route path="/operations/alerts" element={<AlertsPage />} />
 
           <Route path="/operations/chatbot" element={<ChatbotPage />} />
+
+          <Route path="/operations/tasks" element={<TasksPage />} />
+
+          <Route path="/operations/catalogs" element={<CatalogsPage />} />
         </Route>
 
         {/* Fallback */}

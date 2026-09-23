@@ -258,7 +258,44 @@
     }
 
 
-    .ai-chat__input {
+.ai-chat__quick {
+    display: flex;
+
+    flex-wrap: wrap;
+
+    gap: 8px;
+
+    padding: 0 4px 4px;
+}
+
+
+.ai-chat__quick-chip {
+    border-radius: 999px;
+
+    background:
+
+        rgba(
+            59,
+            130,
+            246,
+            0.08,
+        );
+
+
+    &:hover {
+        background:
+
+            rgba(
+                59,
+                130,
+                246,
+                0.16,
+            ) !important;
+    }
+}
+
+
+.ai-chat__input {
         align-items: stretch;
 
         flex-direction: column;

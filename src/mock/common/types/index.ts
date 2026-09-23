@@ -55,58 +55,33 @@ export type {
 } from "./user";
 
 export type {
-    RegionMockData,
-} from "./regionMock";
+    Sector,
+    SectorType,
+} from "./sector";
 
 export type {
-    Department,
-} from "./department";
+    Personnel,
+} from "./personnel";
 
 export type {
-    Guardian,
     Student,
+    Transcript,
+    EnrolmentChange,
+    EnrolmentChangeType,
 } from "./student";
 
 export type {
-    AcademicRecord,
-    SubjectScore,
-} from "./academicRecord";
+    SchoolFacility,
+    SchoolFacilityCategory,
+} from "./schoolFacility";
 
 export type {
-    EnrollmentChange,
-} from "./enrollmentChange";
+    BoardingRecord,
+} from "./boarding";
 
 export type {
-    CareDemand,
-} from "./careDemand";
-
-export type {
-    TeacherAward,
-} from "./teacherAward";
-
-export type {
-    Facility,
-} from "./facility";
-
-export type {
-    FinanceItem,
-} from "./finance";
-
-export type {
-    SchoolHealthItem,
-} from "./schoolHealth";
-
-export type {
-    StudentDiscipline,
-} from "./studentDiscipline";
-
-export type {
-    PolicyGroup,
-} from "./policyGroup";
-
-export type {
-    WardStats,
-} from "./wardStats";
+    RegionMockData,
+} from "./regionMock";
 
 export type {
     GisCampus,

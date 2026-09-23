@@ -8,6 +8,7 @@ import {
   HomeOutlined,
   LineChartOutlined,
   ReloadOutlined,
+  WarningOutlined,
 } from "@ant-design/icons";
 
 import { Button, Card, Col, Empty, Row, Select, Tag } from "antd";
@@ -35,9 +36,7 @@ import "leaflet/dist/leaflet.css";
 
 import StatsCard from "@/components/dashboard/StatCard";
 
-import { getCurrentRegionMockData, getFocusWardStats } from "@/mock";
-
-import { WARD_FOCUS } from "@/config";
+import { getCurrentRegionMockData } from "@/mock";
 
 import type { GisWard } from "@/mock";
 
@@ -72,14 +71,25 @@ function FocusMap({ bounds }: FocusMapProps) {
    CAMPUS MARKER ICON
 ======================================== */
 
-function createCampusIcon(isMainCampus: boolean) {
+function createCampusIcon(isMainCampus: boolean, hasActiveAlert: boolean) {
   const glyph = renderToStaticMarkup(<BankOutlined />);
 
+  const className = [
+    "gis-campus-marker",
+
+    isMainCampus ? "gis-campus-marker--main" : "gis-campus-marker--sub",
+
+    hasActiveAlert && !isMainCampus ? "gis-campus-marker--alert" : "",
+  ]
+    .filter(Boolean)
+    .join(" ");
+
   return L.divIcon({
-    className: "gis-campus-marker",
+    className,
     html: `
       <div class="gis-campus-marker__pin gis-campus-marker__pin--${isMainCampus ? "main" : "sub"}">
         ${glyph}
+        ${hasActiveAlert && !isMainCampus ? '<span class="gis-campus-marker__dot"></span>' : ""}
       </div>
     `,
     iconSize: [30, 37],
@@ -88,37 +98,22 @@ function createCampusIcon(isMainCampus: boolean) {
   });
 }
 
-const campusMainMarkerIcon = createCampusIcon(true);
-
-const campusSubMarkerIcon = createCampusIcon(false);
-
 /* ========================================
    PAGE
 ======================================== */
 
 function GisPage() {
-  const { gis } = getCurrentRegionMockData();
+  const { gis, alerts } = getCurrentRegionMockData();
 
   const { province, wards, campuses } = gis;
 
-  const focusWard = wards.find(
-    (ward) => ward.id === WARD_FOCUS.gisWardId,
-  ) ?? null;
-
-  const [selectedWardId, setSelectedWardId] = useState(
-    focusWard?.id ?? "all",
-  );
+  const [selectedWardId, setSelectedWardId] = useState("all");
 
   const [selectedCampusId, setSelectedCampusId] = useState("all");
 
   const [mapBounds, setMapBounds] = useState<LatLngBoundsExpression | null>(
-    () =>
-      focusWard
-        ? L.latLngBounds(focusWard.polygon.flat(2))
-        : L.latLngBounds(province.polygons.flat(2)),
+    () => L.latLngBounds(province.polygons.flat(2)),
   );
-
-  const focusWardStats = getFocusWardStats();
 
   /* ========================================
        SELECTED WARD
@@ -155,6 +150,24 @@ function GisPage() {
 
     return campuses.find((campus) => campus.id === selectedCampusId) ?? null;
   }, [campuses, selectedCampusId]);
+
+  const activeAlertCountByCampusId = useMemo(() => {
+    const counter = new Map<string, number>();
+
+    alerts.forEach((alert) => {
+      if (!alert.campusId) {
+        return;
+      }
+
+      if (alert.status === "resolved") {
+        return;
+      }
+
+      counter.set(alert.campusId, (counter.get(alert.campusId) ?? 0) + 1);
+    });
+
+    return counter;
+  }, [alerts]);
 
   const campusesInWard = useMemo(() => {
     if (!selectedWard) {
@@ -426,30 +439,42 @@ function GisPage() {
                     CAMPUS MARKERS
                 ======================================== */}
 
-                {filteredCampuses.map((campus) => (
-                  <Marker
-                    key={campus.id}
-                    position={campus.position}
-                    icon={
-                      campus.isMainCampus
-                        ? campusMainMarkerIcon
-                        : campusSubMarkerIcon
-                    }
-                    eventHandlers={{
-                      click: () => handleCampusSelect(campus.id),
-                    }}
-                  >
-                    <Popup>
-                      <div className="gis-popup">
-                        <strong>{campus.schoolName}</strong>
+                {filteredCampuses.map((campus) => {
+                  const activeAlertCount =
+                    activeAlertCountByCampusId.get(campus.id) ?? 0;
 
-                        <span>{campus.name}</span>
+                  const hasActiveAlert =
+                    activeAlertCount > 0 && !campus.isMainCampus;
 
-                        <p>{campus.address}</p>
-                      </div>
-                    </Popup>
-                  </Marker>
-                ))}
+                  return (
+                    <Marker
+                      key={campus.id}
+                      position={campus.position}
+                      icon={createCampusIcon(campus.isMainCampus, hasActiveAlert)}
+                      eventHandlers={{
+                        click: () => handleCampusSelect(campus.id),
+                      }}
+                    >
+                      <Popup>
+                        <div className="gis-popup">
+                          <strong>{campus.schoolName}</strong>
+
+                          <span>{campus.name}</span>
+
+                          <p>{campus.address}</p>
+
+                          {hasActiveAlert && (
+                            <p className="gis-popup__alert">
+                              <WarningOutlined />
+
+                              {activeAlertCount} cảnh báo cần xử lý
+                            </p>
+                          )}
+                        </div>
+                      </Popup>
+                    </Marker>
+                  );
+                })}
               </MapContainer>
 
               {/* LEGEND */}
@@ -468,6 +493,11 @@ function GisPage() {
                 <div>
                   <span className="gis-map__legend-campus gis-map__legend-campus--sub" />
                   Phân hiệu
+                </div>
+
+                <div>
+                  <span className="gis-map__legend-campus gis-map__legend-campus--alert" />
+                  Phân hiệu có cảnh báo
                 </div>
               </div>
 
@@ -675,50 +705,6 @@ function GisPage() {
                 <strong>{filteredCampuses.length}</strong>
               </div>
             </Card>
-
-            {/* FOCUS WARD MICRO STATS */}
-
-            {focusWardStats.length > 0 && (
-              <Card className="gis-result-card">
-                <div className="gis-sidebar__title">
-                  <BankOutlined />
-
-                  <span>Vi mô Phường Ninh Kiều</span>
-                </div>
-
-                <div className="gis-unit-info__grid">
-                  <span>Giáo viên</span>
-
-                  <strong>
-                    {focusWardStats[0].teacherCount}
-                  </strong>
-
-                  <span>Học sinh đang học</span>
-
-                  <strong>
-                    {focusWardStats[0].studentCount}
-                  </strong>
-
-                  <span>Học 2 buổi</span>
-
-                  <strong>
-                    {focusWardStats[0].twoSessionCount}
-                  </strong>
-
-                  <span>Đối tượng chính sách</span>
-
-                  <strong>
-                    {focusWardStats[0].policyStudentCount}
-                  </strong>
-
-                  <span>Biến động sỉ số</span>
-
-                  <strong>
-                    {focusWardStats[0].enrollmentChangeCount}
-                  </strong>
-                </div>
-              </Card>
-            )}
           </div>
         </Col>
       </Row>

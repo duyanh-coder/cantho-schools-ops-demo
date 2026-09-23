@@ -1,0 +1,21 @@
+.catalog-page {
+    &__toolbar {
+        display: flex;
+
+        align-items: center;
+
+        gap: 16px;
+
+        margin-bottom: 20px;
+    }
+
+    &__select {
+        width: 280px;
+    }
+
+    &__hint {
+        color: #6b7280;
+
+        font-size: 13px;
+    }
+}

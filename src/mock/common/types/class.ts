@@ -11,7 +11,5 @@ export interface SchoolClass {
 
     academicYear: string;
 
-    homeroomTeacherId?: string;
-
     status: "active" | "inactive";
 }

@@ -1,8 +1,3 @@
-import type {
-    WardStats,
-} from "./wardStats";
-
-
 export type GisPosition = [
     number,
     number,
@@ -74,6 +69,4 @@ export interface GisMockData {
     wards: GisWard[];
 
     campuses: GisCampus[];
-
-    wardStats: WardStats[];
 }

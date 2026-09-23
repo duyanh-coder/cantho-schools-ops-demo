@@ -1,0 +1,66 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="340" viewBox="0 0 960 340" font-family="Arial, Helvetica, sans-serif">
+  <!-- definitions / arrow marker -->
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L8,3 L0,6 Z" fill="#3b82f6"/>
+    </marker>
+  </defs>
+
+  <!-- ============ CARD 1: Tìm ============ -->
+  <rect x="70" y="42" width="250" height="196" rx="20" fill="#ffffff" stroke="#2563eb" stroke-width="2.5"/>
+  <!-- icon circle -->
+  <circle cx="195" cy="108" r="34" fill="#eff6ff" stroke="#2563eb" stroke-width="2.5"/>
+  <!-- magnifier icon -->
+  <circle cx="190" cy="103" r="14" fill="none" stroke="#2563eb" stroke-width="4"/>
+  <line x1="200" y1="113" x2="212" y2="125" stroke="#2563eb" stroke-width="4" stroke-linecap="round"/>
+  <!-- badge number -->
+  <circle cx="168" cy="82" r="13" fill="#2563eb"/>
+  <text x="168" y="87" text-anchor="middle" font-size="13" font-weight="700" fill="#ffffff">1</text>
+
+  <text x="195" y="165" text-anchor="middle" font-size="19" font-weight="700" fill="#111827">Tìm</text>
+  <text x="195" y="188" text-anchor="middle" font-size="13" fill="#475569">Xem &amp; tìm bản ghi sẵn có</text>
+  <text x="195" y="207" text-anchor="middle" font-size="12" fill="#64748b">theo từ khóa bất kỳ</text>
+
+  <!-- arrow 1 -> 2 -->
+  <line x1="320" y1="140" x2="360" y2="140" stroke="#3b82f6" stroke-width="3" marker-end="url(#arrow)"/>
+
+  <!-- ============ CARD 2: Thêm / Sửa ============ -->
+  <rect x="360" y="42" width="250" height="196" rx="20" fill="#ffffff" stroke="#2563eb" stroke-width="2.5"/>
+  <!-- icon circle -->
+  <circle cx="485" cy="108" r="34" fill="#eff6ff" stroke="#2563eb" stroke-width="2.5"/>
+  <!-- pencil icon -->
+  <path d="M474 118 L496 96 L502 102 L480 124 Z" fill="#2563eb"/>
+  <line x1="472" y1="128" x2="494" y2="130" stroke="#2563eb" stroke-width="4" stroke-linecap="round"/>
+  <!-- badge number -->
+  <circle cx="458" cy="82" r="13" fill="#2563eb"/>
+  <text x="458" y="87" text-anchor="middle" font-size="13" font-weight="700" fill="#ffffff">2</text>
+
+  <text x="485" y="165" text-anchor="middle" font-size="19" font-weight="700" fill="#111827">Thêm / Sửa</text>
+  <text x="485" y="188" text-anchor="middle" font-size="13" fill="#475569">Thêm mới hoặc chỉnh sửa ngay</text>
+  <text x="485" y="207" text-anchor="middle" font-size="12" fill="#64748b">điền thông tin bên dưới bảng</text>
+
+  <!-- arrow 2 -> 3 -->
+  <line x1="610" y1="140" x2="650" y2="140" stroke="#3b82f6" stroke-width="3" marker-end="url(#arrow)"/>
+
+  <!-- ============ CARD 3: Excel ============ -->
+  <rect x="650" y="42" width="250" height="196" rx="20" fill="#ffffff" stroke="#2563eb" stroke-width="2.5"/>
+  <!-- icon circle -->
+  <circle cx="775" cy="108" r="34" fill="#eff6ff" stroke="#2563eb" stroke-width="2.5"/>
+  <!-- spreadsheet icon -->
+  <rect x="765" y="92" width="20" height="26" rx="3" fill="#2563eb"/>
+  <line x1="768" y1="98" x2="782" y2="98" stroke="#ffffff" stroke-width="2"/>
+  <line x1="768" y1="104" x2="782" y2="104" stroke="#ffffff" stroke-width="2"/>
+  <line x1="768" y1="110" x2="782" y2="110" stroke="#ffffff" stroke-width="2"/>
+  <!-- badge number -->
+  <circle cx="748" cy="82" r="13" fill="#2563eb"/>
+  <text x="748" y="87" text-anchor="middle" font-size="13" font-weight="700" fill="#ffffff">3</text>
+
+  <text x="775" y="165" text-anchor="middle" font-size="19" font-weight="700" fill="#111827">Excel</text>
+  <text x="775" y="188" text-anchor="middle" font-size="13" fill="#475569">Xuất / Nhập qua Excel</text>
+  <text x="775" y="207" text-anchor="middle" font-size="12" fill="#64748b">trao đổi dữ liệu bảng tính</text>
+
+  <!-- footer note -->
+  <rect x="150" y="262" width="660" height="46" rx="23" fill="#f0fdf4" stroke="#22c55e" stroke-width="2"/>
+  <text x="480" y="280" text-anchor="middle" font-size="15" font-weight="700" fill="#166534">Mọi thay đổi đã được lưu lại ngay</text>
+  <text x="480" y="298" text-anchor="middle" font-size="12" fill="#475569">không cần bấm nút lưu — dữ liệu tự động cập nhật</text>
+</svg>

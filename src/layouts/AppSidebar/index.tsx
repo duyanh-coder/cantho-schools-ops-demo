@@ -1,10 +1,11 @@
 import {
     AppstoreOutlined,
     CalendarOutlined,
+    DashboardOutlined,
     EnvironmentOutlined,
     FileTextOutlined,
-    ProfileOutlined,
     RobotOutlined,
+    SettingOutlined,
     SolutionOutlined,
     WarningOutlined,
 } from "@ant-design/icons";
@@ -37,39 +38,44 @@ const menuItems: MenuItem[] = [
         label: "Tổng quan",
     },
     {
-        key: "/operations/gis",
+        key: "/dashboard",
+        icon: <DashboardOutlined />,
+        label: "Dashboard",
+    },
+    {
+        key: "/gis",
         icon: <EnvironmentOutlined />,
         label: "Bản đồ GIS",
     },
     {
-        key: "/operations/schools",
+        key: "/schools",
         icon: <SolutionOutlined />,
         label: "Trường & Cơ sở",
     },
     {
-        key: "/operations/timetable",
+        key: "/timetable",
         icon: <CalendarOutlined />,
         label: "Thời khóa biểu",
     },
     {
-        key: "/operations/reports",
-        icon: <ProfileOutlined />,
-        label: "Báo cáo",
-    },
-    {
-        key: "/operations/documents",
+        key: "/documents",
         icon: <FileTextOutlined />,
         label: "Văn bản điện tử",
     },
     {
-        key: "/operations/alerts",
+        key: "/alerts",
         icon: <WarningOutlined />,
         label: "Cảnh báo",
     },
     {
-        key: "/operations/chatbot",
+        key: "/chatbot",
         icon: <RobotOutlined />,
         label: "Trợ lý AI",
+    },
+    {
+        key: "/admin",
+        icon: <SettingOutlined />,
+        label: "Quản trị",
     },
 ];
 
@@ -96,7 +102,7 @@ function AppSidebar() {
 
                 <div className="app-sidebar__brand-text">
                     <strong>
-                        Cần Thơ
+                        Cà Mau
                     </strong>
 
                     <span>

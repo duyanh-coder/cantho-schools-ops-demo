@@ -11,43 +11,16 @@ import type { TaskItem } from "./task";
 import type { ReportItem } from "./report";
 import type { TeachingAttendance } from "./teachingAttendance";
 import type { User } from "./user";
+import type { Sector } from "./sector";
+import type { Personnel } from "./personnel";
+import type { Student } from "./student";
+import type { Transcript } from "./student";
+import type { EnrolmentChange } from "./student";
+import type { SchoolFacility } from "./schoolFacility";
+import type { BoardingRecord } from "./boarding";
 import type {
     GisMockData,
 } from "./gis";
-import type {
-    Department,
-} from "./department";
-import type {
-    Guardian,
-    Student,
-} from "./student";
-import type {
-    AcademicRecord,
-} from "./academicRecord";
-import type {
-    EnrollmentChange,
-} from "./enrollmentChange";
-import type {
-    CareDemand,
-} from "./careDemand";
-import type {
-    TeacherAward,
-} from "./teacherAward";
-import type {
-    Facility,
-} from "./facility";
-import type {
-    FinanceItem,
-} from "./finance";
-import type {
-    SchoolHealthItem,
-} from "./schoolHealth";
-import type {
-    StudentDiscipline,
-} from "./studentDiscipline";
-import type {
-    PolicyGroup,
-} from "./policyGroup";
 
 
 export interface RegionMockData {
@@ -79,27 +52,17 @@ export interface RegionMockData {
 
     users: User[];
 
-    departments: Department[];
+    sectors: Sector[];
+
+    personnel: Personnel[];
 
     students: Student[];
 
-    guardians: Guardian[];
+    transcripts: Transcript[];
 
-    academicRecords: AcademicRecord[];
+    enrolmentChanges: EnrolmentChange[];
 
-    enrollmentChanges: EnrollmentChange[];
+    facilities: SchoolFacility[];
 
-    careDemands: CareDemand[];
-
-    teacherAwards: TeacherAward[];
-
-    facilities: Facility[];
-
-    finances: FinanceItem[];
-
-    schoolHealth: SchoolHealthItem[];
-
-    studentDisciplines: StudentDiscipline[];
-
-    policyGroups: PolicyGroup[];
+    boarding: BoardingRecord[];
 }

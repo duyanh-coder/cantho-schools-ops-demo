@@ -71,14 +71,6 @@ const operationFeatures: OperationFeature[] = [
     icon: <CalendarOutlined />,
   },
   {
-    key: "teaching",
-    title: "Điểm danh giảng dạy",
-    description: "Theo dõi tình hình thực hiện kế hoạch giảng dạy.",
-    path: "/operations/teaching",
-    colorClass: "feature-card--teaching",
-    icon: <SafetyCertificateOutlined />,
-  },
-  {
     key: "schools",
     title: "Trường & Cơ sở",
     description: "Quản lý thông tin trường học và các cơ sở trực thuộc.",
@@ -383,7 +375,7 @@ function HomePage() {
 
                   <Button
                     size="large"
-                    onClick={() => navigate("/operations/documents")}
+                    onClick={() => navigate("/operations/schools")}
                   >
                     Vào trang điều hành
                   </Button>
@@ -418,7 +410,7 @@ function HomePage() {
                     </div>
 
                     <div>
-                      <strong>08+</strong>
+                      <strong>07+</strong>
 
                       <span>Chức năng điều hành</span>
                     </div>

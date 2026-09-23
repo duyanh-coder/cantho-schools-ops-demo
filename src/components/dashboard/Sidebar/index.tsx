@@ -1,10 +1,10 @@
 import {
+  AppstoreOutlined,
   BarChartOutlined,
   CalendarOutlined,
   EnvironmentOutlined,
   FileTextOutlined,
   RobotOutlined,
-  SafetyCertificateOutlined,
   SolutionOutlined,
   WarningOutlined,
 } from "@ant-design/icons";
@@ -15,13 +15,25 @@ import type { MenuProps } from "antd";
 
 import { useLocation, useNavigate } from "react-router-dom";
 
+import { CATALOG_DEFS } from "@/config/catalogs";
+
 import "./style.scss";
 
 type MenuItem = Required<MenuProps>["items"][number];
 
 const { Sider } = Layout;
 
+const catalogMenuItems: MenuItem[] = CATALOG_DEFS.map((catalog) => ({
+  key: `/operations/catalogs?key=${catalog.key}`,
+  label: catalog.title,
+}));
+
 const menuItems: MenuItem[] = [
+  {
+    key: "/operations/schools",
+    icon: <SolutionOutlined />,
+    label: "Trường & Cơ sở",
+  },
   {
     key: "/operations/documents",
     icon: <FileTextOutlined />,
@@ -31,16 +43,6 @@ const menuItems: MenuItem[] = [
     key: "/operations/timetable",
     icon: <CalendarOutlined />,
     label: "Thời khóa biểu",
-  },
-  {
-    key: "/operations/teaching",
-    icon: <SafetyCertificateOutlined />,
-    label: "Điểm danh giảng dạy",
-  },
-  {
-    key: "/operations/schools",
-    icon: <SolutionOutlined />,
-    label: "Trường & Cơ sở",
   },
   {
     key: "/operations/gis",
@@ -62,6 +64,15 @@ const menuItems: MenuItem[] = [
     icon: <RobotOutlined />,
     label: "Trợ lý AI",
   },
+  {
+    type: "divider",
+  },
+  {
+    key: "/operations/catalogs",
+    icon: <AppstoreOutlined />,
+    label: "Danh mục",
+    children: catalogMenuItems,
+  },
 ];
 
 interface DashboardSidebarProps {
@@ -77,6 +88,15 @@ const DashboardSidebar = ({
   const navigate = useNavigate();
 
   const location = useLocation();
+
+  const menuSelectedKey =
+    location.pathname === "/operations/catalogs"
+      ? `${location.pathname}${location.search}`
+      : location.pathname;
+
+  const handleMenuClick: MenuProps["onClick"] = (item) => {
+    navigate(item.key);
+  };
 
   const handleBrandClick = () => {
     sessionStorage.removeItem("home-scroll-position");
@@ -113,9 +133,9 @@ const DashboardSidebar = ({
 
       <Menu
         mode="inline"
-        selectedKeys={[location.pathname]}
+        selectedKeys={[menuSelectedKey]}
         items={menuItems}
-        onClick={(item) => navigate(item.key)}
+        onClick={handleMenuClick}
         className="dashboard-sidebar__menu"
       />
     </Sider>

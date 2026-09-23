@@ -1,17 +1,3 @@
-export interface Guardian {
-    id: string;
-
-    studentId: string;
-
-    relation: "father" | "mother" | "guardian";
-
-    fullName: string;
-
-    phone: string;
-
-    isPrimary: boolean;
-}
-
 export interface Student {
     id: string;
 
@@ -19,9 +5,7 @@ export interface Student {
 
     campusId: string;
 
-    classId: string;
-
-    wardId: string;
+    classId?: string;
 
     code: string;
 
@@ -29,19 +13,51 @@ export interface Student {
 
     gender: "male" | "female";
 
-    birthDate: string;
-
-    ethnicGroup?: string;
-
-    religion?: string;
+    dob: string;
 
     address: string;
 
-    guardianIds: string[];
+    guardianPhone: string;
 
-    policyGroupIds: string[];
+    status: "studying" | "pending" | "suspended";
+}
 
-    status: "studying" | "transferred" | "dropped" | "graduated" | "paused";
+export interface Transcript {
+    id: string;
 
-    enrolledDate: string;
+    studentId: string;
+
+    subjectId: string;
+
+    semester: 1 | 2;
+
+    academicYear: string;
+
+    score: number;
+
+    conduct: string;
+}
+
+export type EnrolmentChangeType =
+    | "increase"
+    | "decrease";
+
+export interface EnrolmentChange {
+    id: string;
+
+    schoolId: string;
+
+    campusId: string;
+
+    classId?: string;
+
+    changeType: EnrolmentChangeType;
+
+    studentName: string;
+
+    effectiveDate: string;
+
+    reason: string;
+
+    status: "completed" | "pending";
 }

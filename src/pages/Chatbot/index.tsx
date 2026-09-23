@@ -37,6 +37,13 @@ interface ChatMessage {
 }
 
 
+const quickPrompts: string[] = [
+    "Thống kê số bán trú tháng này",
+    "Danh sách nhân sự mới tuyển",
+    "Lập thời khóa biểu tuần tới",
+];
+
+
 const initialMessages: ChatMessage[] = [
     {
         id: "chat-001",
@@ -310,6 +317,37 @@ function ChatbotPage() {
                 ======================================== */}
 
                 <div className="ai-chat__input">
+
+                    <div className="ai-chat__quick">
+                        {
+                            quickPrompts.map(
+                                (
+                                    prompt,
+                                ) => (
+                                    <Button
+                                        key={
+                                            prompt
+                                        }
+                                        type="text"
+                                        size="small"
+                                        onClick={
+                                            () => {
+                                                setMessage(
+                                                    prompt,
+                                                );
+                                            }
+                                        }
+                                        className="ai-chat__quick-chip"
+                                    >
+                                        {
+                                            prompt
+                                        }
+                                    </Button>
+                                ),
+                            )
+                        }
+                    </div>
+
 
                     <Input.TextArea
                         value={
