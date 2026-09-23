@@ -21,7 +21,7 @@ import type {
 
 export const CAMPUSES_STORAGE_KEY = "can-tho-campuses";
 
-const LEGACY_ID_MAP: Record<string, string> = {
+export const CAMPUS_LEGACY_ID_MAP: Record<string, string> = {
     "can-tho-campus-001": "campus-main",
     "can-tho-campus-002": "campus-chu-van-an",
     "can-tho-campus-003": "campus-thoi-binh",
@@ -67,7 +67,7 @@ const normalizeType = (
 };
 
 const normalizeCampus = (input: Campus): Campus => {
-    const id = LEGACY_ID_MAP[input.id] ?? input.id;
+    const id = CAMPUS_LEGACY_ID_MAP[input.id] ?? input.id;
 
     const location = input.location &&
         Number.isFinite(input.location?.lat) &&

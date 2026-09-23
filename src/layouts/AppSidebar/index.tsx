@@ -50,7 +50,7 @@ const menuItems: MenuItem[] = [
     {
         key: "/schools",
         icon: <SolutionOutlined />,
-        label: "Trường & Cơ sở",
+        label: "Trường & Phân hiệu",
     },
     {
         key: "/timetable",

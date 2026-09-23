@@ -24,7 +24,7 @@ import {
 
 import CampusesPage from "@/pages/Campuses";
 
-import PersonnelPage from "@/pages/Personnel";
+import PersonnelList from "@/pages/Personnel/PersonnelList";
 
 import SectorPage from "@/pages/Sector";
 
@@ -180,7 +180,7 @@ function SchoolsHub() {
                 key: "personnel",
                 label: "Nhân sự",
                 children: (
-                    <PersonnelPage compact schoolId={schoolId} />
+                    <PersonnelList compact schoolId={schoolId} />
                 ),
             },
             {
@@ -205,10 +205,10 @@ function SchoolsHub() {
                 <header className="page-head">
                     <div className="page-head__title">
                         <span className="page-head__eyebrow">
-                            SCHOOLS & CAMPUSES
+                            TRƯỜNG & PHÂN HIỆU
                         </span>
 
-                        <h2>Trường & Cơ sở</h2>
+                        <h2>Trường & Phân hiệu</h2>
 
                         <p>
                             Quản lý tập trung trường học, cơ sở trực thuộc cùng

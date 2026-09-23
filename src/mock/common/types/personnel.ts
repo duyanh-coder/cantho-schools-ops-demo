@@ -25,6 +25,14 @@ export interface Personnel {
 
     email: string;
 
+    address?: string;
+
+    wardId?: string;
+
+    careerStartDate?: string;
+
+    schoolStartDate?: string;
+
     isExcellentTeacher: boolean;
 
     achievements: string;

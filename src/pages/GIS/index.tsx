@@ -15,6 +15,8 @@ import { Button, Card, Col, Empty, Row, Select, Tag } from "antd";
 
 import { useEffect, useMemo, useState } from "react";
 
+import { useSearchParams } from "react-router-dom";
+
 import type { LatLngBoundsExpression } from "leaflet";
 
 import L from "leaflet";
@@ -107,12 +109,33 @@ function GisPage() {
 
   const { province, wards, campuses } = gis;
 
-  const [selectedWardId, setSelectedWardId] = useState("all");
+  const [searchParams] = useSearchParams();
 
-  const [selectedCampusId, setSelectedCampusId] = useState("all");
+  const presetCampusId = searchParams.get("campus");
+
+  const presetCampus = useMemo(
+    () => campuses.find((campus) => campus.id === presetCampusId) ?? null,
+    [campuses, presetCampusId],
+  );
+
+  const [selectedWardId, setSelectedWardId] = useState(
+    presetCampus?.wardId ?? "all",
+  );
+
+  const [selectedCampusId, setSelectedCampusId] = useState<string>(
+    presetCampus ? presetCampus.id : "all",
+  );
 
   const [mapBounds, setMapBounds] = useState<LatLngBoundsExpression | null>(
-    () => L.latLngBounds(province.polygons.flat(2)),
+    () => {
+      if (presetCampus) {
+        return L.latLngBounds([
+          [presetCampus.position[0], presetCampus.position[1]],
+        ]);
+      }
+
+      return L.latLngBounds(province.polygons.flat(2));
+    },
   );
 
   /* ========================================

@@ -1,9 +1,12 @@
 import {
     ApartmentOutlined,
     BankOutlined,
+    CompassOutlined,
     EditOutlined,
     EnvironmentOutlined,
     EyeOutlined,
+    HistoryOutlined,
+    MoreOutlined,
     PlusOutlined,
     ReloadOutlined,
     SearchOutlined,
@@ -14,12 +17,13 @@ import {
 
 import {
     Button,
+    Divider,
+    Dropdown,
     Form,
     Input,
     InputNumber,
     Modal,
     Select,
-    Space,
     Table,
     Tag,
     message,
@@ -53,6 +57,7 @@ import type {
     CampusHistoryEventType,
     CampusStatus,
     CampusType,
+    Personnel,
 } from "@/mock/common/types";
 
 import {
@@ -66,6 +71,10 @@ import {
 import {
     useCampusHistory,
 } from "@/store/useCampusHistory";
+
+import {
+    usePersonnel,
+} from "@/store/usePersonnel";
 
 import "./style.scss";
 
@@ -118,6 +127,7 @@ const nowIso = (): string => {
 
 function buildCampusStats(
     campusId: string,
+    personnel: Personnel[] = canThoMockData.personnel,
 ) {
     const classCount = canThoMockData.classes.filter(
         (item) => item.campusId === campusId,
@@ -127,8 +137,10 @@ function buildCampusStats(
         (item) => item.campusId === campusId,
     ).length;
 
-    const teacherCount = canThoMockData.teachers.filter(
-        (item) => item.campusIds.includes(campusId),
+    const teacherCount = personnel.filter(
+        (item) =>
+            item.campusIds.includes(campusId) &&
+            item.subjectIds.length > 0,
     ).length;
 
     const roomCount = canThoMockData.facilities.filter(
@@ -158,6 +170,8 @@ const CampusesPage = ({
     const campusesApi = useCampuses(schoolId);
 
     const historyApi = useCampusHistory();
+
+    const personnelApi = usePersonnel();
 
     const campusStatusOptions =
         useCatalogOptions("campus-status");
@@ -203,6 +217,14 @@ const CampusesPage = ({
 
     const kpis = useMemo(
         () => {
+            const headquartersCount = campuses.filter(
+                (campus) => campus.type === "HEADQUARTERS",
+            ).length;
+
+            const branchCount = campuses.filter(
+                (campus) => campus.type === "BRANCH",
+            ).length;
+
             const classCount = campuses.reduce(
                 (total, campus) => total + buildCampusStats(campus.id).classCount,
                 0,
@@ -214,46 +236,61 @@ const CampusesPage = ({
             );
 
             const teacherCount = campuses.reduce(
-                (total, campus) => total + buildCampusStats(campus.id).teacherCount,
+                (total, campus) =>
+                    total + buildCampusStats(campus.id, personnelApi.items).teacherCount,
                 0,
             );
 
             const roomCount = campuses.reduce(
-                (total, campus) => total + buildCampusStats(campus.id).roomCount,
+                (total, campus) => total + buildCampusStats(campus.id, personnelApi.items).roomCount,
                 0,
             );
 
             return [
                 {
-                    title: "Cơ sở",
+                    title: "Tổng cơ sở",
                     value: campuses.length,
                     icon: <EnvironmentOutlined />,
                     tone: "blue" as const,
                     note: "trụ sở chính + phân hiệu",
                 },
                 {
-                    title: "Lớp học",
+                    title: "Trụ sở chính",
+                    value: headquartersCount,
+                    icon: <BankOutlined />,
+                    tone: "blue" as const,
+                    note: "cơ quan đầu não trường",
+                },
+                {
+                    title: "Phân hiệu",
+                    value: branchCount,
+                    icon: <ApartmentOutlined />,
+                    tone: "blue" as const,
+                    note: "cơ sở trực thuộc khác",
+                },
+                {
+                    title: "Tổng lớp",
                     value: classCount,
                     icon: <BankOutlined />,
                     tone: "green" as const,
                     note: "lớp trực thuộc cơ sở",
                 },
                 {
-                    title: "Học sinh",
+                    title: "Tổng học sinh",
                     value: studentCount,
-                    icon: <ApartmentOutlined />,
+                    icon: <TeamOutlined />,
                     tone: "orange" as const,
                     note: "đang theo học",
                 },
                 {
-                    title: "Giáo viên",
+                    title: "Tổng giáo viên",
                     value: teacherCount,
-                    icon: <TeamOutlined />,
+                    icon: <CompassOutlined />,
                     tone: "purple" as const,
                     note: "giảng dạy tại cơ sở",
                 },
                 {
-                    title: "Phòng học",
+                    title: "Tổng phòng",
                     value: roomCount,
                     icon: <ToolOutlined />,
                     tone: "purple" as const,
@@ -261,7 +298,7 @@ const CampusesPage = ({
                 },
             ];
         },
-        [campuses],
+        [campuses, personnelApi.items],
     );
 
     const filtered = useMemo(
@@ -321,6 +358,7 @@ const CampusesPage = ({
             isMainCampus: false,
             type: "BRANCH",
             status: "ACTIVE",
+            city: "TP. Cần Thơ",
             latitude: 10.03,
             longitude: 105.77,
         });
@@ -334,6 +372,7 @@ const CampusesPage = ({
         form.setFieldsValue({
             ...campus,
             schoolId,
+            city: "TP. Cần Thơ",
         });
 
         setOpen(true);
@@ -344,12 +383,16 @@ const CampusesPage = ({
     ) => {
         const historyActor = "Ban Giám hiệu";
 
+        const campusValues: Record<string, unknown> = { ...values };
+
+        delete campusValues.city;
+
         if (editing) {
             const previous = editing;
 
             campusesApi.update({
                 ...previous,
-                ...values,
+                ...campusValues,
                 schoolId,
             } as Campus);
 
@@ -385,7 +428,7 @@ const CampusesPage = ({
             message.success("Đã cập nhật cơ sở");
         } else {
             campusesApi.create({
-                ...values,
+                ...campusValues,
                 id: `campus-${Date.now().toString(36)}`,
                 schoolId,
             } as Campus);
@@ -465,9 +508,16 @@ const CampusesPage = ({
 
     const columns: ColumnsType<Campus> = [
             {
-                title: "Mã",
+                title: "STT",
+                key: "__index",
+                width: 48,
+                render: (_: unknown, __: Campus, index: number) =>
+                    index + 1,
+            },
+            {
+                title: "Mã cơ sở",
                 dataIndex: "code",
-                width: 110,
+                width: 100,
                 render: (value: string) => (
                     <Tag>{value}</Tag>
                 ),
@@ -475,7 +525,7 @@ const CampusesPage = ({
             {
                 title: "Tên cơ sở",
                 dataIndex: "name",
-                width: 260,
+                width: 200,
                 render: (value: string, campus: Campus) => (
                     <div className="campus-cell">
                         <strong>{value}</strong>
@@ -491,7 +541,7 @@ const CampusesPage = ({
             {
                 title: "Loại",
                 dataIndex: "type",
-                width: 130,
+                width: 110,
                 render: (value: CampusType) => (
                     value === "HEADQUARTERS" ? (
                         <Tag color="purple">
@@ -505,31 +555,15 @@ const CampusesPage = ({
                 ),
             },
             {
-                title: "Địa chỉ",
-                dataIndex: "address",
-                width: 280,
-                render: (value: string) => (
-                    <span className="campus-cell__address">{value}</span>
-                ),
-            },
-            {
                 title: "Phường/Xã",
                 dataIndex: "wardId",
-                width: 150,
+                width: 130,
                 render: (value: string) => WARD_NAME(value),
-            },
-            {
-                title: "Cán bộ phụ trách",
-                dataIndex: "managerId",
-                width: 180,
-                render: (value: string | undefined) => MANAGER_NAME(value) || (
-                    <span className="crud-panel__muted">—</span>
-                ),
             },
             {
                 title: "Trạng thái",
                 dataIndex: "status",
-                width: 130,
+                width: 120,
                 render: (value: CampusStatus) => (
                     <Tag color={STATUS_TONE[value]}>{labelMaps.status.get(value)}</Tag>
                 ),
@@ -537,35 +571,61 @@ const CampusesPage = ({
             {
                 title: "",
                 key: "__actions",
-                width: 150,
+                width: 56,
                 align: "right",
                 render: (_: unknown, campus: Campus) => (
-                    <Space size={4}>
+                    <Dropdown
+                        trigger={["click"]}
+                        menu={{
+                            items: [
+                                {
+                                    key: "view",
+                                    icon: <EyeOutlined />,
+                                    label: "Xem chi tiết",
+                                    onClick: () =>
+                                        navigate(`/operations/campuses/${campus.id}`),
+                                },
+                                {
+                                    key: "edit",
+                                    icon: <EditOutlined />,
+                                    label: "Chỉnh sửa",
+                                    onClick: () => openEdit(campus),
+                                },
+                                {
+                                    key: "gis",
+                                    icon: <EnvironmentOutlined />,
+                                    label: "Xem GIS",
+                                    onClick: () =>
+                                        navigate(`/operations/gis?campus=${campus.id}`),
+                                },
+                                {
+                                    key: "history",
+                                    icon: <HistoryOutlined />,
+                                    label: "Xem lịch sử",
+                                    onClick: () =>
+                                        navigate(
+                                            `/operations/campuses/${campus.id}?tab=history`,
+                                        ),
+                                },
+                                {
+                                    type: "divider",
+                                },
+                                {
+                                    key: "status",
+                                    icon: <SwapOutlined />,
+                                    label: "Đổi trạng thái hoạt động",
+                                    onClick: () => openStatusChange(campus),
+                                },
+                            ],
+                        }}
+                    >
                         <Button
                             type="text"
                             size="small"
-                            icon={<EyeOutlined />}
-                            title="Xem chi tiết"
-                            onClick={() =>
-                                navigate(`/operations/campuses/${campus.id}`)}
+                            icon={<MoreOutlined />}
+                            title="Thao tác"
                         />
-
-                        <Button
-                            type="text"
-                            size="small"
-                            icon={<EditOutlined />}
-                            title="Chỉnh sửa cơ sở"
-                            onClick={() => openEdit(campus)}
-                        />
-
-                        <Button
-                            type="text"
-                            size="small"
-                            icon={<SwapOutlined />}
-                            title="Đổi trạng thái hoạt động"
-                            onClick={() => openStatusChange(campus)}
-                        />
-                    </Space>
+                    </Dropdown>
                 ),
             },
         ];
@@ -616,14 +676,14 @@ const CampusesPage = ({
                 <header className="page-head">
                     <div className="page-head__title">
                         <span className="page-head__eyebrow">
-                            CAMPUS MANAGEMENT
+                            TRƯỜNG &amp; PHÂN HIỆU
                         </span>
 
-                        <h2>Cơ sở trực thuộc</h2>
+                        <h2>Danh sách cơ sở</h2>
 
                         <p>
-                            Quản lý trụ sở chính và các phân hiệu theo cơ sở,
-                            địa chỉ, tọa độ GIS và lịch sử hoạt động.
+                            Quản lý trụ sở chính và các phân hiệu của
+                            Trường THCS Ninh Kiều.
                         </p>
                     </div>
                 </header>
@@ -652,11 +712,6 @@ const CampusesPage = ({
                         </span>
 
                         <h3>Quản lý cơ sở trực thuộc</h3>
-
-                        <p>
-                            {filtered.length} cơ sở ·
-                            Lưu tự động trên trình duyệt (localStorage)
-                        </p>
                     </div>
 
                     <div className="crud-panel__actions">
@@ -744,8 +799,9 @@ const CampusesPage = ({
                 title={editing ? "Cập nhật cơ sở" : "Thêm mới cơ sở"}
                 okText="Lưu"
                 cancelText="Hủy"
-                width={720}
+                width={760}
                 destroyOnHidden
+                styles={{ body: { maxHeight: "70vh", overflowY: "auto" } }}
                 onCancel={() => {
                     setOpen(false);
 
@@ -758,68 +814,155 @@ const CampusesPage = ({
                     layout="vertical"
                     onFinish={handleFinish}
                 >
-                    <Form.Item
-                        name="name"
-                        label="Tên cơ sở"
-                        required
-                        rules={[{ required: true, message: "Vui lòng nhập tên cơ sở" }]}
-                    >
-                        <Input placeholder="VD: Phân hiệu An Cư" />
-                    </Form.Item>
+                    <div className="campus-form-section">
+                        <Divider titlePlacement="left" plain>
+                            Thông tin cơ bản
+                        </Divider>
 
-                    <Form.Item
-                        name="code"
-                        label="Mã cơ sở"
-                        required
-                        rules={[{ required: true, message: "Vui lòng nhập mã cơ sở" }]}
-                    >
-                        <Input placeholder="VD: NK-AC" />
-                    </Form.Item>
+                        <Form.Item
+                            name="name"
+                            label="Tên cơ sở"
+                            required
+                            rules={[{ required: true, message: "Vui lòng nhập tên cơ sở" }]}
+                        >
+                            <Input placeholder="VD: Phân hiệu An Cư" />
+                        </Form.Item>
 
-                    <Form.Item name="type" label="Loại cơ sở">
-                        <Select options={campusTypeOptions} />
-                    </Form.Item>
+                        <Form.Item
+                            name="code"
+                            label="Mã cơ sở"
+                            required
+                            rules={[
+                                { required: true, message: "Vui lòng nhập mã cơ sở" },
+                                {
+                                    validator: (_, value: string) => {
+                                        const code = String(value ?? "").trim().toUpperCase();
 
-                    <Form.Item name="status" label="Trạng thái">
-                        <Select options={campusStatusOptions} />
-                    </Form.Item>
+                                        if (!code) {
+                                            return Promise.resolve();
+                                        }
 
-                    <Form.Item name="address" label="Địa chỉ">
-                        <Input.TextArea rows={2} placeholder="Địa chỉ trụ sở" />
-                    </Form.Item>
+                                        const duplicated = campuses.some(
+                                            (campus) =>
+                                                campus.code.toUpperCase() === code &&
+                                                campus.id !== editing?.id,
+                                        );
 
-                    <Form.Item name="wardId" label="Phường/Xã">
-                        <Select
-                            showSearch
-                            optionFilterProp="label"
-                            options={wardOptions}
-                        />
-                    </Form.Item>
+                                        return duplicated
+                                            ? Promise.reject(
+                                                new Error("Mã cơ sở đã tồn tại, vui lòng nhập mã khác"),
+                                            )
+                                            : Promise.resolve();
+                                    },
+                                },
+                            ]}
+                        >
+                            <Input placeholder="VD: NK-AC" />
+                        </Form.Item>
 
-                    <Form.Item name="managerId" label="Cán bộ phụ trách">
-                        <Select
-                            allowClear
-                            showSearch
-                            optionFilterProp="label"
-                            options={managerOptions}
-                        />
-                    </Form.Item>
+                        <Form.Item
+                            name="type"
+                            label="Loại cơ sở"
+                            required
+                            rules={[{ required: true, message: "Vui lòng chọn loại cơ sở" }]}
+                        >
+                            <Select options={campusTypeOptions} />
+                        </Form.Item>
 
-                    <Form.Item name="phone" label="Số điện thoại">
-                        <Input placeholder="VD: 02923 823 456" />
-                    </Form.Item>
+                        <Form.Item
+                            name="schoolId"
+                            label="Đơn vị quản lý"
+                            required
+                            rules={[{ required: true, message: "Vui lòng chọn đơn vị quản lý" }]}
+                        >
+                            <Select
+                                showSearch
+                                optionFilterProp="label"
+                                options={canThoMockData.schools.map((school) => ({
+                                    value: school.id,
+                                    label: school.name,
+                                }))}
+                            />
+                        </Form.Item>
 
-                    <Form.Item name="email" label="Email">
-                        <Input placeholder="VD: main@ninhkieu.edu.vn" />
-                    </Form.Item>
+                        <Form.Item
+                            name="status"
+                            label="Trạng thái"
+                            required
+                            rules={[{ required: true, message: "Vui lòng chọn trạng thái" }]}
+                        >
+                            <Select options={campusStatusOptions} />
+                        </Form.Item>
+                    </div>
 
-                    <Form.Item name="latitude" label="Vĩ độ" style={{ display: "inline-block", width: "50%" }}>
-                        <InputNumber min={8} max={24} step={0.0001} style={{ width: "100%" }} />
-                    </Form.Item>
+                    <div className="campus-form-section">
+                        <Divider titlePlacement="left" plain>
+                            Địa chỉ
+                        </Divider>
 
-                    <Form.Item name="longitude" label="Kinh độ" style={{ display: "inline-block", width: "50%" }}>
-                        <InputNumber min={103} max={110} step={0.0001} style={{ width: "100%" }} />
-                    </Form.Item>
+                        <Form.Item
+                            name="address"
+                            label="Địa chỉ"
+                            required
+                            rules={[{ required: true, message: "Vui lòng nhập địa chỉ" }]}
+                        >
+                            <Input.TextArea rows={2} placeholder="Địa chỉ trụ sở" />
+                        </Form.Item>
+
+                        <Form.Item
+                            name="wardId"
+                            label="Phường/Xã"
+                            required
+                            rules={[{ required: true, message: "Vui lòng chọn phường/xã" }]}
+                        >
+                            <Select
+                                showSearch
+                                optionFilterProp="label"
+                                options={wardOptions}
+                            />
+                        </Form.Item>
+
+                        <Form.Item name="city" label="Thành phố">
+                            <Input placeholder="TP. Cần Thơ" disabled />
+                        </Form.Item>
+                    </div>
+
+                    <div className="campus-form-section">
+                        <Divider titlePlacement="left" plain>
+                            GIS
+                        </Divider>
+
+                        <Form.Item name="latitude" label="Vĩ độ" style={{ display: "inline-block", width: "50%" }}>
+                            <InputNumber min={8} max={24} step={0.0001} style={{ width: "100%" }} />
+                        </Form.Item>
+
+                        <Form.Item name="longitude" label="Kinh độ" style={{ display: "inline-block", width: "50%" }}>
+                            <InputNumber min={103} max={110} step={0.0001} style={{ width: "100%" }} />
+                        </Form.Item>
+                    </div>
+
+                    <div className="campus-form-section">
+                        <Divider titlePlacement="left" plain>
+                            Người phụ trách
+                        </Divider>
+
+                        <Form.Item name="managerId" label="Người phụ trách">
+                            <Select
+                                allowClear
+                                showSearch
+                                optionFilterProp="label"
+                                options={managerOptions}
+                            />
+                        </Form.Item>
+
+                        <Form.Item name="phone" label="Số điện thoại" style={{ display: "inline-block", width: "50%" }}>
+                            <Input placeholder="VD: 02923 823 456" />
+                        </Form.Item>
+
+                        <Form.Item name="email" label="Email" style={{ display: "inline-block", width: "50%" }}>
+                            <Input placeholder="VD: main@ninhkieu.edu.vn" />
+                        </Form.Item>
+                    </div>
                 </Form>
             </Modal>
 

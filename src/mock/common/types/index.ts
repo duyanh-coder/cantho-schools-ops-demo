@@ -71,6 +71,18 @@ export type {
 } from "./personnel";
 
 export type {
+    PersonnelAssignment,
+    PersonnelAssignmentStatus,
+    PersonnelCompetition,
+    PersonnelCompetitionLevel,
+    PersonnelReward,
+    PersonnelRewardLevel,
+    PersonnelWorkHistory,
+    PersonnelHistoryEntry,
+    PersonnelHistoryEventType,
+} from "./personnelDetail";
+
+export type {
     Student,
     Transcript,
     EnrolmentChange,

@@ -72,7 +72,7 @@ const operationFeatures: OperationFeature[] = [
   },
   {
     key: "schools",
-    title: "Trường & Cơ sở",
+    title: "Trường & Phân hiệu",
     description: "Quản lý thông tin trường học và các cơ sở trực thuộc.",
     path: "/operations/schools",
     colorClass: "feature-card--school",

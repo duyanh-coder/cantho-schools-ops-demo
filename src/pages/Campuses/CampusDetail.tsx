@@ -1,6 +1,7 @@
 import {
     AimOutlined,
     EnvironmentOutlined,
+    GlobalOutlined,
     HomeOutlined,
     PhoneOutlined,
     ReadOutlined,
@@ -13,11 +14,15 @@ import {
     Alert,
     Button,
     Descriptions,
+    Form,
+    InputNumber,
+    Modal,
     Select,
     Space,
     Table,
     Tabs,
     Tag,
+    message,
 } from "antd";
 
 import type {
@@ -33,6 +38,7 @@ import {
 import {
     useNavigate,
     useParams,
+    useSearchParams,
 } from "react-router-dom";
 
 import L from "leaflet";
@@ -59,6 +65,7 @@ import {
 import type {
     CampusHistoryEntry,
     CampusStatus,
+    Personnel,
 } from "@/mock/common/types";
 
 import {
@@ -72,6 +79,10 @@ import {
 import {
     useCampusHistory,
 } from "@/store/useCampusHistory";
+
+import {
+    usePersonnel,
+} from "@/store/usePersonnel";
 
 import "./style.scss";
 
@@ -90,6 +101,19 @@ const GRADE_OPTIONS = [6, 7, 8, 9].map((grade) => ({
     value: grade,
     label: `Khối ${grade}`,
 }));
+
+const TAB_KEYS = [
+    "overview",
+    "gis",
+    "classes",
+    "staff",
+    "students",
+    "facilities",
+    "timetable",
+    "history",
+] as const;
+
+type TabKey = (typeof TAB_KEYS)[number];
 
 const PAGINATION = {
     showSizeChanger: false,
@@ -159,7 +183,16 @@ const toSubjectName = (
     return SUBJECT_NAME.get(subjectId) ?? subjectId;
 };
 
-const buildStats = (campusId: string) => {
+const toSchoolName = (
+    schoolId: string,
+): string => {
+    return canThoMockData.schools.find(
+        (school) => school.id === schoolId,
+    )?.name
+        ?? schoolId;
+};
+
+const buildStats = (campusId: string, allPersonnel: Personnel[]) => {
     const classCount = canThoMockData.classes.filter(
         (item) => item.campusId === campusId,
     ).length;
@@ -168,8 +201,10 @@ const buildStats = (campusId: string) => {
         (item) => item.campusId === campusId,
     ).length;
 
-    const teacherCount = canThoMockData.teachers.filter(
-        (item) => item.campusIds.includes(campusId),
+    const teacherCount = allPersonnel.filter(
+        (item) =>
+            item.campusIds.includes(campusId) &&
+            item.subjectIds.length > 0,
     ).length;
 
     const facilityCount = canThoMockData.facilities.filter(
@@ -197,9 +232,13 @@ const CampusDetail = () => {
 
     const navigate = useNavigate();
 
+    const [searchParams] = useSearchParams();
+
     const campusesApi = useCampuses();
 
     const historyApi = useCampusHistory(campusId);
+
+    const personnelApi = usePersonnel();
 
     const campusStatusOptions =
         useCatalogOptions("campus-status");
@@ -227,6 +266,20 @@ const CampusDetail = () => {
 
     const campus = campusesApi.byId.get(campusId);
 
+    const initialTab = useMemo<TabKey>(() => {
+        const raw = searchParams.get("tab");
+
+        return (TAB_KEYS as readonly string[]).includes(raw ?? "")
+            ? raw as TabKey
+            : "overview";
+    }, [searchParams]);
+
+    const [activeTab, setActiveTab] = useState<TabKey>(initialTab);
+
+    const [editPositionOpen, setEditPositionOpen] = useState(false);
+
+    const [positionForm] = Form.useForm<{ latitude: number; longitude: number }>();
+
     const [classGrade, setClassGrade] = useState<number | undefined>();
 
     const [studentGrade, setStudentGrade] = useState<number | undefined>();
@@ -242,13 +295,13 @@ const CampusDetail = () => {
 
     useEffect(() => {
         if (!campus && campusesApi.items.length > 0) {
-            navigate("/operations/campuses", { replace: true });
+            navigate("/operations/schools?tab=campuses", { replace: true });
         }
     }, [campus, campusesApi.items.length, navigate]);
 
     const stats = useMemo(
-        () => campus ? buildStats(campus.id) : null,
-        [campus],
+        () => campus ? buildStats(campus.id, personnelApi.items) : null,
+        [campus, personnelApi.items],
     );
 
     if (!campus || !stats) {
@@ -262,6 +315,7 @@ const CampusDetail = () => {
             icon: <HomeOutlined />,
             tone: "blue" as const,
             note: "lớp trực thuộc",
+            tab: "classes" as TabKey,
         },
         {
             title: "Học sinh",
@@ -269,6 +323,7 @@ const CampusDetail = () => {
             icon: <ReadOutlined />,
             tone: "green" as const,
             note: "đang theo học",
+            tab: "students" as TabKey,
         },
         {
             title: "Giáo viên",
@@ -276,6 +331,7 @@ const CampusDetail = () => {
             icon: <TeamOutlined />,
             tone: "orange" as const,
             note: "giảng dạy tại cơ sở",
+            tab: "staff" as TabKey,
         },
         {
             title: "Hạng mục CSVC",
@@ -283,6 +339,7 @@ const CampusDetail = () => {
             icon: <ToolOutlined />,
             tone: "purple" as const,
             note: "đơn vị đã kiểm kê",
+            tab: "facilities" as TabKey,
         },
     ];
 
@@ -319,16 +376,22 @@ const CampusDetail = () => {
         },
     ];
 
-    const teacherColumns: ColumnsType<typeof canThoMockData.teachers[number]> = [
+    const personnelColumns: ColumnsType<Personnel> = [
         {
-            title: "Mã GV",
+            title: "Mã CB-GV",
             dataIndex: "code",
-            width: 100,
+            width: 110,
+            render: (value: string) => <Tag>{value}</Tag>,
         },
         {
             title: "Họ và tên",
             dataIndex: "fullName",
             width: 200,
+        },
+        {
+            title: "Chức danh / Vị trí",
+            dataIndex: "roleTitle",
+            width: 190,
         },
         {
             title: "Môn dạy",
@@ -344,11 +407,27 @@ const CampusDetail = () => {
         {
             title: "Trạng thái",
             dataIndex: "status",
-            width: 110,
+            width: 120,
             render: (value: string) => (
                 <Tag color={value === "active" ? "green" : "red"}>
                     {value === "active" ? "Đang công tác" : "Đã nghỉ"}
                 </Tag>
+            ),
+        },
+        {
+            title: "",
+            key: "__navigate",
+            width: 60,
+            align: "center",
+            render: (_: unknown, row: Personnel) => (
+                <Button
+                    type="link"
+                    size="small"
+                    onClick={() =>
+                        navigate(`/operations/personnel/${row.id}?tab=overview`)}
+                >
+                    Xem
+                </Button>
             ),
         },
     ];
@@ -575,6 +654,7 @@ const CampusDetail = () => {
                                 value={kpi.value}
                                 icon={kpi.icon}
                                 note={kpi.note}
+                                onClick={() => setActiveTab(kpi.tab)}
                             />
                         ))}
                     </div>
@@ -607,6 +687,10 @@ const CampusDetail = () => {
                             <Tag color={STATUS_TONE[campus.status]}>
                                 {statusLabelMap.get(campus.status) ?? campus.status}
                             </Tag>
+                        </Descriptions.Item>
+
+                        <Descriptions.Item label="Đơn vị quản lý">
+                            {toSchoolName(campus.schoolId)}
                         </Descriptions.Item>
 
                         <Descriptions.Item label="Địa chỉ" span={2}>
@@ -663,9 +747,34 @@ const CampusDetail = () => {
 
                         <p>
                             Điểm trường được xác định trên nền bản đồ nội thành
-                            TP. Cần Thơ. Kéo thả không hỗ trợ trong demo; tọa độ
-                            hiệu chỉnh tại màn hình danh sách.
+                            TP. Cần Thơ. Kéo thả không hỗ trợ trong demo; bạn có
+                            thể hiệu chỉnh tọa độ bằng nút "Chỉnh vị trí".
                         </p>
+
+                        <Space wrap>
+                            <Button
+                                type="primary"
+                                icon={<GlobalOutlined />}
+                                onClick={() => {
+                                    setEditPositionOpen(true);
+
+                                    positionForm.setFieldsValue({
+                                        latitude: campus.latitude,
+                                        longitude: campus.longitude,
+                                    });
+                                }}
+                            >
+                                Chỉnh vị trí
+                            </Button>
+
+                            <Button
+                                icon={<EnvironmentOutlined />}
+                                onClick={() =>
+                                    navigate(`/operations/gis?campus=${campus.id}`)}
+                            >
+                                Xem trên bản đồ
+                            </Button>
+                        </Space>
                     </div>
 
                     <div className="campus-detail__map">
@@ -738,8 +847,8 @@ const CampusDetail = () => {
             children: (
                 <Table
                     rowKey="id"
-                    columns={teacherColumns}
-                    dataSource={canThoMockData.teachers.filter(
+                    columns={personnelColumns}
+                    dataSource={personnelApi.items.filter(
                         (item) => item.campusIds.includes(campus.id),
                     )}
                     pagination={{
@@ -908,9 +1017,67 @@ const CampusDetail = () => {
             <Tabs
                 key={campus.id}
                 className="campus-detail__tabs"
+                activeKey={activeTab}
+                onChange={(key) => setActiveTab(key as TabKey)}
                 items={tabItems}
                 tabBarStyle={{ margin: 0 }}
             />
+
+            <Modal
+                open={editPositionOpen}
+                title="Chỉnh vị trí trên bản đồ"
+                okText="Lưu tọa độ"
+                cancelText="Hủy"
+                width={460}
+                destroyOnHidden
+                onCancel={() => setEditPositionOpen(false)}
+                onOk={() => positionForm.submit()}
+            >
+                <Form
+                    form={positionForm}
+                    layout="vertical"
+                    onFinish={(values: { latitude: number; longitude: number }) => {
+                        campusesApi.update({
+                            ...campus,
+                            ...values,
+                        });
+
+                        historyApi.create({
+                            id: `campus-history-${Date.now().toString(36)}`,
+                            campusId: campus.id,
+                            type: "gis_changed",
+                            actor: "Ban Giám hiệu",
+                            content:
+                                `Cập nhật tọa độ GIS sang ` +
+                                `${Number(values.latitude).toFixed(4)}, ` +
+                                `${Number(values.longitude).toFixed(4)}.`,
+                            createdAt: new Date().toISOString(),
+                        });
+
+                        message.success("Đã cập nhật vị trí");
+
+                        setEditPositionOpen(false);
+                    }}
+                >
+                    <Form.Item
+                        name="latitude"
+                        label="Vĩ độ"
+                        required
+                        rules={[{ required: true, message: "Vui lòng nhập vĩ độ" }]}
+                    >
+                        <InputNumber min={8} max={24} step={0.0001} style={{ width: "100%" }} />
+                    </Form.Item>
+
+                    <Form.Item
+                        name="longitude"
+                        label="Kinh độ"
+                        required
+                        rules={[{ required: true, message: "Vui lòng nhập kinh độ" }]}
+                    >
+                        <InputNumber min={103} max={110} step={0.0001} style={{ width: "100%" }} />
+                    </Form.Item>
+                </Form>
+            </Modal>
         </div>
     );
 };

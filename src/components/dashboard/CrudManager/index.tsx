@@ -1089,11 +1089,6 @@ function CrudManager<T extends { id: string }>({
                         </span>
 
                         <h3>Quản lý {entityName ?? title.toLowerCase()}</h3>
-
-                        <p>
-                            {filtered.length} bản ghi ·
-                            Lưu tự động trên trình duyệt (localStorage)
-                        </p>
                     </div>
 
                     <div className="crud-panel__actions">

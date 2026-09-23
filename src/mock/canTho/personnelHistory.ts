@@ -1,0 +1,68 @@
+import type { PersonnelHistoryEntry } from "../common/types";
+
+export const canThoPersonnelHistory: PersonnelHistoryEntry[] = [
+    {
+        id: "personnel-history-001",
+        personnelId: "can-tho-personnel-002",
+        type: "created",
+        actor: "Phòng GD&ĐT quận Ninh Kiều",
+        content: "Tiếp nhận giáo viên về công tác tại trường.",
+        createdAt: "2012-08-15T08:00:00",
+    },
+    {
+        id: "personnel-history-002",
+        personnelId: "can-tho-personnel-002",
+        type: "status_changed",
+        actor: "Ban Giám hiệu",
+        content: "Luân chuyển công tác đến phân hiệu Chu Văn An.",
+        createdAt: "2024-08-16T09:00:00",
+    },
+    {
+        id: "personnel-history-003",
+        personnelId: "can-tho-personnel-003",
+        type: "created",
+        actor: "Phòng GD&ĐT quận Ninh Kiều",
+        content: "Tiếp nhận giáo viên về công tác tại trường.",
+        createdAt: "2010-08-25T08:30:00",
+    },
+    {
+        id: "personnel-history-004",
+        personnelId: "can-tho-personnel-003",
+        type: "updated",
+        actor: "Ban Giám hiệu",
+        content: "Phân công làm Tổ trưởng tổ Toán – Lý – Hóa – Sinh.",
+        createdAt: "2020-09-01T10:00:00",
+    },
+    {
+        id: "personnel-history-005",
+        personnelId: "can-tho-personnel-001",
+        type: "created",
+        actor: "Phòng GD&ĐT quận Ninh Kiều",
+        content: "Bổ nhiệm Phó hiệu trưởng phụ trách chuyên môn.",
+        createdAt: "2015-08-20T08:00:00",
+    },
+    {
+        id: "personnel-history-006",
+        personnelId: "can-tho-personnel-005",
+        type: "created",
+        actor: "Phòng GD&ĐT quận Ninh Kiều",
+        content: "Tiếp nhận giáo viên về công tác tại trường.",
+        createdAt: "2014-08-25T08:00:00",
+    },
+    {
+        id: "personnel-history-007",
+        personnelId: "can-tho-personnel-006",
+        type: "created",
+        actor: "Ban Giám hiệu",
+        content: "Tiếp nhận giáo viên mới ra trường về công tác.",
+        createdAt: "2016-08-20T08:00:00",
+    },
+    {
+        id: "personnel-history-008",
+        personnelId: "can-tho-personnel-006",
+        type: "status_changed",
+        actor: "Ban Giám hiệu",
+        content: "Luân chuyển công tác về trụ sở chính.",
+        createdAt: "2024-08-16T09:30:00",
+    },
+];

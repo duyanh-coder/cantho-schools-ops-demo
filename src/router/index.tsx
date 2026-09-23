@@ -8,7 +8,6 @@ import {
 import OperationLayout from "@/layouts/OperationLayout";
 
 import AlertsPage from "@/pages/Alerts";
-import CampusesPage from "@/pages/Campuses";
 import CampusDetail from "@/pages/Campuses/CampusDetail";
 import ChatbotPage from "@/pages/Chatbot";
 import DocumentsPage from "@/pages/Documents";
@@ -16,6 +15,7 @@ import GISPage from "@/pages/GIS";
 import HomePage from "@/pages/Home";
 import ReportsPage from "@/pages/Reports";
 import SchoolPage from "@/pages/Schools";
+import PersonnelDetail from "@/pages/Personnel/PersonnelDetail";
 import TimetablePage from "@/pages/Timetable";
 
 import OperationsDashboardPage from "@/pages/OperationsDashboard";
@@ -43,7 +43,7 @@ function AppRouter() {
 
           <Route path="/operations/schools" element={<SchoolPage />} />
 
-          <Route path="/operations/campuses" element={<CampusesPage />} />
+          <Route path="/operations/campuses" element={<Navigate to="/operations/schools?tab=campuses" replace />} />
 
           <Route path="/operations/campuses/:campusId" element={<CampusDetail />} />
 
@@ -52,6 +52,8 @@ function AppRouter() {
           <Route path="/operations/reports" element={<ReportsPage />} />
 
           <Route path="/operations/personnel" element={<Navigate to="/operations/schools?tab=personnel" replace />} />
+
+          <Route path="/operations/personnel/:personnelId" element={<PersonnelDetail />} />
 
           <Route path="/operations/sectors" element={<Navigate to="/operations/schools?tab=sectors" replace />} />
 

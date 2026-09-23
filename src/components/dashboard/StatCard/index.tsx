@@ -9,6 +9,7 @@ interface StatCardProps {
   icon: ReactNode;
   tone: "blue" | "green" | "orange" | "purple";
   note?: string;
+  onClick?: () => void;
 }
 
 const StatCard = ({
@@ -18,15 +19,30 @@ const StatCard = ({
   icon,
   tone,
   note,
+  onClick,
 }: StatCardProps) => {
   return (
     <div
       className={[
         "dashboard-stat-card",
         `dashboard-stat-card--${tone}`,
+        onClick ? "dashboard-stat-card--clickable" : "",
       ]
         .filter(Boolean)
         .join(" ")}
+      role={onClick ? "button" : undefined}
+      tabIndex={onClick ? 0 : undefined}
+      onClick={onClick}
+      onKeyDown={
+        onClick
+          ? (event) => {
+              if (event.key === "Enter" || event.key === " ") {
+                event.preventDefault();
+                onClick();
+              }
+            }
+          : undefined
+      }
     >
       <div className="dashboard-stat-card__icon">{icon}</div>
 
