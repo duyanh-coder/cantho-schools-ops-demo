@@ -59,6 +59,7 @@ import {
 } from "@/mock";
 
 import {
+    periodTimes,
     subjects,
 } from "@/mock/common";
 
@@ -83,6 +84,10 @@ import {
 import {
     usePersonnel,
 } from "@/store/usePersonnel";
+
+import {
+    useRooms,
+} from "@/store/useRooms";
 
 import "./style.scss";
 
@@ -241,6 +246,8 @@ const CampusDetail = () => {
     const historyApi = useCampusHistory(campusId);
 
     const personnelApi = usePersonnel();
+
+    const roomsApi = useRooms(campusId);
 
     const campusStatusOptions =
         useCatalogOptions("campus-status");
@@ -647,7 +654,7 @@ const CampusDetail = () => {
         },
         {
             title: "Ngày",
-            dataIndex: "day",
+            dataIndex: "dayOfWeek",
             width: 130,
             render: (value: string) => {
                 const map: Record<string, string> = {
@@ -670,15 +677,19 @@ const CampusDetail = () => {
         },
         {
             title: "Phòng",
-            dataIndex: "room",
+            dataIndex: "roomId",
             width: 100,
+            render: (value: string) =>
+                roomsApi.byId.get(value)?.code ?? value,
         },
         {
             title: "Thời gian",
             width: 160,
-            render: (_: unknown, row: typeof canThoMockData.timetables[number]) => (
-                <span>{row.startTime} – {row.endTime}</span>
-            ),
+            render: (_: unknown, row: typeof canThoMockData.timetables[number]) => {
+                const time = periodTimes(row.period);
+
+                return <span>{time.startTime} – {time.endTime}</span>;
+            },
         },
     ];
 

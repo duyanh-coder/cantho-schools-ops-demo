@@ -43,6 +43,7 @@ import {
 } from "@/mock";
 
 import {
+    periodTimes,
     subjects,
 } from "@/mock/common";
 
@@ -50,7 +51,7 @@ import type {
     Campus,
     ClassHistoryEntry,
     TeachingAttendance,
-    TimetableItem,
+    TimetableEntry,
 } from "@/mock/common/types";
 
 import {
@@ -395,10 +396,10 @@ const ClassDetail = () => {
         },
     ];
 
-    const timetableColumns: ColumnsType<TimetableItem> = [
+    const timetableColumns: ColumnsType<TimetableEntry> = [
         {
             title: "Ngày",
-            dataIndex: "day",
+            dataIndex: "dayOfWeek",
             width: 110,
             render: (value: string) => DAY_LABEL[value] ?? value,
         },
@@ -427,15 +428,19 @@ const ClassDetail = () => {
         },
         {
             title: "Phòng",
-            dataIndex: "room",
+            dataIndex: "roomId",
             width: 90,
+            render: (value: string) =>
+                roomsApi.byId.get(value)?.code ?? value,
         },
         {
             title: "Thời gian",
             width: 150,
-            render: (_: unknown, row: TimetableItem) => (
-                <span>{row.startTime} – {row.endTime}</span>
-            ),
+            render: (_: unknown, row: TimetableEntry) => {
+                const time = periodTimes(row.period);
+
+                return <span>{time.startTime} – {time.endTime}</span>;
+            },
         },
     ];
 

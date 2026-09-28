@@ -14,6 +14,10 @@ import {
     getCurrentRegionMockData,
 } from "@/mock";
 
+import {
+    useRooms,
+} from "@/store/useRooms";
+
 import AttendanceChart from "./components/AttendanceChart";
 import CampusStatusPanel from "./components/CampusStatus";
 import FilterBar from "./components/FilterBar";
@@ -66,6 +70,8 @@ const TimetablePage = () => {
         teachingAttendance,
         alerts,
     } = getCurrentRegionMockData();
+
+    const roomsApi = useRooms();
 
     const [selectedSchool, setSelectedSchool] = useState("all");
 
@@ -129,14 +135,14 @@ const TimetablePage = () => {
     }, [timetables, matchCampus, availableClasses]);
 
     const dayLessons = weekLessons.filter(
-        (item) => item.day === selectedDay,
+        (item) => item.dayOfWeek === selectedDay,
     );
 
     const seriesByDay = useMemo(() => {
         return dayOptions.map((day) => ({
             label: day.label,
             value: weekLessons.filter(
-                (item) => item.day === day.key,
+                (item) => item.dayOfWeek === day.key,
             ).length,
         }));
     }, [weekLessons]);
@@ -423,7 +429,7 @@ const TimetablePage = () => {
                                 </span>
 
                                 <span>
-                                    {campus?.name ?? "-"} · Phòng {item.room}
+                                    {campus?.name ?? "-"} · Phòng {roomsApi.byId.get(item.roomId)?.code ?? item.roomId}
                                 </span>
                             </div>
                         </article>

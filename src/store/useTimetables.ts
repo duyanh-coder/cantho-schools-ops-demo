@@ -61,6 +61,16 @@ export function useTimetables(
 
     const items = base.items;
 
+    const {
+        campusId,
+        classId,
+        teacherId,
+        roomId,
+        subjectId,
+        academicYearId,
+        semesterId,
+    } = filters ?? {};
+
     const byId = useMemo(
         () => new Map<string, TimetableEntry>(
             items.map((entry) => [entry.id, entry]),
@@ -69,49 +79,49 @@ export function useTimetables(
     );
 
     const byCampus = useMemo(
-        () => filters?.campusId
-            ? items.filter((entry) => entry.campusId === filters.campusId)
+        () => campusId
+            ? items.filter((entry) => entry.campusId === campusId)
             : items,
-        [items, filters?.campusId],
+        [items, campusId],
     );
 
     const byClass = useMemo(
-        () => filters?.classId
-            ? items.filter((entry) => entry.classId === filters.classId)
+        () => classId
+            ? items.filter((entry) => entry.classId === classId)
             : items,
-        [items, filters?.classId],
+        [items, classId],
     );
 
     const byTeacher = useMemo(
-        () => filters?.teacherId
-            ? items.filter((entry) => entry.teacherId === filters.teacherId)
+        () => teacherId
+            ? items.filter((entry) => entry.teacherId === teacherId)
             : items,
-        [items, filters?.teacherId],
+        [items, teacherId],
     );
 
     const byRoom = useMemo(
-        () => filters?.roomId
-            ? items.filter((entry) => entry.roomId === filters.roomId)
+        () => roomId
+            ? items.filter((entry) => entry.roomId === roomId)
             : items,
-        [items, filters?.roomId],
+        [items, roomId],
     );
 
     const bySubject = useMemo(
-        () => filters?.subjectId
-            ? items.filter((entry) => entry.subjectId === filters.subjectId)
+        () => subjectId
+            ? items.filter((entry) => entry.subjectId === subjectId)
             : items,
-        [items, filters?.subjectId],
+        [items, subjectId],
     );
 
     const byAcademicYearAndSemester = useMemo(
         () => items.filter((entry) =>
-            (filters?.academicYearId
-                ? entry.academicYearId === filters.academicYearId
+            (academicYearId
+                ? entry.academicYearId === academicYearId
                 : true) &&
-            (filters?.semesterId
-                ? entry.semesterId === filters.semesterId
+            (semesterId
+                ? entry.semesterId === semesterId
                 : true)),
-        [items, filters?.academicYearId, filters?.semesterId],
+        [items, academicYearId, semesterId],
     );
 
     const api = useMemo<TimetablesApi>(
