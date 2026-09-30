@@ -10,6 +10,10 @@ import {
     canThoPersonnel,
 } from "./personnel";
 
+import {
+    canThoStudents,
+} from "./students";
+
 
 export interface SchoolGradeCount {
     grade: number;
@@ -151,22 +155,46 @@ const classCountsOfSchool = (
     };
 };
 
+const studentStatsOfSchool = (
+    schoolId: string,
+): SchoolStudentsStats => {
+    const enrolled = canThoStudents.filter(
+        (item) => item.schoolId === schoolId && item.status === "studying",
+    );
+
+    const gradeMap = new Map<number, number>();
+
+    for (const student of enrolled) {
+        if (student.grade === undefined) {
+            continue;
+        }
+
+        gradeMap.set(
+            student.grade,
+            (gradeMap.get(student.grade) ?? 0) + 1,
+        );
+    }
+
+    const male = enrolled.filter(
+        (item) => item.gender === "male",
+    ).length;
+
+    return {
+        total: enrolled.length,
+        grades: Array.from(gradeMap.entries())
+            .map(([grade, count]) => ({ grade, count }))
+            .sort((a, b) => a.grade - b.grade),
+        male,
+        female: enrolled.length - male,
+    };
+};
+
 export const canThoSchoolOverviewStats: SchoolOverviewStats[] = [
     {
         schoolId: SCHOOL_001,
         academicYear: ACADEMIC_YEAR,
         personnel: personnelStatsOfSchool(SCHOOL_001),
-        students: {
-            total: 4280,
-            grades: [
-                { grade: 6, count: 1080 },
-                { grade: 7, count: 1060 },
-                { grade: 8, count: 1070 },
-                { grade: 9, count: 1070 },
-            ],
-            male: 2210,
-            female: 2070,
-        },
+        students: studentStatsOfSchool(SCHOOL_001),
         campuses: campusCountsOfSchool(SCHOOL_001),
         classes: classCountsOfSchool(SCHOOL_001),
     },

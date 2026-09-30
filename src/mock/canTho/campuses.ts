@@ -51,7 +51,7 @@ export const canThoCampuses: Campus[] = [
 
     {
         id: "can-tho-campus-007", schoolId: "can-tho-school-002", wardId: "can-tho-ward-005", code: "CT-CS-007",
-        name: "Trụ sở chính – THCS Cái Răng", address: "Phường Cái Răng, quận Cái Răng, TP. Cần Thơ",
+        name: "Trường THCS Cái Răng", address: "Phường Cái Răng, quận Cái Răng, TP. Cần Thơ",
         location: { lat: 10.0005, lng: 105.792 }, latitude: 10.0005, longitude: 105.792, managerId: "can-tho-personnel-009", isMainCampus: true, type: "HEADQUARTERS", status: "ACTIVE",
     },
 
@@ -63,13 +63,13 @@ export const canThoCampuses: Campus[] = [
 
     {
         id: "can-tho-campus-009", schoolId: "can-tho-school-003", wardId: "can-tho-ward-004", code: "CT-CS-009",
-        name: "Trụ sở chính – THCS Bình Thủy", address: "Phường Bình Thủy, quận Bình Thủy, TP. Cần Thơ",
+        name: "Trường THCS Bình Thủy", address: "Phường Bình Thủy, quận Bình Thủy, TP. Cần Thơ",
         location: { lat: 10.0725, lng: 105.7565 }, latitude: 10.0725, longitude: 105.7565, managerId: "can-tho-personnel-013", isMainCampus: true, type: "HEADQUARTERS", status: "ACTIVE",
     },
 
     {
         id: "can-tho-campus-010", schoolId: "can-tho-school-004", wardId: "can-tho-ward-002", code: "CT-CS-010",
-        name: "Trụ sở chính – THPT Cái Khế", address: "Phường Cái Khế, quận Ninh Kiều, TP. Cần Thơ",
+        name: "Trường THPT Cái Khế", address: "Phường Cái Khế, quận Ninh Kiều, TP. Cần Thơ",
         location: { lat: 10.0502, lng: 105.781 }, latitude: 10.0502, longitude: 105.781, managerId: "can-tho-personnel-015", isMainCampus: true, type: "HEADQUARTERS", status: "ACTIVE",
     },
 ];

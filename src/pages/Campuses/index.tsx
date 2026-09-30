@@ -83,6 +83,10 @@ import {
     buildCampusScale,
 } from "@/utils/campusScale";
 
+import {
+    summarizeCampus,
+} from "@/utils/campusSummary";
+
 import "./style.scss";
 
 
@@ -128,33 +132,15 @@ const nowIso = (): string => {
 
 function buildCampusStats(
     campusId: string,
-    personnel: Personnel[] = canThoMockData.personnel,
+    personnel?: Personnel[],
 ) {
-    const classCount = canThoMockData.classes.filter(
-        (item) => item.campusId === campusId,
-    ).length;
-
-    const studentCount = canThoMockData.students.filter(
-        (item) => item.campusId === campusId,
-    ).length;
-
-    const teacherCount = personnel.filter(
-        (item) =>
-            item.campusIds.includes(campusId) &&
-            item.subjectIds.length > 0,
-    ).length;
-
-    const roomCount = canThoMockData.facilities.filter(
-        (item) =>
-            item.campusId === campusId &&
-            item.category === "classroom",
-    ).reduce((total, item) => total + item.quantity, 0);
+    const summary = summarizeCampus(campusId, personnel);
 
     return {
-        classCount,
-        studentCount,
-        teacherCount,
-        roomCount,
+        classCount: summary.classCount,
+        studentCount: summary.studentCount,
+        teacherCount: summary.teachers,
+        roomCount: summary.roomCount,
     };
 }
 

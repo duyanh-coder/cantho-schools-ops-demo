@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
     canThoCampuses,
     canThoClasses,
+    canThoStudents,
     getSchoolOverviewStats,
 } from "@/mock/canTho";
 
@@ -77,5 +78,56 @@ describe("PHASE 01 school overview stats integrity", () => {
 
             expect(entry.count).toBe(realCount);
         }
+    });
+
+    it("student stats are derived from the student roster, not hard-coded", () => {
+        const stats = statsFor001!;
+
+        const enrolled = canThoStudents.filter(
+            (student) =>
+                student.schoolId === "can-tho-school-001" &&
+                student.status === "studying",
+        );
+
+        expect(stats.students.total).toBe(enrolled.length);
+
+        expect(stats.students.male).toBe(
+            enrolled.filter((student) => student.gender === "male")
+                .length,
+        );
+
+        for (const entry of stats.students.grades) {
+            const realCount = enrolled.filter(
+                (student) => student.grade === entry.grade,
+            ).length;
+
+            expect(entry.count).toBe(realCount);
+        }
+    });
+
+    it("campus naming follows the Trường/Phân hiệu convention", () => {
+        const headquarters = canThoCampuses.filter(
+            (campus) => campus.isMainCampus,
+        );
+
+        for (const campus of headquarters) {
+            expect(campus.name).toMatch(/^Trường /);
+            expect(campus.name).not.toContain("Trụ sở chính");
+        }
+
+        const branches = canThoCampuses.filter(
+            (campus) => !campus.isMainCampus,
+        );
+
+        for (const campus of branches) {
+            expect(campus.name).toMatch(/^Phân hiệu /);
+        }
+
+        const main = canThoCampuses.find(
+            (campus) => campus.id === "campus-main",
+        );
+
+        expect(main?.name).toBe("Trường THCS Ninh Kiều");
+        expect(main?.historicalName).toBe("THCS Đoàn Thị Điểm");
     });
 });
