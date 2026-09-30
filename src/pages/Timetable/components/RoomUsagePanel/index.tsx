@@ -48,6 +48,7 @@ const DAYS: WeekDay[] = [
     "wednesday",
     "thursday",
     "friday",
+    "saturday",
 ];
 
 const PERIODS = [1, 2, 3, 4, 5];

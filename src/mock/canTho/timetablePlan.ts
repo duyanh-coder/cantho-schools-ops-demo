@@ -11,6 +11,10 @@ import type {
     WeekDay,
 } from "../common/types";
 
+import {
+    AFTERNOON_PERIODS,
+} from "../common/types";
+
 
 const SCHOOL_001 = "can-tho-school-001";
 
@@ -24,9 +28,15 @@ const DAYS: WeekDay[] = [
     "wednesday",
     "thursday",
     "friday",
+    "saturday",
 ];
 
 const PERIODS = [1, 2, 3, 4, 5];
+
+const AFTERNOON_SLOT_PERIODS = AFTERNOON_PERIODS.map(
+    (item) => item.period,
+);
+
 
 const SUBJECT_TEACHERS: Record<string, string[]> = {
     math: [
@@ -378,6 +388,78 @@ const buildGenerated = (): TimetableEntry[] => {
     return generated;
 };
 
+/**
+ * Buổi chiều (tiết 6-10) cho lớp học hai buổi mỗi ngày.
+ *
+ * Lớp 026 nhận một tiết toán mỗi chiều để giữ hình dạng lịch
+ * thực tế. Lớp 027 dồn năm tiết toán vào một ngày: giáo viên phụ
+ * trách vốn đã dạy đủ năm tiết sáng nên chạm ngưỡng quá tải
+ * (10 tiết/ngày) - đây là kịch bản cố ý để lớp hiển thị thời
+ * khóa biểu thể hiện được trạng thái WORKLOAD_STRAIN.
+ *
+ * Cả hai bộ ba giáo viên - lớp - môn đều chưa có phân công cố định
+ * trong học kỳ 1, nên `plannedPeriods` tự đếm lại và
+ * `personnelAssignments` sinh khớp hạn mức: không phát sinh thêm
+ * xung đột quota hay thiếu phân công.
+ */
+const buildAfternoonSession = (): TimetableEntry[] => {
+    const strain = TIMETABLE_SCENARIOS.workloadStrain;
+
+    const twoSessionClass = TIMETABLE_SCENARIOS.twoSessionClasses[0];
+
+    const plan: Slot[] = DAYS.map((day) => ({
+        day,
+        period: AFTERNOON_SLOT_PERIODS[0],
+    }));
+
+    const strainPlan: Slot[] = AFTERNOON_SLOT_PERIODS.map((period) => ({
+        day: strain.dayOfWeek,
+        period,
+    }));
+
+    const entries: TimetableEntry[] = [];
+
+    const push = (
+        id: string,
+        classId: string,
+        teacherId: string,
+        subjectId: string,
+        slot: Slot,
+    ): void => {
+        if (!isFree(slot, classId, teacherId, campusByClass.get(classId) ?? "campus-main")) {
+            return;
+        }
+
+        const entry = buildEntry(id, classId, teacherId, subjectId, slot, 0);
+
+        claim(entry);
+
+        entries.push(entry);
+    };
+
+    plan.forEach((slot, index) => {
+        push(
+            `can-tho-timetable-a${padIndex(index + 1)}`,
+            twoSessionClass,
+            "can-tho-personnel-006",
+            "math",
+            slot,
+        );
+    });
+
+    strainPlan.forEach((slot, index) => {
+        push(
+            `can-tho-timetable-a${padIndex(plan.length + index + 1)}`,
+            strain.classId,
+            strain.teacherId,
+            strain.subjectId,
+            slot,
+        );
+    });
+
+    return entries;
+};
+
 export const TIMETABLE_SCENARIOS = {
     teacherConflict: [
         "can-tho-timetable-b01",
@@ -407,6 +489,19 @@ export const TIMETABLE_SCENARIOS = {
         subjectId: "physics",
     },
     crossCampus: "can-tho-personnel-002",
+    twoSessionClasses: [
+        "can-tho-class-026",
+        "can-tho-class-027",
+    ],
+    workloadStrain: {
+        teacherId: "can-tho-personnel-003",
+
+        classId: "can-tho-class-027",
+
+        subjectId: "math",
+
+        dayOfWeek: "wednesday",
+    },
 } as const;
 
 /**
@@ -636,43 +731,12 @@ const buildAdjustment = (): TimetableEntry[] => {
     const campusId = campusByClass.get(source.classId) ?? source.campusId;
 
     /**
-     * Phiên bản điều chỉnh giữ nguyên ô thời gian của bản đã xuất bản,
-     * nên chỉ chọn giáo viên còn trống tại ô đó. Nếu ô đã kín chỗ thì
-     * giữ nguyên giáo viên và chỉ chuyển phòng học còn trống, để phiên
-     * bản điều chỉnh luôn được tạo ra thay cho bản đã xuất bản.
+     * Phiên bản điều chỉnh giữ nguyên ô thời gian và bộ ba giáo viên -
+     * lớp - môn của bản đã xuất bản để tiếp tục điểm danh, chỉ chuyển
+     * sang phòng học còn trống tại ô đó. Nếu không còn phòng trống thì
+     * giữ nguyên phòng gốc, để phiên bản điều chỉnh luôn được tạo ra
+     * thay cho bản đã xuất bản.
      */
-    const pickFreeTeacher = (): {
-        teacherId: string;
-
-        subjectId: string;
-    } | null => {
-        for (const [
-            subjectId,
-            pool,
-        ] of Object.entries(SUBJECT_TEACHERS)) {
-            for (const teacherId of pool) {
-                if (teacherId === source.teacherId) {
-                    continue;
-                }
-
-                if (
-                    !teacherBusy.has(
-                        `${teacherId}|${source.dayOfWeek}|${source.period}`,
-                    )
-                ) {
-                    return {
-                        teacherId,
-                        subjectId,
-                    };
-                }
-            }
-        }
-
-        return null;
-    };
-
-    const picked = pickFreeTeacher();
-
     const rooms = (roomsByCampus.get(campusId) ?? []).filter((roomId) =>
         !roomBusy.has(`${roomId}|${source.dayOfWeek}|${source.period}`));
 
@@ -684,8 +748,8 @@ const buildAdjustment = (): TimetableEntry[] => {
         semesterId: SEMESTER_ID,
         campusId,
         classId: source.classId,
-        teacherId: picked?.teacherId ?? source.teacherId,
-        subjectId: picked?.subjectId ?? source.subjectId,
+        teacherId: source.teacherId,
+        subjectId: source.subjectId,
         roomId,
         dayOfWeek: source.dayOfWeek,
         period: source.period,
@@ -705,6 +769,9 @@ export const plannedBaseEntries: TimetableEntry[] = buildBase();
 
 export const plannedGeneratedEntries: TimetableEntry[] = buildGenerated();
 
+export const plannedAfternoonEntries: TimetableEntry[] =
+    buildAfternoonSession();
+
 export const plannedAdjustmentEntries: TimetableEntry[] = buildAdjustment();
 
 export const plannedScenarioEntries: TimetableEntry[] = buildScenarios();
@@ -712,6 +779,7 @@ export const plannedScenarioEntries: TimetableEntry[] = buildScenarios();
 export const plannedTimetables: TimetableEntry[] = [
     ...plannedBaseEntries,
     ...plannedGeneratedEntries,
+    ...plannedAfternoonEntries,
     ...plannedAdjustmentEntries,
     ...plannedScenarioEntries,
 ];

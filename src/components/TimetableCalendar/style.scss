@@ -1,0 +1,715 @@
+.tt-cal {
+    --tt-cal-time-col: 88px;
+    --tt-cal-day-min: 150px;
+    --tt-cal-line: rgba(100, 116, 139, 0.35);
+    --tt-cal-soft: #f8fafc;
+    --tt-cal-muted: #94a3b8;
+
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 16px;
+}
+
+/* ========================================
+   HEADER
+   ======================================== */
+
+.tt-cal__head {
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 12px;
+}
+
+.tt-cal__head-main {
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    flex-wrap: wrap;
+
+    gap: 12px;
+}
+
+.tt-cal__week-nav {
+    display: inline-flex;
+
+    align-items: center;
+
+    flex-wrap: wrap;
+
+    gap: 8px;
+}
+
+.tt-cal__week-label {
+    min-width: 168px;
+
+    color: #0f172a;
+
+    font-size: 13.5px;
+
+    text-align: center;
+}
+
+/**
+ * Nút về tuần hiện hành: dùng hai lớp để thắng style runtime của
+ * antd (`.ant-btn`), vốn được inject sau stylesheet của ứng dụng.
+ */
+.tt-cal__week-nav .tt-cal__week-today {
+    color: #1d4ed8;
+
+    border-color: #93c5fd;
+
+    background: #eff6ff;
+}
+
+.tt-cal__metric {
+    margin-inline-end: 0;
+}
+
+.tt-cal__head-filters {
+    padding-top: 12px;
+
+    border-top: 2px solid rgba(100, 116, 139, 0.18);
+}
+
+.tt-cal-filters {
+    display: flex;
+}
+
+.tt-cal__empty {
+    display: flex;
+
+    flex-direction: column;
+
+    align-items: center;
+
+    gap: 12px;
+
+    margin: 0;
+
+    padding: 32px 24px;
+
+    border: 2px dashed rgba(100, 116, 139, 0.35);
+
+    border-radius: 14px;
+
+    color: #64748b;
+
+    background: #ffffff;
+
+    font-size: 13px;
+
+    text-align: center;
+}
+
+.tt-cal__hint {
+    margin: 0;
+
+    color: #64748b;
+
+    font-size: 12px;
+}
+
+/* ========================================
+   GRID
+   ======================================== */
+
+.tt-cal__scroll {
+    overflow-x: auto;
+
+    border: 2px solid rgba(100, 116, 139, 0.6);
+
+    border-radius: 14px;
+
+    background: #ffffff;
+}
+
+.tt-cal__grid {
+    display: grid;
+
+    min-width: max-content;
+}
+
+.tt-cal__corner,
+.tt-cal__day-head {
+    position: sticky;
+
+    top: 0;
+
+    z-index: 3;
+
+    display: flex;
+
+    flex-direction: column;
+
+    align-items: center;
+
+    gap: 2px;
+
+    padding: 10px 8px;
+
+    border-bottom: 2px solid var(--tt-cal-line);
+
+    background: var(--tt-cal-soft);
+
+}
+
+.tt-cal__corner {
+    left: 0;
+
+    z-index: 4;
+
+    align-items: flex-start;
+
+    border-right: 2px solid var(--tt-cal-line);
+
+    color: #334155;
+
+    font-size: 12px;
+
+    font-weight: 700;
+}
+
+.tt-cal__day-head {
+    border-right: 1px solid var(--tt-cal-line);
+
+    color: #334155;
+
+    font-size: 12.5px;
+
+    text-align: center;
+
+    /**
+     * Ngày hiện hành nổi thành dải riêng: viền đậm hơn hẳn đường kẻ
+     * 1px của lưới, bo góc ở đầu cột và đổ bóng để tách khỏi các cột
+     * khác. Không kẻ đường dưới để nối liền với thân cột, phần thân
+     * dải giữ vuông vắn nên không đứt đoạn giữa các hàng.
+     */
+    &.is-today {
+        color: #172554;
+
+        background: #93c5fd;
+
+        border: 2px solid #1d4ed8;
+
+        border-bottom: none;
+
+        border-radius: 10px 10px 0 0;
+
+        box-shadow: 0 2px 6px rgba(29, 78, 216, 0.28);
+    }
+}
+
+.tt-cal__day-date {
+    color: var(--tt-cal-muted);
+
+    font-size: 11px;
+}
+
+.tt-cal__day-head.is-today .tt-cal__day-date {
+    color: #1e3a8a;
+}
+
+/**
+ * Nhãn ngày hiện hành: dùng hai lớp để thắng style runtime của
+ * antd (`.ant-tag`), vốn được inject sau stylesheet của ứng dụng.
+ */
+.tt-cal__day-head .tt-cal__day-today {
+    margin: 3px 0 0;
+
+    padding: 0 9px;
+
+    border: 1px solid #1e3a8a;
+
+    border-radius: 999px;
+
+    color: #ffffff;
+
+    background: #1d4ed8;
+
+    font-size: 11px;
+
+    font-weight: 700;
+
+    line-height: 19px;
+
+    letter-spacing: 0.04em;
+
+    text-transform: uppercase;
+}
+
+/* ---- session divider ---- */
+
+.tt-cal__session {
+    display: flex;
+
+    align-items: center;
+
+    gap: 10px;
+
+    grid-column: 1 / -1;
+
+    padding: 10px 12px;
+
+    border-bottom: 1px solid var(--tt-cal-line);
+
+    border-top: 1px solid var(--tt-cal-line);
+
+    color: #334155;
+
+    font-size: 11px;
+
+    font-weight: 700;
+
+    letter-spacing: 0.6px;
+
+    text-transform: uppercase;
+
+    background: #eef2f7;
+
+}
+
+.tt-cal__session span::after {
+    content: "";
+
+    display: inline-block;
+
+    width: 100%;
+
+    min-width: 24px;
+
+    height: 1px;
+
+    margin-left: 8px;
+
+    vertical-align: middle;
+
+    background: rgba(100, 116, 139, 0.4);
+}
+
+/* ---- rows ---- */
+
+.tt-cal__row {
+    display: grid;
+
+    grid-column: 1 / -1;
+
+    grid-template-columns: subgrid;
+}
+
+.tt-cal__time {
+    position: sticky;
+
+    left: 0;
+
+    z-index: 2;
+
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 2px;
+
+    min-height: 84px;
+
+    padding: 8px;
+
+    border-right: 2px solid var(--tt-cal-line);
+
+    border-bottom: 1px solid var(--tt-cal-line);
+
+    background: var(--tt-cal-soft);
+
+    strong {
+        color: #334155;
+
+        font-size: 12px;
+    }
+
+    span {
+        color: var(--tt-cal-muted);
+
+        font-size: 10.5px;
+
+        line-height: 1.35;
+    }
+}
+
+/**
+ * Giờ hiện tại đặt cạnh vạch đỏ, cách điệu Google Calendar: chỉ báo giờ
+ * luôn nằm đúng một đường ngang với vạch vì cùng dùng công thức `top`
+ * theo phần trăm thời gian đã trôi qua của tiết.
+ */
+.tt-cal__time .tt-cal__now-label {
+    position: absolute;
+
+    right: 6px;
+
+    transform: translateY(-50%);
+
+    padding: 0 2px;
+
+    color: #ef4444;
+
+    font-size: 10.5px;
+
+    font-weight: 700;
+
+    line-height: 1.2;
+
+    background: var(--tt-cal-soft);
+}
+
+.tt-cal__cell {
+    position: relative;
+
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 6px;
+
+    min-height: 84px;
+
+    padding: 6px;
+
+    border-right: 1px solid var(--tt-cal-line);
+
+    border-bottom: 1px solid var(--tt-cal-line);
+
+    cursor: pointer;
+
+    &.is-empty {
+        cursor: default;
+
+        background: #fbfdff;
+    }
+
+    &.is-today {
+        background: #dbeafe;
+
+        border-right: 2px solid #2563eb;
+
+        border-left: 2px solid #2563eb;
+    }
+
+    &.has-conflict {
+        background: rgba(239, 68, 68, 0.04);
+    }
+}
+
+.tt-cal__cell-empty {
+    margin: auto;
+
+    color: var(--tt-cal-muted);
+
+    font-size: 11px;
+
+    font-style: italic;
+}
+
+.tt-cal__cell-conflict {
+    position: absolute;
+
+    top: 4px;
+
+    right: 4px;
+
+    z-index: 2;
+
+    display: inline-flex;
+
+    align-items: center;
+
+    gap: 3px;
+
+    padding: 0 6px;
+
+    border-radius: 999px;
+
+    color: #ffffff;
+
+    font-size: 10px;
+
+    font-weight: 700;
+
+    line-height: 16px;
+
+    background: #ef4444;
+}
+
+.tt-cal__now-line {
+    position: absolute;
+
+    right: -4px;
+
+    left: -4px;
+
+    z-index: 1;
+
+    height: 2px;
+
+    pointer-events: none;
+
+    background: #ef4444;
+}
+
+.tt-cal__now-line::before {
+    content: "";
+
+    position: absolute;
+
+    top: -3px;
+
+    left: 3px;
+
+    width: 8px;
+
+    height: 8px;
+
+    border-radius: 50%;
+
+    background: #ef4444;
+}
+
+/* ========================================
+   EVENT BLOCK
+   ======================================== */
+
+.tt-cal-event {
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 3px;
+
+    width: 100%;
+
+    padding: 6px 8px;
+
+    border: 2px solid rgba(100, 116, 139, 0.28);
+
+    border-left-width: 4px;
+
+    border-radius: 8px;
+
+    background: #ffffff;
+
+    cursor: pointer;
+
+    font: inherit;
+
+    text-align: left;
+
+    transition:
+        border-color 0.15s ease,
+        box-shadow 0.15s ease;
+
+    &:hover,
+    &:focus-visible {
+        border-color: rgba(37, 99, 235, 0.6);
+
+        box-shadow: 0 4px 12px rgba(15, 23, 42, 0.12);
+
+        outline: none;
+    }
+
+    &--conflict {
+        border-color: rgba(239, 68, 68, 0.6);
+    }
+}
+
+.tt-cal-event--blue { border-left-color: #2563eb; }
+.tt-cal-event--pink { border-left-color: #db2777; }
+.tt-cal-event--purple { border-left-color: #7c3aed; }
+.tt-cal-event--geekblue { border-left-color: #0d9488; }
+.tt-cal-event--orange { border-left-color: #ea580c; }
+.tt-cal-event--green { border-left-color: #16a34a; }
+.tt-cal-event--gold { border-left-color: #ca8a04; }
+.tt-cal-event--lime { border-left-color: #65a30d; }
+.tt-cal-event--cyan { border-left-color: #0891b2; }
+.tt-cal-event--teal { border-left-color: #0d9488; }
+.tt-cal-event--volcano { border-left-color: #d4380d; }
+.tt-cal-event--magenta { border-left-color: #c026d3; }
+.tt-cal-event--default { border-left-color: #64748b; }
+
+.tt-cal-event__main {
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 1px;
+}
+
+.tt-cal-event__class {
+    overflow: hidden;
+
+    color: #0f172a;
+
+    font-size: 12.5px;
+
+    text-overflow: ellipsis;
+
+    white-space: nowrap;
+}
+
+.tt-cal-event__subject {
+    overflow: hidden;
+
+    color: #334155;
+
+    font-size: 11.5px;
+
+    text-overflow: ellipsis;
+
+    white-space: nowrap;
+}
+
+.tt-cal-event__teacher {
+    display: flex;
+
+    align-items: center;
+
+    gap: 5px;
+
+    overflow: hidden;
+
+    color: #64748b;
+
+    font-size: 11px;
+
+    font-style: normal;
+
+    text-overflow: ellipsis;
+
+    white-space: nowrap;
+}
+
+.tt-cal-event__teacher-name {
+    overflow: hidden;
+
+    text-overflow: ellipsis;
+
+    white-space: nowrap;
+}
+
+.tt-cal-event__meta {
+    display: flex;
+
+    align-items: center;
+
+    gap: 4px;
+
+    color: #64748b;
+
+    font-size: 10.5px;
+}
+
+.tt-cal-event__conflicts {
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 2px;
+
+    margin-top: 2px;
+}
+
+.tt-cal-event__conflict {
+    display: inline-flex;
+
+    align-items: center;
+
+    gap: 4px;
+
+    padding: 1px 6px;
+
+    border-radius: 999px;
+
+    color: #ffffff;
+
+    font-size: 10px;
+
+    font-weight: 700;
+
+    background: #ef4444;
+}
+
+/* ========================================
+   DETAIL
+   ======================================== */
+
+.tt-cal-detail__heading {
+    display: flex;
+
+    align-items: center;
+
+    gap: 6px;
+
+    margin: 0 0 8px;
+
+    color: #0f172a;
+
+    font-size: 13px;
+}
+
+.tt-cal-detail__conflict {
+    padding: 10px 12px;
+
+    border: 2px solid rgba(239, 68, 68, 0.3);
+
+    border-radius: 10px;
+
+    background: rgba(239, 68, 68, 0.04);
+
+    p {
+        margin: 0 0 4px;
+
+        color: #475569;
+
+        font-size: 12px;
+
+        line-height: 1.5;
+    }
+}
+
+.tt-cal-detail__hint {
+    margin: 0;
+
+    color: #94a3b8;
+
+    font-size: 11.5px;
+}
+
+/* ========================================
+   RESPONSIVE
+   ======================================== */
+
+@media (max-width: 768px) {
+    .tt-cal {
+        --tt-cal-time-col: 68px;
+        --tt-cal-day-min: 128px;
+    }
+
+    .tt-cal__head-main {
+        align-items: flex-start;
+
+        flex-direction: column;
+    }
+
+    .tt-cal__week-label {
+        min-width: 128px;
+
+        font-size: 12.5px;
+    }
+
+    .tt-cal__session-switch {
+        width: 100%;
+    }
+}

@@ -1,18 +1,14 @@
 import {
-    AlertOutlined,
     CalendarOutlined,
     CheckCircleOutlined,
     ReadOutlined,
-    SearchOutlined,
     UnorderedListOutlined,
 } from "@ant-design/icons";
 
 import {
-    Button,
     Select,
     Space,
     Tabs,
-    Tag,
     message,
 } from "antd";
 
@@ -33,7 +29,6 @@ import StatsCard from "@/components/dashboard/StatCard";
 
 import {
     canThoSemesters,
-    canThoTimetableAlerts,
 } from "@/mock/canTho";
 
 import {
@@ -83,16 +78,23 @@ import {
 
 import {
     computeQuotaUsage,
-    detectConflicts,
-    sortConflicts,
     suggestFreeSlots,
 } from "@/utils/timetable";
+
+import TimetableCalendar from "@/components/TimetableCalendar";
+
+import type {
+    TimetableCalendarFiltersState as TimetableCalendarFilterState,
+} from "@/components/TimetableCalendar";
+
+import {
+    buildCalendarConflicts,
+} from "@/components/TimetableCalendar/helpers";
 
 import AssignmentBoard from "./components/AssignmentBoard";
 import CellDrawer from "./components/CellDrawer";
 import ConflictPanel from "./components/ConflictPanel";
 import RoomUsagePanel from "./components/RoomUsagePanel";
-import TimetableGrid from "./components/TimetableGrid";
 import VersionPipeline from "./components/VersionPipeline";
 
 import {
@@ -114,7 +116,6 @@ const tabsOf = (
         "assignment",
         "versions",
         "rooms",
-        "alerts",
     ].includes(tabValue ?? "");
 
     return valid ? (tabValue as string) : "grid";
@@ -203,14 +204,35 @@ const TimetablePage = () => {
     );
 
     const conflicts: TimetableConflict[] = useMemo(
-        () => sortConflicts(
-            detectConflicts(effective, {
-                assignments: quotaSources,
-                classes: classesApi.items,
-                roomCapacity,
-            }),
-        ),
+        () => buildCalendarConflicts(effective, {
+            assignments: quotaSources,
+            classes: classesApi.items,
+            roomCapacity,
+        }),
         [effective, quotaSources, classesApi.items, roomCapacity],
+    );
+
+    const currentSemester = useMemo(
+        () => canThoSemesters.find(
+            (semester) => semester.id === semesterId,
+        ),
+        [semesterId],
+    );
+
+    /**
+     * Học kỳ và cơ sở đã có bộ chọn ở đầu trang nên lưới chỉ nhận các
+     * bộ lọc còn lại để không có hai nút điều khiển cho cùng một dữ liệu.
+     */
+    const [calendarFilters, setCalendarFilters] =
+        useState<TimetableCalendarFilterState>({});
+
+    const scopedCalendarFilters = useMemo<TimetableCalendarFilterState>(
+        () => ({
+            ...calendarFilters,
+            semesterId,
+            campusId: campusId || undefined,
+        }),
+        [calendarFilters, semesterId, campusId],
     );
 
     const quotas = useMemo(
@@ -454,8 +476,6 @@ const TimetablePage = () => {
     const activeAssignments = assignmentApi.activeByTerm;
 
     const kpi = useMemo(() => {
-        const conflictCount = conflicts.length;
-
         const quotaMissing = quotas.filter(
             (quota) => quota.assigned < quota.standard,
         ).length;
@@ -466,11 +486,10 @@ const TimetablePage = () => {
 
         return {
             lessons: effective.length,
-            conflictCount,
             quotaMissing,
             quotaOver,
         };
-    }, [effective, conflicts, quotas]);
+    }, [effective, quotas]);
 
     const kpiCards = [
         {
@@ -479,13 +498,6 @@ const TimetablePage = () => {
             icon: <ReadOutlined />,
             tone: "blue" as const,
             note: "bản có hiệu lực",
-        },
-        {
-            title: "Xung đột",
-            value: kpi.conflictCount,
-            icon: <AlertOutlined />,
-            tone: "orange" as const,
-            note: "cần xử lý",
         },
         {
             title: "Thiếu tiết",
@@ -503,18 +515,23 @@ const TimetablePage = () => {
         },
     ];
 
-    const timetableAlerts = canThoTimetableAlerts;
-
     const items: TabsProps["items"] = [
         {
             key: "grid",
             label: "Lưới thời khóa biểu",
             children: (
-                <TimetableGrid
-                    effective={effective}
-                    conflicts={conflicts}
+                <TimetableCalendar
+                    entries={effective}
                     lookups={lookups}
-                    onOpenSlot={openSlot}
+                    semester={currentSemester}
+                    filters={scopedCalendarFilters}
+                    mode="school"
+                    showFilters
+                    showSemesterFilter={false}
+                    showCampusFilter={false}
+                    showRoom
+                    onFiltersChange={setCalendarFilters}
+                    onSelectSlot={(slot) => openSlot(slot.day, slot.period)}
                 />
             ),
         },
@@ -598,94 +615,6 @@ const TimetablePage = () => {
                 />
             ),
         },
-        {
-            key: "alerts",
-            label: `Cảnh báo (${timetableAlerts.length})`,
-            children: (
-                <div className="tt-alerts-tab">
-                    {timetableAlerts.map((alert) => (
-                        <div
-                            key={alert.id}
-                            className="tt-alert-card"
-                        >
-                            <div className="tt-alert-card__head">
-                                <Space size={6} wrap>
-                                    <Tag color={
-                                        alert.level === "danger"
-                                            ? "red"
-                                            : alert.level === "warning"
-                                                ? "orange"
-                                                : "blue"
-                                    }>
-                                        {alert.level === "danger"
-                                            ? "Nghiêm trọng"
-                                            : alert.level === "warning"
-                                                ? "Cần chú ý"
-                                                : "Thông tin"}
-                                    </Tag>
-
-                                    <Tag color="purple">
-                                        {alert.refType}
-                                    </Tag>
-
-                                    <span className="tt-alert-card__time">
-                                        {new Date(alert.createdAt).toLocaleString("vi-VN")}
-                                    </span>
-                                </Space>
-                            </div>
-
-                            <h4>{alert.title}</h4>
-
-                            <p className="tt-alert-card__desc">{alert.description}</p>
-
-                            <div className="tt-alert-card__cause">
-                                <p><em>Nguyên nhân:</em> {alert.cause ?? "—"}</p>
-
-                                <p><em>Hướng xử lý:</em> {alert.resolution ?? "—"}</p>
-                            </div>
-
-                            <div className="tt-alert-card__actions">
-                                <Space size={8} wrap>
-                                    {alert.timetableIds && alert.timetableIds.length > 0 ? (
-                                        <Tag
-                                            color="blue"
-                                            onClick={() => {
-                                                const firstId = alert.timetableIds?.[0];
-
-                                                const entry = firstId
-                                                    ? timetables.byId.get(firstId)
-                                                    : undefined;
-
-                                                if (entry) {
-                                                    changeTab("grid");
-
-                                                    openSlot(
-                                                        entry.dayOfWeek,
-                                                        entry.period,
-                                                    );
-                                                }
-                                            }}
-                                            style={{ cursor: "pointer" }}
-                                        >
-                                            <SearchOutlined /> Xem trong lưới
-                                        </Tag>
-                                    ) : null}
-
-                                    <Button
-                                        size="small"
-                                        type="primary"
-                                        ghost
-                                        onClick={() => changeTab("conflicts")}
-                                    >
-                                        <AlertOutlined /> Mở bảng xung đột
-                                    </Button>
-                                </Space>
-                            </div>
-                        </div>
-                    ))}
-                </div>
-            ),
-        },
     ];
 
     return (
@@ -759,7 +688,8 @@ const TimetablePage = () => {
                 activeKey={activeTab}
                 onChange={changeTab}
                 items={items}
-                tabBarStyle={{ margin: 0 }}
+                className="page-tabs"
+                tabBarStyle={{ margin: "0 0 24px" }}
             />
 
             <CellDrawer

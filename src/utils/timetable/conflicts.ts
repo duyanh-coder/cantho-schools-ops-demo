@@ -4,13 +4,17 @@ import type {
     TimetableConflictType,
     TimetableEntry,
     TimetableQuota,
+    TimetableSession,
     TimetableSuggestion,
     WeekDay,
 } from "@/mock/common/types";
 
 import {
+    DAY_LABELS,
     PERIOD_TIME,
+    SESSION_LABELS,
     WEEKDAY_ORDER,
+    periodSession,
 } from "@/mock/common/types";
 
 
@@ -28,6 +32,7 @@ const SCHOOL_DAYS: WeekDay[] = [
     "wednesday",
     "thursday",
     "friday",
+    "saturday",
 ];
 
 export const weeksOverlap = (
@@ -689,3 +694,158 @@ export const computeQuotaUsage = (
             assigned,
         };
     });
+
+export interface WorkloadStrainOptions {
+    /**
+     * Số tiết liên tục tối đa trong một buổi trước khi coi là quá tải.
+     * Mặc định 5 theo ngưỡng nghiệp vụ "quá 5 tiết liên tục".
+     */
+    maxConsecutivePerSession?: number;
+
+    /**
+     * Tổng số tiết một giáo viên có thể dạy trong một ngày.
+     * Mặc định 8 (tương ứng 2 buổi x 5 tiết).
+     */
+    maxPeriodsPerDay?: number;
+
+    /**
+     * Ngày được xét. Mặc định Thứ Hai - Thứ Sáu.
+     */
+    days?: WeekDay[];
+}
+
+export const DEFAULT_MAX_CONSECUTIVE_PER_SESSION = 5;
+
+export const DEFAULT_MAX_PERIODS_PER_DAY = 8;
+
+const longestConsecutiveRun = (
+    periods: number[],
+): number => {
+    if (periods.length === 0) {
+        return 0;
+    }
+
+    const sorted = [...new Set(periods)].sort((a, b) => a - b);
+
+    let best = 1;
+    let current = 1;
+
+    for (let index = 1; index < sorted.length; index += 1) {
+        if (sorted[index] === sorted[index - 1] + 1) {
+            current += 1;
+        } else {
+            current = 1;
+        }
+
+        if (current > best) {
+            best = current;
+        }
+    }
+
+    return best;
+};
+
+/**
+ * Phát hiện giáo viên quá tải theo hai tiêu chí:
+ * 1. Dạy quá `maxConsecutivePerSession` tiết liên tục trong cùng một buổi.
+ * 2. Dạy quá `maxPeriodsPerDay` tiết trong một ngày.
+ */
+export const detectWorkloadStrain = (
+    entries: TimetableEntry[],
+    options: WorkloadStrainOptions = {},
+): TimetableConflict[] => {
+    const maxConsecutive = options.maxConsecutivePerSession
+        ?? DEFAULT_MAX_CONSECUTIVE_PER_SESSION;
+
+    const maxPerDay = options.maxPeriodsPerDay
+        ?? DEFAULT_MAX_PERIODS_PER_DAY;
+
+    const days = options.days ?? SCHOOL_DAYS;
+
+    const daySet = new Set(days);
+
+    const conflicts: TimetableConflict[] = [];
+
+    const byTeacherDay = groupBySlot(
+        entries.filter((entry) => daySet.has(entry.dayOfWeek)),
+        (entry) => `${entry.teacherId}|${entry.dayOfWeek}`,
+    );
+
+    for (const [key, rows] of byTeacherDay) {
+        const [teacherId] = key.split("|");
+
+        const bySession = new Map<TimetableSession, TimetableEntry[]>();
+
+        for (const entry of rows) {
+            const session = periodSession(entry.period);
+
+            const bucket = bySession.get(session) ?? [];
+
+            bucket.push(entry);
+
+            bySession.set(session, bucket);
+        }
+
+        for (const [session, sessionRows] of bySession) {
+            const periods = sessionRows.map((entry) => entry.period);
+
+            const run = longestConsecutiveRun(periods);
+
+            if (run <= maxConsecutive) {
+                continue;
+            }
+
+            const worstPeriod = Math.min(...periods);
+
+            const anchor = sessionRows.find((entry) =>
+                entry.period === worstPeriod) ?? sessionRows[0];
+
+            conflicts.push({
+                type: "workload_strain",
+                dayOfWeek: anchor.dayOfWeek,
+                period: anchor.period,
+                week: anchor.week,
+                rows: sessionRows,
+                message: `Giáo viên dạy ${run} tiết liên tục trong ${SESSION_LABELS[session].toLowerCase()}`,
+                cause:
+                    `Giáo viên ${teacherId} dạy ${run} tiết liền nhau ${SESSION_LABELS[session].toLowerCase()}, vượt ngưỡng ${maxConsecutive} tiết liên tục.`,
+                resolution:
+                    "Rảnh bớt tiết cho giáo viên khác hoặc xen kẽ giờ nghỉ giữa buổi.",
+            });
+        }
+
+        if (rows.length > maxPerDay) {
+            const periods = rows.map((entry) => entry.period);
+
+            const anchor = rows.find((entry) =>
+                entry.period === Math.min(...periods)) ?? rows[0];
+
+            conflicts.push({
+                type: "workload_strain",
+                dayOfWeek: anchor.dayOfWeek,
+                period: anchor.period,
+                week: anchor.week,
+                rows,
+                message: `Giáo viên dạy ${rows.length} tiết trong một ngày`,
+                cause:
+                    `Giáo viên ${teacherId} dạy ${rows.length} tiết ${DAY_LABELS[anchor.dayOfWeek].toLowerCase()}, vượt ngưỡng ${maxPerDay} tiết/ngày.`,
+                resolution:
+                    "Phân bổ lại tiết dạy sang ngày khác hoặc giáo viên khác để giảm tải.",
+            });
+        }
+    }
+
+    return conflicts;
+};
+
+/**
+ * Bộ xung đột dùng chung cho lớp hiển thị thời khóa biểu:
+ * xung đột theo cặp + quá tải giáo viên.
+ */
+export const detectCalendarConflicts = (
+    entries: TimetableEntry[],
+    context: DetectConflictContext & WorkloadStrainOptions = {},
+): TimetableConflict[] => [
+    ...detectConflicts(entries, context),
+    ...detectWorkloadStrain(entries, context),
+];

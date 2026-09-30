@@ -50,20 +50,41 @@ export interface TimetableEntry {
     updatedAt?: string;
 }
 
+export type TimetableSession =
+    | "morning"
+    | "afternoon";
+
 export interface TimetablePeriod {
     period: number;
+
+    session: TimetableSession;
 
     startTime: string;
 
     endTime: string;
 }
 
+export const SESSION_LABELS: Record<TimetableSession, string> = {
+    morning: "Buổi sáng",
+    afternoon: "Buổi chiều",
+};
+
+export const SESSION_ORDER: TimetableSession[] = [
+    "morning",
+    "afternoon",
+];
+
 export const PERIOD_TIME: TimetablePeriod[] = [
-    { period: 1, startTime: "07:00", endTime: "07:45" },
-    { period: 2, startTime: "07:50", endTime: "08:35" },
-    { period: 3, startTime: "08:40", endTime: "09:25" },
-    { period: 4, startTime: "09:30", endTime: "10:15" },
-    { period: 5, startTime: "10:20", endTime: "11:05" },
+    { period: 1, session: "morning", startTime: "07:00", endTime: "07:45" },
+    { period: 2, session: "morning", startTime: "07:50", endTime: "08:35" },
+    { period: 3, session: "morning", startTime: "08:40", endTime: "09:25" },
+    { period: 4, session: "morning", startTime: "09:30", endTime: "10:15" },
+    { period: 5, session: "morning", startTime: "10:20", endTime: "11:05" },
+    { period: 6, session: "afternoon", startTime: "13:00", endTime: "13:45" },
+    { period: 7, session: "afternoon", startTime: "13:50", endTime: "14:35" },
+    { period: 8, session: "afternoon", startTime: "14:40", endTime: "15:25" },
+    { period: 9, session: "afternoon", startTime: "15:30", endTime: "16:15" },
+    { period: 10, session: "afternoon", startTime: "16:20", endTime: "17:05" },
 ];
 
 export const periodTimes = (
@@ -72,6 +93,19 @@ export const periodTimes = (
     return PERIOD_TIME.find((item) => item.period === period)
         ?? PERIOD_TIME[0];
 };
+
+export const periodSession = (
+    period: number,
+): TimetableSession => periodTimes(period).session;
+
+export const periodsBySession = (
+    session: TimetableSession,
+): TimetablePeriod[] => PERIOD_TIME.filter((item) =>
+    item.session === session);
+
+export const MORNING_PERIODS = periodsBySession("morning");
+
+export const AFTERNOON_PERIODS = periodsBySession("afternoon");
 
 export const DAY_LABELS: Record<WeekDay, string> = {
     monday: "Thứ Hai",
@@ -181,6 +215,7 @@ export type TimetableConflictType =
     | "teacher_conflict"
     | "class_conflict"
     | "room_conflict"
+    | "workload_strain"
     | "quota_exceeded"
     | "quota_missing"
     | "assignment_missing"
@@ -191,6 +226,7 @@ export const CONFLICT_TYPE_LABELS: Record<TimetableConflictType, string> = {
     teacher_conflict: "Trùng giáo viên",
     class_conflict: "Trùng lớp",
     room_conflict: "Trùng phòng",
+    workload_strain: "Quá tải giáo viên",
     quota_exceeded: "Vượt số tiết phân công",
     quota_missing: "Thiếu tiết so với phân công",
     assignment_missing: "Thiếu phân công giảng dạy",
@@ -202,6 +238,7 @@ export const CONFLICT_TYPE_TONES: Record<TimetableConflictType, string> = {
     teacher_conflict: "red",
     class_conflict: "volcano",
     room_conflict: "magenta",
+    workload_strain: "geekblue",
     quota_exceeded: "orange",
     quota_missing: "gold",
     assignment_missing: "purple",
