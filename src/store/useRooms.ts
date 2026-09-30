@@ -21,6 +21,9 @@ import type {
 
 export const ROOMS_STORAGE_KEY = "can-tho-rooms";
 
+/** Seed 2: phòng của 4 cơ sở ngoài Ninh Kiều và mã phòng thực hành có hậu tố `th`. */
+export const ROOMS_SEED_VERSION = 2;
+
 export interface RoomsApi extends CrudApi<SchoolRoom> {
     byId: Map<string, SchoolRoom>;
 
@@ -33,6 +36,7 @@ export function useRooms(
     const base = useCrud<SchoolRoom>(
         ROOMS_STORAGE_KEY,
         canThoRooms,
+        ROOMS_SEED_VERSION,
     );
 
     const items = base.items;

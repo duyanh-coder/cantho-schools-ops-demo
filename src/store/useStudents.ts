@@ -22,6 +22,9 @@ import type {
 
 export const STUDENTS_STORAGE_KEY = "can-tho-students";
 
+/** Seed 1: khóa cache cũ để hồ sơ học sinh luôn khớp với lớp/phân hiệu. */
+export const STUDENTS_SEED_VERSION = 1;
+
 export interface StudentsApi extends CrudApi<Student> {
     byId: Map<string, Student>;
 
@@ -40,6 +43,7 @@ export function useStudents(
     const base = useCrud<Student>(
         STUDENTS_STORAGE_KEY,
         canThoStudents,
+        STUDENTS_SEED_VERSION,
     );
 
     const byId = useMemo(

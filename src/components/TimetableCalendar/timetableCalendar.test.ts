@@ -9,6 +9,7 @@ import {
 } from "@/mock/canTho";
 
 import {
+    plannedGeneratedEntries,
     plannedTimetables,
 } from "@/mock/canTho/timetablePlan";
 
@@ -312,7 +313,7 @@ describe("Chuẩn hóa sự kiện", () => {
         expect(bySlot.get("tuesday|1")).toHaveLength(1);
     });
 
-    it("chỉ render buổi có dữ liệu thực tế", () => {
+    it("luôn dựng đủ khung tiết của cả hai buổi", () => {
         const events = toTimetableEvents([
             makeEntry({ id: "e-1", period: 1 }),
             makeEntry({ id: "e-2", period: 7 }),
@@ -323,11 +324,27 @@ describe("Chuẩn hóa sự kiện", () => {
         expect(blocks.map((block) => block.session))
             .toEqual(["morning", "afternoon"]);
 
-        expect(blocks[0].periods).toHaveLength(1);
+        // Lớp chỉ có một tiết sáng và một tiết chiều vẫn dựng đủ 5+5 hàng.
+        expect(blocks[0].periods.map((item) => item.period))
+            .toEqual([1, 2, 3, 4, 5]);
 
-        expect(blocks[1].periods).toHaveLength(1);
+        expect(blocks[1].periods.map((item) => item.period))
+            .toEqual([6, 7, 8, 9, 10]);
+    });
 
-        expect(blocks[1].periods[0].period).toBe(7);
+    it("lọc theo buổi thì chỉ dựng buổi đang chọn", () => {
+        const events = toTimetableEvents([
+            makeEntry({ id: "e-1", period: 1 }),
+            makeEntry({ id: "e-2", period: 7 }),
+        ], lookups);
+
+        const blocks = deriveSessionBlocks(events, "afternoon");
+
+        expect(blocks.map((block) => block.session))
+            .toEqual(["afternoon"]);
+
+        expect(blocks[0].periods.map((item) => item.period))
+            .toEqual([6, 7, 8, 9, 10]);
     });
 
     it("không có dữ liệu thì không dựng khối buổi nào", () => {
@@ -372,15 +389,49 @@ describe("Phạm vi lựa chọn của bộ lọc", () => {
     const entriesOf = (teacherId: string): TimetableEntry[] =>
         plannedTimetables.filter((entry) => entry.teacherId === teacherId);
 
-    it("dữ liệu mock có hai lớp học hai buổi", () => {
-        const afternoon = plannedTimetables.filter((entry) =>
-            entry.period >= 6);
+    it("mọi lớp có thời khóa biểu đều học đủ ngày trong tuần và có tiết buổi chiều", () => {
+        const scheduledClasses = new Set(
+            plannedGeneratedEntries.map((entry) => entry.classId),
+        );
 
-        expect(new Set(afternoon.map((entry) => entry.classId)))
-            .toEqual(new Set([twoSessionClass, strainClass]));
+        expect(scheduledClasses.size).toBe(64);
 
-        expect(afternoon.every((entry) => entry.teacherId !== undefined))
-            .toBe(true);
+        const sortedDays = [...CALENDAR_DAYS].sort();
+
+        for (const classId of scheduledClasses) {
+            const own = plannedTimetables.filter((entry) =>
+                entry.classId === classId);
+
+            const days = [...new Set(own.map((entry) => entry.dayOfWeek))]
+                .sort();
+
+            expect(days, `lớp ${classId} để trống ngày học`)
+                .toEqual(sortedDays);
+
+            expect(
+                own.some((entry) => entry.period >= 6),
+                `lớp ${classId} chưa có tiết buổi chiều`,
+            ).toBe(true);
+        }
+    });
+
+    it("giữ kịch bản quá tải: lớp 027 dồn tiết chiều 6-10 vào thứ Tư", () => {
+        const strainSlots = plannedTimetables
+            .filter((entry) =>
+                entry.classId === strainClass &&
+                entry.teacherId === strainTeacher &&
+                entry.subjectId === "math" &&
+                entry.period >= 6)
+            .map((entry) => `${entry.dayOfWeek}|${entry.period}`);
+
+        expect(strainSlots.sort())
+            .toEqual([
+                "wednesday|10",
+                "wednesday|6",
+                "wednesday|7",
+                "wednesday|8",
+                "wednesday|9",
+            ]);
     });
 
     it("phạm vi bỏ chính lớp đang chọn nên danh sách không tự thu hẹp", () => {
@@ -406,10 +457,15 @@ describe("Phạm vi lựa chọn của bộ lọc", () => {
             lookups,
         );
 
-        expect(new Set(scope.map((entry) => entry.classId)))
-            .toEqual(new Set([twoSessionClass]));
+        expect(scope.length).toBeGreaterThan(0);
+
+        expect(scope.every((entry) => entry.teacherId === twoSessionTeacher))
+            .toBe(true);
 
         expect(scope.every((entry) => entry.period >= 6)).toBe(true);
+
+        expect(scope.some((entry) => entry.classId === twoSessionClass))
+            .toBe(true);
     });
 
     it("phạm vi rỗng khi buổi đang xem không có tiết nào", () => {
@@ -421,17 +477,19 @@ describe("Phạm vi lựa chọn của bộ lọc", () => {
     });
 
     it("lấy đúng tập khối/lớp/môn/phòng trong phạm vi", () => {
-        const scope = filterScopeOf(
-            entriesOf(twoSessionTeacher).filter((entry) =>
-                entry.period >= 6),
-            lookups,
-        );
+        const afternoonEntries = entriesOf(twoSessionTeacher)
+            .filter((entry) => entry.period >= 6);
 
-        expect([...scope.classIds]).toEqual([twoSessionClass]);
+        const scope = filterScopeOf(afternoonEntries, lookups);
 
-        expect([...scope.grades]).toEqual([
-            lookups.classById.get(twoSessionClass)?.grade,
-        ]);
+        expect(new Set(scope.classIds)).toEqual(new Set(
+            afternoonEntries.map((entry) => entry.classId),
+        ));
+
+        expect(new Set(scope.grades)).toEqual(new Set(
+            [...scope.classIds].map((classId) =>
+                lookups.classById.get(classId)?.grade),
+        ));
 
         expect(scope.subjectIds.size).toBeGreaterThan(0);
 

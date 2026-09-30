@@ -1,5 +1,6 @@
 import {
   AimOutlined,
+  AppstoreOutlined,
   ArrowLeftOutlined,
   BankOutlined,
   EnvironmentOutlined,
@@ -9,7 +10,8 @@ import {
   HomeOutlined,
   LineChartOutlined,
   ReloadOutlined,
-  WarningOutlined,
+  ShopOutlined,
+  TeamOutlined,
 } from "@ant-design/icons";
 
 import {
@@ -57,13 +59,23 @@ import {
   getCurrentRegionMockData,
 } from "@/mock";
 
+import { canThoRooms } from "@/mock/canTho";
+
 import type {
-    Campus,
+  Campus,
+  CampusType,
+  Ward,
 } from "@/mock/common/types";
 
 import type {
-    GisWard,
+  GisWard,
 } from "@/mock";
+
+import {
+  buildCampusDetail,
+  campusDetailFields,
+  CAMPUS_TYPE_LABELS,
+} from "@/utils/campusDetail";
 
 import "./style.scss";
 
@@ -98,7 +110,6 @@ function FocusMap({ bounds }: FocusMapProps) {
 
 function createCampusIcon(
   isMainCampus: boolean,
-  hasActiveAlert: boolean,
   isSelected = false,
 ) {
   const glyph = renderToStaticMarkup(<BankOutlined />);
@@ -107,8 +118,6 @@ function createCampusIcon(
     "gis-campus-marker",
 
     isMainCampus ? "gis-campus-marker--main" : "gis-campus-marker--sub",
-
-    hasActiveAlert && !isMainCampus ? "gis-campus-marker--alert" : "",
 
     isSelected ? "gis-campus-marker--selected" : "",
   ]
@@ -120,7 +129,6 @@ function createCampusIcon(
     html: `
       <div class="gis-campus-marker__pin gis-campus-marker__pin--${isMainCampus ? "main" : "sub"}">
         ${glyph}
-        ${hasActiveAlert && !isMainCampus ? '<span class="gis-campus-marker__dot"></span>' : ""}
       </div>
     `,
     iconSize: [30, 37],
@@ -139,10 +147,15 @@ const campusEntityById = new Map<string, Campus>(
   ),
 );
 
-const CAMPUS_TYPE_LABEL: Record<Campus["type"], string> = {
-  HEADQUARTERS: "Trụ sở chính",
-  BRANCH: "Phân hiệu",
-};
+/** Phường/xã nghiệp vụ, khác với đơn vị hành chính vẽ trên bản đồ. */
+const businessWardById = new Map<string, Ward>(
+  canThoMockData.wards.map((ward) => [ward.id, ward] as [string, Ward]),
+);
+
+const CAMPUS_TYPE_OPTIONS: Array<{ value: CampusType; label: string }> = [
+  { value: "HEADQUARTERS", label: CAMPUS_TYPE_LABELS.HEADQUARTERS },
+  { value: "BRANCH", label: CAMPUS_TYPE_LABELS.BRANCH },
+];
 
 const hasValidCoordinates = (
   campus: Campus | GisWard,
@@ -164,7 +177,7 @@ const hasValidCoordinates = (
 function GisPage() {
   const navigation = useNavigate();
 
-  const { gis, alerts } = getCurrentRegionMockData();
+  const { gis } = getCurrentRegionMockData();
 
   const { province, wards, campuses } = gis;
 
@@ -198,6 +211,19 @@ function GisPage() {
   const [selectedCampusId, setSelectedCampusId] = useState<string>(
     presetCampus ? presetCampus.id : "all",
   );
+
+  /**
+   * Ba bộ lọc nghiệp vụ: trường, loại cơ sở và phường/xã trong hồ sơ.
+   *
+   * Chúng tác động lên danh sách marker, còn `selectedWardId` chỉ điều
+   * khiển vùng bản đồ để tránh lẫn hai loại địa bàn.
+   */
+  const [selectedSchoolId, setSelectedSchoolId] = useState("all");
+
+  const [selectedCampusType, setSelectedCampusType] =
+    useState<CampusType | "all">("all");
+
+  const [selectedBusinessWardId, setSelectedBusinessWardId] = useState("all");
 
   const [mapBounds, setMapBounds] = useState<LatLngBoundsExpression | null>(
     () => {
@@ -239,9 +265,33 @@ function GisPage() {
       const matchCampus =
         selectedCampusId === "all" || campus.id === selectedCampusId;
 
-      return matchWard && matchCampus;
+      const campusEntity = campusEntityById.get(campus.id);
+
+      const matchSchool =
+        selectedSchoolId === "all" || campus.schoolId === selectedSchoolId;
+
+      const matchType =
+        selectedCampusType === "all" ||
+        campusEntity?.type === selectedCampusType;
+
+      const matchBusinessWard =
+        selectedBusinessWardId === "all" ||
+        campusEntity?.wardId === selectedBusinessWardId;
+
+      return matchWard
+        && matchCampus
+        && matchSchool
+        && matchType
+        && matchBusinessWard;
     });
-  }, [campuses, selectedWardId, selectedCampusId]);
+  }, [
+    campuses,
+    selectedWardId,
+    selectedCampusId,
+    selectedSchoolId,
+    selectedCampusType,
+    selectedBusinessWardId,
+  ]);
 
   const selectedCampus = useMemo(() => {
     if (selectedCampusId === "all") {
@@ -267,24 +317,6 @@ function GisPage() {
     }
   }, [presetCampusId, filteredCampuses]);
 
-  const activeAlertCountByCampusId = useMemo(() => {
-    const counter = new Map<string, number>();
-
-    alerts.forEach((alert) => {
-      if (!alert.campusId) {
-        return;
-      }
-
-      if (alert.status === "resolved") {
-        return;
-      }
-
-      counter.set(alert.campusId, (counter.get(alert.campusId) ?? 0) + 1);
-    });
-
-    return counter;
-  }, [alerts]);
-
   const campusesInWard = useMemo(() => {
     if (!selectedWard) {
       return [];
@@ -296,6 +328,123 @@ function GisPage() {
   const filteredSchoolCount = useMemo(() => {
     return new Set(filteredCampuses.map((campus) => campus.schoolId)).size;
   }, [filteredCampuses]);
+
+  /* ========================================
+       BUSINESS WARD STATISTICS
+     ======================================== */
+
+  const businessWardStats = useMemo(() => {
+    const scoped = campuses.filter((campus) => {
+      const campusEntity = campusEntityById.get(campus.id);
+
+      const matchSchool =
+        selectedSchoolId === "all" || campus.schoolId === selectedSchoolId;
+
+      const matchType =
+        selectedCampusType === "all" ||
+        campusEntity?.type === selectedCampusType;
+
+      return matchSchool && matchType;
+    });
+
+    return canThoMockData.wards
+      .map((ward) => {
+        const campusEntities = scoped
+          .filter((campus) => campusEntityById.get(campus.id)?.wardId === ward.id)
+          .map((campus) => campusEntityById.get(campus.id))
+          .filter((entity): entity is Campus => Boolean(entity));
+
+        const campusIds = new Set(campusEntities.map((campus) => campus.id));
+
+        const classIds = new Set(
+          canThoMockData.classes
+            .filter((item) => campusIds.has(item.campusId))
+            .map((item) => item.id),
+        );
+
+        return {
+          ward,
+
+          campusCount: campusEntities.length,
+
+          schoolCount: new Set(
+            campusEntities.map((campus) => campus.schoolId),
+          ).size,
+
+          classCount: classIds.size,
+
+          studentCount: canThoMockData.students.filter((student) =>
+            student.classId !== undefined && classIds.has(student.classId),
+          ).length,
+
+          personnelCount: new Set(
+            canThoMockData.personnel
+              .filter((person) =>
+                person.campusIds.some((id) => campusIds.has(id)))
+              .map((person) => person.id),
+          ).size,
+        };
+      })
+      .filter((row) => row.campusCount > 0 || row.ward.id === selectedBusinessWardId)
+      .sort((a, b) => b.campusCount - a.campusCount
+        || b.studentCount - a.studentCount
+        || a.ward.name.localeCompare(b.ward.name, "vi-VN"));
+  }, [
+    campuses,
+    selectedSchoolId,
+    selectedCampusType,
+    selectedBusinessWardId,
+  ]);
+
+  const selectedBusinessWardStat = useMemo(() => {
+    return businessWardStats.find(
+      (row) => row.ward.id === selectedBusinessWardId,
+    ) ?? null;
+  }, [businessWardStats, selectedBusinessWardId]);
+
+  /* ========================================
+       SELECTED CAMPUS DETAIL (16 fields)
+     ======================================== */
+
+  const selectedCampusDetail = useMemo(() => {
+    if (!selectedCampus) {
+      return null;
+    }
+
+    const campusEntity = campusEntityById.get(selectedCampus.id);
+
+    if (!campusEntity) {
+      return null;
+    }
+
+    const classes = canThoMockData.classes.filter(
+      (item) => item.campusId === campusEntity.id,
+    );
+
+    const rooms = canThoRooms.filter(
+      (room) => room.campusId === campusEntity.id,
+    );
+
+    const detail = buildCampusDetail({
+      campus: campusEntity,
+
+      school: canThoMockData.schools.find(
+        (school) => school.id === campusEntity.schoolId,
+      ),
+
+      ward: businessWardById.get(campusEntity.wardId),
+
+      classes,
+
+      rooms,
+
+      personnel: canThoMockData.personnel,
+
+      students: canThoMockData.students,
+    });
+
+    return { detail, fields: campusDetailFields(detail) };
+  }, [selectedCampus]);
 
   /* ========================================
        HANDLERS
@@ -354,6 +503,12 @@ function GisPage() {
 
     setSelectedCampusId("all");
 
+    setSelectedSchoolId("all");
+
+    setSelectedCampusType("all");
+
+    setSelectedBusinessWardId("all");
+
     setMapBounds(
       defaultWard
         ? L.latLngBounds(defaultWard.polygon.flat(2))
@@ -388,6 +543,7 @@ function GisPage() {
           tone="blue"
           title="Đơn vị hành chính"
           value={wards.length}
+          note="Xã/phường trên bản đồ"
           icon={<AimOutlined />}
         />
 
@@ -580,23 +736,13 @@ function GisPage() {
                     return null;
                   }
 
-                  const activeAlertCount =
-                    activeAlertCountByCampusId.get(campus.id) ?? 0;
-
-                  const hasActiveAlert =
-                    activeAlertCount > 0 && !campus.isMainCampus;
-
                   const isSelected = campus.id === selectedCampusId;
 
                   return (
                     <Marker
                       key={campus.id}
                       position={campus.position}
-                      icon={createCampusIcon(
-                        campus.isMainCampus,
-                        hasActiveAlert,
-                        isSelected,
-                      )}
+                      icon={createCampusIcon(campus.isMainCampus, isSelected)}
                       ref={(marker) => {
                         markerRefs.current[campus.id] = marker;
                       }}
@@ -609,7 +755,7 @@ function GisPage() {
                           <strong>{campus.name}</strong>
 
                           <span className="gis-popup__tag">
-                            {CAMPUS_TYPE_LABEL[campusEntity.type]}
+                            {CAMPUS_TYPE_LABELS[campusEntity.type]}
                           </span>
 
                           <p>{campus.address}</p>
@@ -617,14 +763,6 @@ function GisPage() {
                           {campusEntity.phone && (
                             <p className="gis-popup__phone">
                               ☎ {campusEntity.phone}
-                            </p>
-                          )}
-
-                          {hasActiveAlert && (
-                            <p className="gis-popup__alert">
-                              <WarningOutlined />
-
-                              {activeAlertCount} cảnh báo cần xử lý
                             </p>
                           )}
 
@@ -670,11 +808,6 @@ function GisPage() {
                 <div>
                   <span className="gis-map__legend-campus gis-map__legend-campus--sub" />
                   Phân hiệu
-                </div>
-
-                <div>
-                  <span className="gis-map__legend-campus gis-map__legend-campus--alert" />
-                  Phân hiệu có cảnh báo
                 </div>
               </div>
 
@@ -761,7 +894,72 @@ function GisPage() {
               </div>
 
               <div className="gis-filter-card__field">
-                <label>Xã / Phường</label>
+                <label>
+                  <ShopOutlined /> Trường
+                </label>
+
+                <Select
+                  value={selectedSchoolId}
+                  onChange={(value) => {
+                    setSelectedSchoolId(value);
+
+                    setSelectedCampusId("all");
+                  }}
+                  className="gis-select"
+                  showSearch
+                  optionFilterProp="label"
+                  options={[
+                    { value: "all", label: "Tất cả trường" },
+
+                    ...canThoMockData.schools.map((school) => ({
+                      value: school.id,
+                      label: school.name,
+                    })),
+                  ]}
+                />
+              </div>
+
+              <div className="gis-filter-card__field">
+                <label>
+                  <AppstoreOutlined /> Loại cơ sở
+                </label>
+
+                <Select
+                  value={selectedCampusType}
+                  onChange={setSelectedCampusType}
+                  className="gis-select"
+                  options={[
+                    { value: "all", label: "Tất cả loại" },
+
+                    ...CAMPUS_TYPE_OPTIONS,
+                  ]}
+                />
+              </div>
+
+              <div className="gis-filter-card__field">
+                <label>
+                  <EnvironmentOutlined /> Phường / Xã hồ sơ
+                </label>
+
+                <Select
+                  value={selectedBusinessWardId}
+                  onChange={setSelectedBusinessWardId}
+                  className="gis-select"
+                  showSearch
+                  optionFilterProp="label"
+                  options={[
+                    { value: "all", label: "Tất cả phường / xã" },
+
+                    ...canThoMockData.wards.map((ward) => ({
+                      value: ward.id,
+                      label: ward.name,
+                    })),
+                  ]}
+                />
+              </div>
+
+              <div className="gis-filter-card__field">
+                <label>Xã / Phường trên bản đồ</label>
 
                 <Select
                   value={selectedWardId}
@@ -818,30 +1016,117 @@ function GisPage() {
                 <span>Thông tin cơ sở</span>
               </div>
 
-              {!selectedCampus ? (
+              {!selectedCampusDetail ? (
                 <Empty
                   image={Empty.PRESENTED_IMAGE_SIMPLE}
                   description="Chọn cơ sở trên bản đồ"
                 />
               ) : (
-                <div className="gis-location-info">
-                  <Tag color="blue">{selectedCampus.code}</Tag>
+                <div className="gis-campus-detail">
+                  <div className="gis-campus-detail__head">
+                    <Tag color="blue">
+                      {selectedCampusDetail.detail.code}
+                    </Tag>
 
-                  <h3>{selectedCampus.name}</h3>
-
-                  <p>{selectedCampus.schoolName ?? "-"}</p>
-
-                  <div className="gis-location-info__address">
-                    <EnvironmentOutlined />
-
-                    <span>{selectedCampus.address}</span>
+                    <h3>{selectedCampusDetail.detail.name}</h3>
                   </div>
 
-                  <div className="gis-location-info__coordinates">
-                    <span>Lat: {selectedCampus.position[0]}</span>
+                  <div className="gis-campus-detail__grid">
+                    {selectedCampusDetail.fields.map((field) => (
+                      <div
+                        key={field.key}
+                        className="gis-campus-detail__row"
+                      >
+                        <span>{field.label}</span>
 
-                    <span>Lng: {selectedCampus.position[1]}</span>
+                        <strong>{field.value}</strong>
+                      </div>
+                    ))}
                   </div>
+
+                  <Button
+                    block
+                    type="primary"
+                    icon={<EyeOutlined />}
+                    onClick={() =>
+                      navigation(
+                        `/operations/campuses/${selectedCampusDetail.detail.campusId}`,
+                      )
+                    }
+                  >
+                    Mở hồ sơ cơ sở
+                  </Button>
+                </div>
+              )}
+            </Card>
+
+            {/* BUSINESS WARD STATISTICS */}
+
+            <Card className="gis-location-card">
+              <div className="gis-sidebar__title">
+                <TeamOutlined />
+
+                <span>Thống kê phường / xã</span>
+              </div>
+
+              <p className="gis-ward-stats__hint">
+                Theo phường/xã trong hồ sơ cơ sở, đã áp bộ lọc trường và loại.
+              </p>
+
+              {businessWardStats.length === 0 ? (
+                <Empty
+                  image={Empty.PRESENTED_IMAGE_SIMPLE}
+                  description="Không có dữ liệu theo bộ lọc"
+                />
+              ) : (
+                <div className="gis-ward-stats">
+                  {businessWardStats.map((row) => {
+                    const isActive = row.ward.id === selectedBusinessWardId;
+
+                    return (
+                      <button
+                        key={row.ward.id}
+                        type="button"
+                        className={`gis-ward-stats__row${isActive
+                          ? " is-active"
+                          : ""}`}
+                        onClick={() =>
+                          setSelectedBusinessWardId(isActive ? "all" : row.ward.id)
+                        }
+                      >
+                        <div className="gis-ward-stats__name">
+                          <strong>{row.ward.name}</strong>
+
+                          <span>
+                            {row.campusCount} cơ sở · {row.schoolCount} trường
+                          </span>
+                        </div>
+
+                        <div className="gis-ward-stats__metrics">
+                          <span>{row.classCount} lớp</span>
+
+                          <span>
+                            {row.studentCount.toLocaleString("vi-VN")} HS
+                          </span>
+
+                          <span>{row.personnelCount} CB</span>
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+
+              {selectedBusinessWardStat && (
+                <div className="gis-ward-stats__total">
+                  <span>Tổng đang chọn</span>
+
+                  <strong>
+                    {selectedBusinessWardStat.campusCount} cơ sở ·{" "}
+                    {selectedBusinessWardStat.classCount} lớp ·{" "}
+                    {selectedBusinessWardStat.studentCount.toLocaleString("vi-VN")}{" "}
+                    học sinh
+                  </strong>
                 </div>
               )}
             </Card>

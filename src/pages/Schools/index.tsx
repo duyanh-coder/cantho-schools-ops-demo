@@ -13,6 +13,7 @@ import type {
 } from "antd";
 
 import {
+    useEffect,
     useMemo,
 } from "react";
 
@@ -29,8 +30,6 @@ import ClassList from "@/pages/Classes/ClassList";
 import PersonnelList from "@/pages/Personnel/PersonnelList";
 
 import SectorPage from "@/pages/Sector";
-
-import StudentList from "@/pages/Students/StudentList";
 
 import SchoolOverview from "./SchoolOverview";
 
@@ -49,10 +48,18 @@ const TAB_KEYS = [
     "personnel",
     "sectors",
     "classes",
-    "students",
 ] as const;
 
 type TabKey = (typeof TAB_KEYS)[number];
+
+/**
+ * Học sinh không còn là tab cấp trường: dữ liệu học sinh chỉ được mở
+ * qua Trường & Phân hiệu → Lớp học → Chi tiết lớp → tab Học sinh.
+ * Bookmark/link cũ `?tab=students` được chuyển hướng sang tab Lớp học.
+ */
+const RETIRED_TAB_ALIASES: Record<string, TabKey> = {
+    students: "classes",
+};
 
 
 const isValidTab = (
@@ -68,6 +75,32 @@ const isValidTab = (
 function SchoolsHub() {
     const [searchParams, setSearchParams] = useSearchParams();
 
+    const rawTab = searchParams.get("tab");
+
+    useEffect(() => {
+        if (!rawTab) {
+            return;
+        }
+
+        const replacement = RETIRED_TAB_ALIASES[rawTab];
+
+        if (!replacement) {
+            return;
+        }
+
+        const next: Record<string, string> = {
+            tab: replacement,
+        };
+
+        const school = searchParams.get("school");
+
+        if (school) {
+            next.school = school;
+        }
+
+        setSearchParams(next, { replace: true });
+    }, [rawTab, searchParams, setSearchParams]);
+
     const activeTab =
         useMemo(() => {
             const raw = searchParams.get("tab");
@@ -77,10 +110,6 @@ function SchoolsHub() {
             }
 
             const next = raw ?? "schools";
-
-            if (next === "schools") {
-                return "schools" as TabKey;
-            }
 
             if (next === "campuses") {
                 return "campuses" as TabKey;
@@ -96,10 +125,6 @@ function SchoolsHub() {
 
             if (next === "classes") {
                 return "classes" as TabKey;
-            }
-
-            if (next === "students") {
-                return "students" as TabKey;
             }
 
             return "schools" as TabKey;
@@ -206,13 +231,6 @@ function SchoolsHub() {
                 label: "Lớp học",
                 children: (
                     <ClassList compact schoolId={schoolId} />
-                ),
-            },
-            {
-                key: "students",
-                label: "Học sinh",
-                children: (
-                    <StudentList compact schoolId={schoolId} />
                 ),
             },
         ];

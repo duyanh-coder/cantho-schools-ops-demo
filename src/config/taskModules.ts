@@ -13,10 +13,9 @@ const moduleByTitle:
         "trường & cơ sở": "/operations/schools",
         "nhân sự": "/operations/schools?tab=personnel",
         "khối & tổ": "/operations/schools?tab=sectors",
-        "học sinh": "/operations/schools?tab=students",
+        "học sinh": "/operations/schools?tab=classes",
         "lớp học": "/operations/schools?tab=classes",
         "báo cáo": "/operations/reports",
-        "cảnh báo": "/operations/alerts",
         "trợ lý ai": "/operations/chatbot",
         "bản đồ gis": "/operations/gis",
         "danh mục": "/operations/catalogs",
@@ -101,9 +100,9 @@ export const getTaskHint = (
     }
 
     return {
-        module: "cảnh báo",
-        color: "red",
-        iconKey: "alert",
+        module: "trường & cơ sở",
+        color: "blue",
+        iconKey: "school",
     };
 };
 
@@ -114,6 +113,6 @@ export const modulePathByHint = (
         moduleByTitle[
             hint.module.toLowerCase()
         ] ??
-        "/operations/alerts"
+        "/operations/schools"
     );
 };

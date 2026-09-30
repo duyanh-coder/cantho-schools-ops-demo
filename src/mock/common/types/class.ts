@@ -15,6 +15,8 @@ export interface SchoolClass {
 
     grade: number;
 
+    gradeId?: string;
+
     academicYear: string;
 
     homeroomTeacherId?: string;

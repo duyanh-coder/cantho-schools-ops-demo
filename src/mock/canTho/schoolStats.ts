@@ -11,8 +11,16 @@ import {
 } from "./personnel";
 
 import {
+    canThoSchools,
+} from "./schools";
+
+import {
     canThoStudents,
 } from "./students";
+
+import {
+    summarizePersonnel,
+} from "../common/personnelRole";
 
 
 export interface SchoolGradeCount {
@@ -69,8 +77,6 @@ export interface SchoolOverviewStats {
     };
 }
 
-const SCHOOL_001 = "can-tho-school-001";
-
 const ACADEMIC_YEAR = "2026-2027";
 
 const campusCountsOfSchool = (
@@ -87,45 +93,24 @@ const campusCountsOfSchool = (
     };
 };
 
-const MANAGER_TITLES = [
-    "Hiệu trưởng",
-    "Phó hiệu trưởng",
-    "Tổ trưởng chuyên môn",
-    "Trưởng khối",
-];
-
-const isManagerRole = (roleTitle: string): boolean => {
-    return MANAGER_TITLES.some((title) => roleTitle.includes(title));
-};
-
 const personnelStatsOfSchool = (
     schoolId: string,
 ): SchoolPersonnelStats => {
-    const personnel = canThoPersonnel.filter(
+    /**
+     * Dùng chung bộ phân nhóm với tab Nhân sự để số cán bộ, giáo viên và
+     * nhân viên ở tab Tổng quan luôn khớp với danh sách chi tiết.
+     */
+    const summary = summarizePersonnel(canThoPersonnel.filter(
         (item) => item.schoolId === schoolId,
-    );
-
-    const managers = personnel.filter(
-        (item) => isManagerRole(item.roleTitle),
-    ).length;
-
-    const teachers = personnel.filter(
-        (item) =>
-            !isManagerRole(item.roleTitle) &&
-            item.subjectIds.length > 0,
-    ).length;
-
-    const male = personnel.filter(
-        (item) => item.gender === "male",
-    ).length;
+    ));
 
     return {
-        total: personnel.length,
-        teachers,
-        managers,
-        staff: Math.max(0, personnel.length - teachers - managers),
-        male,
-        female: personnel.length - male,
+        total: summary.total,
+        teachers: summary.teachers,
+        managers: summary.managers,
+        staff: summary.staff,
+        male: summary.male,
+        female: summary.female,
     };
 };
 
@@ -189,16 +174,15 @@ const studentStatsOfSchool = (
     };
 };
 
-export const canThoSchoolOverviewStats: SchoolOverviewStats[] = [
-    {
-        schoolId: SCHOOL_001,
+export const canThoSchoolOverviewStats: SchoolOverviewStats[] =
+    canThoSchools.map((school) => ({
+        schoolId: school.id,
         academicYear: ACADEMIC_YEAR,
-        personnel: personnelStatsOfSchool(SCHOOL_001),
-        students: studentStatsOfSchool(SCHOOL_001),
-        campuses: campusCountsOfSchool(SCHOOL_001),
-        classes: classCountsOfSchool(SCHOOL_001),
-    },
-];
+        personnel: personnelStatsOfSchool(school.id),
+        students: studentStatsOfSchool(school.id),
+        campuses: campusCountsOfSchool(school.id),
+        classes: classCountsOfSchool(school.id),
+    }));
 
 export const getSchoolOverviewStats = (
     schoolId: string,

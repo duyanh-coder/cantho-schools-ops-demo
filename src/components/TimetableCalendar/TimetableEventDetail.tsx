@@ -18,6 +18,7 @@ import type {
 
 import {
     CONFLICT_TYPE_LABELS,
+    SESSION_LABELS,
     STATUS_LABELS,
     STATUS_TONES,
 } from "@/mock/common/types";
@@ -28,8 +29,8 @@ import type {
 } from "./types";
 
 import {
+    dayLabel,
     periodLabel,
-    slotLabel,
 } from "./helpers";
 
 import {
@@ -91,11 +92,16 @@ const TimetableEventDetail = ({
                         column={1}
                         bordered
                     >
-                        <Descriptions.Item label="Thời khóa biểu">
-                            {slotLabel({
-                                day: event.dayOfWeek,
-                                period: event.period,
-                            })}
+                        <Descriptions.Item label="Ngày">
+                            {dayLabel(event.dayOfWeek)}
+                        </Descriptions.Item>
+
+                        <Descriptions.Item label="Tiết">
+                            Tiết {event.period}
+                        </Descriptions.Item>
+
+                        <Descriptions.Item label="Buổi">
+                            {SESSION_LABELS[event.session]}
                         </Descriptions.Item>
 
                         <Descriptions.Item label="Giờ học">

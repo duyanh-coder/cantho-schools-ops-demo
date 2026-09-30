@@ -1,6 +1,72 @@
-import type { BoardingProfile } from "../common/types";
+import type {
+    BoardingProfile,
+} from "../common/types";
 
-export const canThoBoardingProfiles: BoardingProfile[] = [
+import {
+    canThoClasses,
+} from "./classes";
+
+import {
+    canThoStudents,
+} from "./students";
+
+const ACADEMIC_YEAR = "2026-2027";
+
+/**
+ * Hồ sơ nội trú / hai buổi được sinh từ chính lớp học: học sinh lớp nội trú
+ * thì ở nội trú, học sinh lớp hai buổi thì chỉ học hai buổi. Nhờ vậy sĩ số và
+ * nhu cầu của lớp luôn khớp với danh sách học sinh.
+ */
+const generatedProfiles = ((): BoardingProfile[] => {
+    const classById = new Map(
+        canThoClasses.map((classItem) => [classItem.id, classItem]),
+    );
+
+    const profiles: BoardingProfile[] = [];
+    let index = 0;
+
+    for (const student of canThoStudents) {
+        if (student.status !== "studying" || !student.classId) {
+            continue;
+        }
+
+        const classItem = classById.get(student.classId);
+
+        if (!classItem || classItem.academicYear !== ACADEMIC_YEAR) {
+            continue;
+        }
+
+        const boarding = classItem.classType === "BOARDING";
+        const twoSession = boarding || classItem.classType === "TWO_SESSION";
+
+        if (!twoSession) {
+            continue;
+        }
+
+        index += 1;
+
+        const day = String(1 + (index % 9)).padStart(2, "0");
+
+        profiles.push({
+            id: `can-tho-boarding-g${String(index).padStart(4, "0")}`,
+            studentId: student.id,
+            academicYearId: ACADEMIC_YEAR,
+            twoSession,
+            boarding,
+            mealRequired: boarding,
+            startDate: `2026-09-${day}`,
+            status: "active",
+        });
+    }
+
+    return profiles;
+})();
+
+/**
+ * Các hồ sơ viết tay giữ nguyên để giữ các ca đặc biệt: học sinh đã ngừng
+ * nội trú trong năm và ngày bắt đầu cụ thể.
+ */
+const manualProfiles: BoardingProfile[] = [
     { id: "can-tho-boarding-001", studentId: "can-tho-student-001", academicYearId: "2026-2027", twoSession: true, boarding: true, mealRequired: true, startDate: "2026-09-01", status: "active" },
     { id: "can-tho-boarding-002", studentId: "can-tho-student-002", academicYearId: "2026-2027", twoSession: true, boarding: true, mealRequired: true, startDate: "2026-09-01", status: "active" },
     { id: "can-tho-boarding-003", studentId: "can-tho-student-003", academicYearId: "2026-2027", twoSession: true, boarding: true, mealRequired: true, startDate: "2026-09-05", status: "active" },
@@ -32,3 +98,17 @@ export const canThoBoardingProfiles: BoardingProfile[] = [
     { id: "can-tho-boarding-029", studentId: "can-tho-student-054", academicYearId: "2026-2027", twoSession: true, boarding: true, mealRequired: true, startDate: "2026-09-07", status: "active" },
     { id: "can-tho-boarding-030", studentId: "can-tho-student-057", academicYearId: "2026-2027", twoSession: true, boarding: true, mealRequired: true, startDate: "2026-09-01", status: "active" },
 ];
+
+export const canThoBoardingProfiles: BoardingProfile[] = (() => {
+    const merged = new Map<string, BoardingProfile>();
+
+    for (const profile of generatedProfiles) {
+        merged.set(profile.studentId, profile);
+    }
+
+    for (const profile of manualProfiles) {
+        merged.set(profile.studentId, profile);
+    }
+
+    return [...merged.values()];
+})();

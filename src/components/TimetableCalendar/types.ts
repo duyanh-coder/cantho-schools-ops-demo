@@ -1,4 +1,5 @@
 import type {
+    AcademicYear,
     Semester,
     TimetableConflict,
     TimetableConflictType,
@@ -19,10 +20,20 @@ import type {
  * chọn lại giáo viên.
  */
 export type TimetableCalendarMode =
+    /**
+     * Toàn trường: màn hình quản trị của ban giám hiệu, xem TKB chung của
+     * mọi cơ sở. `school` giữ lại để các màn hình cũ không đổi call site.
+     */
+    | "overview"
     | "school"
     | "campus"
     | "grade"
     | "class"
+    /**
+     * Lịch của một học sinh, lấy theo lớp của học sinh nên hiển thị giống
+     * ngữ cảnh lớp.
+     */
+    | "student"
     | "teacher"
     | "room";
 
@@ -96,6 +107,12 @@ export interface TimetableCalendarFilters {
      * có tiết trong tuần đang chọn.
      */
     session?: TimetableSession;
+
+    /**
+     * Thứ trong tuần đang xem. Bỏ trống nghĩa là xem cả tuần, chọn một thứ
+     * thì lưới chỉ còn cột của thứ đó.
+     */
+    dayOfWeek?: WeekDay;
 
     campusId?: string;
 
@@ -193,6 +210,17 @@ export interface TimetableCalendarModel {
     totalSubjects: number;
 
     totalConflicts: number;
+
+    /**
+     * Chú giải màu theo môn của các môn đang có tiết trong tuần đang xem.
+     */
+    legend: {
+        subjectId: string;
+
+        subjectName: string;
+
+        tone: string;
+    }[];
 }
 
 export interface UseTimetableCalendarOptions {
@@ -243,6 +271,13 @@ export interface TimetableCalendarProps extends UseTimetableCalendarOptions {
 
     onWeekChange?: (week: number) => void;
 
+    /**
+     * Điều hướng tới trang chi tiết của đối tượng được bấm trong hộp chi tiết
+     * tiết học (giáo viên, lớp, phòng). Không truyền thì các liên kết chỉ
+     * hiển thị dạng văn bản.
+     */
+    onNavigate?: (to: string) => void;
+
     onFiltersChange?: (filters: TimetableCalendarFilters) => void;
 
     showFilters?: boolean;
@@ -267,6 +302,29 @@ export interface TimetableCalendarProps extends UseTimetableCalendarOptions {
      * Bật bộ chọn môn học.
      */
     showSubjectFilter?: boolean;
+
+    /**
+     * Bật bộ chọn thứ trong tuần. Mặc định bật vì đây là cách nhanh nhất để
+     * ban giám hiệu xem một ngày cụ thể.
+     */
+    showDayFilter?: boolean;
+
+    /**
+     * Bật bộ chọn năm học. Cần truyền `academicYearOptions` thì mới có
+     * danh sách chọn.
+     */
+    showAcademicYearFilter?: boolean;
+
+    /**
+     * Danh sách năm học cho bộ chọn năm học.
+     */
+    academicYearOptions?: AcademicYear[];
+
+    /**
+     * Hiện chú giải màu theo môn học ngay dưới bộ lọc, phục vụ khi màu
+     * mang ý nghĩa nghiệp vụ.
+     */
+    showLegend?: boolean;
 
     /**
      * Giới hạn lựa chọn khối/lớp/phòng/môn theo đúng các tiết đang có

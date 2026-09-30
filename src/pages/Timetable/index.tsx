@@ -1,11 +1,17 @@
 import {
+    BankOutlined,
     CalendarOutlined,
     CheckCircleOutlined,
+    HomeOutlined,
     ReadOutlined,
+    ReloadOutlined,
+    TeamOutlined,
     UnorderedListOutlined,
+    UserOutlined,
 } from "@ant-design/icons";
 
 import {
+    Button,
     Select,
     Space,
     Tabs,
@@ -49,6 +55,10 @@ import {
 } from "@/mock/common/types";
 
 import {
+    useAcademicYears,
+} from "@/store/useAcademicYears";
+
+import {
     useCampuses,
 } from "@/store/useCampuses";
 
@@ -67,6 +77,10 @@ import {
 import {
     useRooms,
 } from "@/store/useRooms";
+
+import {
+    useSemesters,
+} from "@/store/useSemesters";
 
 import {
     useTimetableHistory,
@@ -89,7 +103,13 @@ import type {
 
 import {
     buildCalendarConflicts,
+    resolveCalendarWeek,
+    weekOfDate,
 } from "@/components/TimetableCalendar/helpers";
+
+import {
+    summarizeTimetableWeek,
+} from "@/components/TimetableCalendar/overview";
 
 import AssignmentBoard from "./components/AssignmentBoard";
 import CellDrawer from "./components/CellDrawer";
@@ -103,9 +123,16 @@ import {
 
 import "./style.scss";
 
-const ACADEMIC_YEAR_ID = "2026-2027";
+const SCHOOL_ID = "can-tho-school-001";
 
-const DEFAULT_SEMESTER = "2026-2027-HK1";
+const MAIN_CAMPUS_ID = "campus-main";
+
+/**
+ * Mặc định của màn hình quản trị: năm học đang hoạt động, học kỳ đầu tiên
+ * của năm đó, tuần hiện tại và toàn bộ phân hiệu. Không mở sẵn một lớp hay
+ * một giáo viên vì ban giám hiệu cần nhìn tổng thể trường.
+ */
+const ACTIVE_SEMESTER_FALLBACK = "2026-2027-HK1";
 
 const tabsOf = (
     tabValue: string | null,
@@ -130,7 +157,18 @@ const TimetablePage = () => {
 
     const activeTab = tabsOf(params.get("tab"));
 
-    const [semesterId, setSemesterId] = useState(DEFAULT_SEMESTER);
+    const academicYearsApi = useAcademicYears(SCHOOL_ID);
+
+    const activeYearId = academicYearsApi.activeYear?.id
+        ?? ACTIVE_SEMESTER_FALLBACK.split("-H")[0];
+
+    const [academicYearId, setAcademicYearId] = useState(activeYearId);
+
+    const semestersApi = useSemesters(academicYearId);
+
+    const [semesterId, setSemesterId] = useState(
+        semestersApi.byAcademicYear[0]?.id ?? ACTIVE_SEMESTER_FALLBACK,
+    );
 
     const [campusId, setCampusId] = useState<string>("");
 
@@ -149,21 +187,40 @@ const TimetablePage = () => {
     const roomsApi = useRooms();
 
     const timetables = useTimetables({
-        academicYearId: ACADEMIC_YEAR_ID,
+        academicYearId,
         semesterId,
         campusId: campusId || undefined,
     });
 
     const historyApi = useTimetableHistory({
-        academicYearId: ACADEMIC_YEAR_ID,
+        academicYearId,
         semesterId,
     });
+
+    const currentSemester = useMemo(
+        () => semestersApi.byAcademicYear.find(
+            (semester) => semester.id === semesterId,
+        ) ?? canThoSemesters.find(
+            (semester) => semester.id === semesterId,
+        ),
+        [semesterId, semestersApi.byAcademicYear],
+    );
+
+    /**
+     * Định mức giảng dạy phải theo đúng học kỳ đang xem, nếu không tab
+     * Phân công và số liệu định mức sẽ lệch với lưới khi chọn HK2.
+     */
+    const semesterNumber = useMemo<1 | 2>(() => {
+        const code = currentSemester?.code ?? currentSemester?.id ?? "";
+
+        return code.replace(/\D/g, "").startsWith("2") ? 2 : 1;
+    }, [currentSemester]);
 
     const assignmentApi = usePersonnelAssignments(
         undefined,
         {
-            academicYear: ACADEMIC_YEAR_ID,
-            semester: 1,
+            academicYear: academicYearId,
+            semester: semesterNumber,
         },
     );
 
@@ -212,16 +269,9 @@ const TimetablePage = () => {
         [effective, quotaSources, classesApi.items, roomCapacity],
     );
 
-    const currentSemester = useMemo(
-        () => canThoSemesters.find(
-            (semester) => semester.id === semesterId,
-        ),
-        [semesterId],
-    );
-
     /**
-     * Học kỳ và cơ sở đã có bộ chọn ở đầu trang nên lưới chỉ nhận các
-     * bộ lọc còn lại để không có hai nút điều khiển cho cùng một dữ liệu.
+     * Học kỳ, năm học và cơ sở đã có bộ chọn ở đầu trang nên lưới chỉ nhận
+     * các bộ lọc còn lại để không có hai nút điều khiển cho cùng một dữ liệu.
      */
     const [calendarFilters, setCalendarFilters] =
         useState<TimetableCalendarFilterState>({});
@@ -229,11 +279,64 @@ const TimetablePage = () => {
     const scopedCalendarFilters = useMemo<TimetableCalendarFilterState>(
         () => ({
             ...calendarFilters,
+            academicYearId,
             semesterId,
             campusId: campusId || undefined,
         }),
-        [calendarFilters, semesterId, campusId],
+        [calendarFilters, academicYearId, semesterId, campusId],
     );
+
+    /**
+     * Tuần đang xem. Bỏ trống để lưới tự quy về tuần hiện tại của học kỳ,
+     * đúng như mặc định "tuần hiện tại" của ban giám hiệu.
+     */
+    const [week, setWeek] = useState<number | undefined>(undefined);
+
+    const activeWeek = useMemo(
+        () => resolveCalendarWeek(
+            scopedCalendarFilters.week,
+            weekOfDate(currentSemester, new Date()) ?? 1,
+        ),
+        [scopedCalendarFilters.week, currentSemester],
+    );
+
+    /**
+     * Tổng quan tuần suy ra từ đúng pipeline của lưới nên số liệu luôn
+     * khớp với những tiết đang hiển thị, kể cả khi lọc cơ sở/khối/lớp/
+     * giáo viên/môn/phòng.
+     */
+    const weekSummary = useMemo(
+        () => summarizeTimetableWeek(
+            effective,
+            scopedCalendarFilters,
+            lookups,
+            activeWeek,
+        ),
+        [effective, scopedCalendarFilters, lookups, activeWeek],
+    );
+
+    const weekSummaryScope = useMemo(
+        () => campusId
+            ? campusesApi.byId.get(campusId)?.name ?? "cơ sở đang chọn"
+            : "toàn trường",
+        [campusId, campusesApi.byId],
+    );
+
+    const mainCampusName = campusesApi.byId.get(MAIN_CAMPUS_ID)?.name
+        ?? "Trường";
+
+    const weekLabelText = `Tuần ${activeWeek} · ${
+        currentSemester?.name ?? ""
+    } năm học ${academicYearId}`;
+
+    const resetFilters = () => {
+        setCampusId("");
+        setCalendarFilters({});
+        setWeek(undefined);
+        setSemesterId(
+            semestersApi.byAcademicYear[0]?.id ?? ACTIVE_SEMESTER_FALLBACK,
+        );
+    };
 
     const quotas = useMemo(
         () => computeQuotaUsage(effective, quotaSources),
@@ -262,12 +365,12 @@ const TimetablePage = () => {
         return (timetables.bySlot.get(
             `${selectedSlot.day}|${selectedSlot.period}`,
         ) ?? []).filter((entry) =>
-            entry.academicYearId === ACADEMIC_YEAR_ID &&
+            entry.academicYearId === academicYearId &&
             (
                 !campusId ||
                 entry.campusId === campusId
             ));
-    }, [selectedSlot, timetables.bySlot, campusId]);
+    }, [selectedSlot, timetables.bySlot, campusId, academicYearId]);
 
     const drawerConflicts = useMemo(() => {
         if (!selectedSlot) {
@@ -298,7 +401,7 @@ const TimetablePage = () => {
             effective,
             primary,
             {
-                academicYearId: ACADEMIC_YEAR_ID,
+                academicYearId: academicYearId,
                 semesterId,
                 classes: classesApi.items,
                 assignments: quotaSources,
@@ -317,6 +420,7 @@ const TimetablePage = () => {
         drawerConflicts,
         effective,
         semesterId,
+        academicYearId,
         classesApi.items,
         quotaSources,
         roomsApi.items,
@@ -515,24 +619,95 @@ const TimetablePage = () => {
         },
     ];
 
+    const weekSummaryCards = [
+        {
+            title: "Tổng tiết",
+            value: weekSummary.totalLessons,
+            icon: <ReadOutlined />,
+            tone: "blue" as const,
+            note: `tuần đang xem · ${weekSummaryScope}`,
+        },
+        {
+            title: "Lớp có lịch",
+            value: weekSummary.classCount,
+            icon: <TeamOutlined />,
+            tone: "green" as const,
+            note: "lớp có ít nhất một tiết",
+        },
+        {
+            title: "Giáo viên có lịch",
+            value: weekSummary.teacherCount,
+            icon: <UserOutlined />,
+            tone: "purple" as const,
+            note: "giáo viên được xếp tiết",
+        },
+        {
+            title: "Phòng sử dụng",
+            value: weekSummary.roomCount,
+            icon: <BankOutlined />,
+            tone: "orange" as const,
+            note: "phòng học được dùng",
+        },
+        {
+            title: "Phân hiệu hoạt động",
+            value: weekSummary.campusCount,
+            icon: <HomeOutlined />,
+            tone: "blue" as const,
+            note: "cơ sở có tiết trong tuần",
+        },
+    ];
+
     const items: TabsProps["items"] = [
         {
             key: "grid",
             label: "Lưới thời khóa biểu",
             children: (
-                <TimetableCalendar
-                    entries={effective}
-                    lookups={lookups}
-                    semester={currentSemester}
-                    filters={scopedCalendarFilters}
-                    mode="school"
-                    showFilters
-                    showSemesterFilter={false}
-                    showCampusFilter={false}
-                    showRoom
-                    onFiltersChange={setCalendarFilters}
-                    onSelectSlot={(slot) => openSlot(slot.day, slot.period)}
-                />
+                <div className="tt-overview">
+                    <div className="tt-overview__summary">
+                        <h4 className="tt-overview__summary-title">
+                            Tổng quan tuần
+                            {campusId
+                                ? ` · ${weekSummaryScope}`
+                                : " · toàn trường"}
+                        </h4>
+
+                        <div className="page-kpi">
+                            {weekSummaryCards.map((card) => (
+                                <StatsCard
+                                    key={card.title}
+                                    title={card.title}
+                                    value={card.value}
+                                    icon={card.icon}
+                                    tone={card.tone}
+                                    note={card.note}
+                                />
+                            ))}
+                        </div>
+                    </div>
+
+                    <TimetableCalendar
+                        entries={effective}
+                        lookups={lookups}
+                        semester={currentSemester}
+                        semesterOptions={semestersApi.byAcademicYear}
+                        academicYearOptions={academicYearsApi.items}
+                        filters={scopedCalendarFilters}
+                        week={week}
+                        mode="overview"
+                        showFilters
+                        showSemesterFilter={false}
+                        showCampusFilter={false}
+                        showAcademicYearFilter={false}
+                        showSubjectFilter
+                        showDayFilter
+                        showLegend
+                        showRoom
+                        scopeOptionsToEntries
+                        onWeekChange={setWeek}
+                        onFiltersChange={setCalendarFilters}
+                        onNavigate={(to) => navigate(to)}
+                    />
+                </div>
             ),
         },
         {
@@ -581,7 +756,7 @@ const TimetablePage = () => {
                 <VersionPipeline
                     entries={timetables.items.filter(
                         (entry) =>
-                            entry.academicYearId === ACADEMIC_YEAR_ID &&
+                            entry.academicYearId === academicYearId &&
                             (
                                 !campusId ||
                                 entry.campusId === campusId
@@ -623,14 +798,13 @@ const TimetablePage = () => {
                 <header className="page-head">
                     <div className="page-head__title">
                         <span className="page-head__eyebrow">
-                            LỊCH GIẢNG DẠY
+                            TOÀN TRƯỜNG
                         </span>
 
                         <h2>Thời khóa biểu</h2>
 
                         <p>
-                            Xếp lịch, kiểm tra xung đột, quản lý phiên bản và
-                            công suất phòng học cho năm học {ACADEMIC_YEAR_ID}.
+                            {mainCampusName} · {weekLabelText}
                         </p>
                     </div>
 
@@ -639,9 +813,29 @@ const TimetablePage = () => {
                             <CalendarOutlined />
 
                             <Select
+                                value={academicYearId}
+                                onChange={(value) => {
+                                    setAcademicYearId(value);
+
+                                    setSemesterId(
+                                        semestersApi.byAcademicYear[0]
+                                            ?.id
+                                            ?? ACTIVE_SEMESTER_FALLBACK,
+                                    );
+                                }}
+                                options={academicYearsApi.items.map(
+                                    (year) => ({
+                                        value: year.id,
+                                        label: year.name,
+                                    }),
+                                )}
+                                style={{ minWidth: 190 }}
+                            />
+
+                            <Select
                                 value={semesterId}
                                 onChange={setSemesterId}
-                                options={canThoSemesters.map(
+                                options={semestersApi.byAcademicYear.map(
                                     (semester) => ({
                                         value: semester.id,
                                         label: `${semester.name} · ${semester.academicYearId}`,
@@ -656,16 +850,26 @@ const TimetablePage = () => {
                                 options={[
                                     {
                                         value: "",
-                                        label: "Toàn địa bàn",
+                                        label: "Tất cả phân hiệu",
                                     },
-                                    ...campusesApi.items.map((campus) => ({
-                                        value: campus.id,
-                                        label: campus.name,
-                                    })),
+                                    ...campusesApi.items
+                                        .filter((campus) =>
+                                            campus.schoolId === SCHOOL_ID)
+                                        .map((campus) => ({
+                                            value: campus.id,
+                                            label: campus.name,
+                                        })),
                                 ]}
-                                style={{ minWidth: 200 }}
-                                placeholder="Cơ sở"
+                                style={{ minWidth: 220 }}
+                                placeholder="Phân hiệu"
                             />
+
+                            <Button
+                                icon={<ReloadOutlined />}
+                                onClick={resetFilters}
+                            >
+                                Đặt lại bộ lọc
+                            </Button>
                         </Space>
                     </div>
                 </header>

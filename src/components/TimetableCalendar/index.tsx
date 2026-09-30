@@ -83,11 +83,16 @@ const TimetableCalendar = ({
     entityId,
     onWeekChange,
     onFiltersChange,
+    onNavigate,
     showFilters = false,
     showSemesterFilter = true,
     showCampusFilter = true,
     showGradeFilter,
     showSubjectFilter = false,
+    showDayFilter = true,
+    showAcademicYearFilter = false,
+    academicYearOptions = [],
+    showLegend = false,
     scopeOptionsToEntries = false,
     showClass = true,
     showSubject = true,
@@ -112,7 +117,9 @@ const TimetableCalendar = ({
         semesterId: semester?.id,
         week: controlledWeek,
         campusId: entityId && mode === "campus" ? entityId : undefined,
-        classId: entityId && mode === "class" ? entityId : undefined,
+        classId: entityId && (mode === "class" || mode === "student")
+            ? entityId
+            : undefined,
         grade: entityId && mode === "grade"
             ? Number.parseInt(entityId, 10)
             : undefined,
@@ -409,7 +416,28 @@ const TimetableCalendar = ({
                             showCampus={showCampusFilter}
                             showGrade={showGradeFilter}
                             showSubject={showSubjectFilter}
+                            showDay={showDayFilter}
+                            showAcademicYear={showAcademicYearFilter}
+                            academicYears={academicYearOptions}
                         />
+                    </div>
+                )}
+
+                {showLegend && model.legend.length > 0 && (
+                    <div className="tt-cal__legend">
+                        <span className="tt-cal__legend-title">
+                            Môn học
+                        </span>
+
+                        {model.legend.map((item) => (
+                            <Tag
+                                key={item.subjectId}
+                                color={item.tone}
+                                className="tt-cal__legend-item"
+                            >
+                                {item.subjectName}
+                            </Tag>
+                        ))}
                     </div>
                 )}
             </header>
@@ -652,6 +680,7 @@ const TimetableCalendar = ({
                     ? timetablesConflictOf(model.conflicts, selectedEvent.id)
                     : []}
                 mode={mode}
+                onNavigate={onNavigate}
                 onClose={() => setSelectedEvent(null)}
             />
         </section>

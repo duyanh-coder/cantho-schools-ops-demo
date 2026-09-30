@@ -2,8 +2,8 @@ import {
     ArrowLeftOutlined,
     BookOutlined,
     CalendarOutlined,
-    EditOutlined,
     EnvironmentOutlined,
+    HomeOutlined,
     ReadOutlined,
     TeamOutlined,
     UserOutlined,
@@ -14,6 +14,7 @@ import {
     Avatar,
     Button,
     Descriptions,
+    Empty,
     Space,
     Table,
     Tabs,
@@ -55,12 +56,26 @@ import {
 import type {
     Campus,
     ClassHistoryEntry,
+    EnrolmentChange,
+    StudentMovement,
     TeachingAttendance,
 } from "@/mock/common/types";
 
 import {
+    buildClassEnrolment,
+    buildClassNeeds,
+    buildClassRosterIntegrity,
+    buildClassRosterStats,
+    buildClassWarnings,
+} from "@/utils/classRoster";
+
+import {
     useAcademicYears,
 } from "@/store/useAcademicYears";
+
+import {
+    useBoardingProfiles,
+} from "@/store/useBoardingProfiles";
 
 import {
     useCatalogOptions,
@@ -78,6 +93,14 @@ import {
 import {
     useClasses,
 } from "@/store/useClasses";
+
+import {
+    useEnrolmentChanges,
+} from "@/store/useEnrolmentChanges";
+
+import {
+    useGrades,
+} from "@/store/useGrades";
 
 import {
     usePersonnel,
@@ -100,6 +123,10 @@ import {
 } from "@/store/useStudents";
 
 import {
+    useStudentMovements,
+} from "@/store/useStudentMovements";
+
+import {
     useTimetables,
 } from "@/store/useTimetables";
 
@@ -111,13 +138,11 @@ import "./style.scss";
 const TAB_KEYS = [
     "overview",
     "students",
-    "homeroom",
     "teachers",
     "timetable",
-    "room",
-    "roster",
-    "activities",
-    "history",
+    "enrollment",
+    "needs",
+    "records",
 ] as const;
 
 type TabKey = (typeof TAB_KEYS)[number];
@@ -138,6 +163,16 @@ const STATUS_TONE: Record<string, string> = {
 const SUBJECT_NAME = new Map<string, string>(
     subjects.map((subject) => [subject.id, subject.name] as [string, string]),
 );
+
+const MOVEMENT_NAME: Record<string, string> = {
+    admitted: "Tiếp nhận",
+    class_transfer: "Chuyển lớp",
+    campus_transfer: "Chuyển cơ sở",
+    school_transfer: "Chuyển trường",
+    drop_out: "Bỏ học",
+    withdraw: "Rút học",
+    graduate: "Tốt nghiệp",
+};
 
 const campusName = (
     campusesById: Map<string, Campus>,
@@ -174,6 +209,8 @@ const ClassDetail = () => {
 
     const classesApi = useClasses();
 
+    const gradesApi = useGrades();
+
     const campusesApi = useCampuses();
 
     const yearsApi = useAcademicYears();
@@ -201,6 +238,12 @@ const ClassDetail = () => {
         classItem?.campusId,
         classId,
     );
+
+    const boardingApi = useBoardingProfiles();
+
+    const movementApi = useStudentMovements();
+
+    const enrolmentApi = useEnrolmentChanges(classId);
 
     const campusesById = campusesApi.byId;
 
@@ -250,6 +293,52 @@ const ClassDetail = () => {
             (student) => student.status === "studying",
         ),
         [students],
+    );
+
+    const profileByStudent = useMemo(
+        () => new Map(
+            boardingApi.items
+                .filter((profile) =>
+                    profile.academicYearId === classItem?.academicYear)
+                .map((profile) => [profile.studentId, profile] as const),
+        ),
+        [boardingApi.items, classItem?.academicYear],
+    );
+
+    const rosterRows = useMemo(
+        () => studyingStudents.map((student) => ({
+            student,
+            profile: profileByStudent.get(student.id),
+        })),
+        [studyingStudents, profileByStudent],
+    );
+
+    const rosterStats = useMemo(
+        () => classItem
+            ? buildClassRosterStats(students, classItem)
+            : null,
+        [students, classItem],
+    );
+
+    const rosterIntegrity = useMemo(
+        () => classItem
+            ? buildClassRosterIntegrity(students, classItem)
+            : null,
+        [students, classItem],
+    );
+
+    const needs = useMemo(
+        () => buildClassNeeds(rosterRows),
+        [rosterRows],
+    );
+
+    const enrolment = useMemo(
+        () => buildClassEnrolment(
+            enrolmentApi.byClass,
+            movementApi.items,
+            classId,
+        ),
+        [enrolmentApi.byClass, movementApi.items, classId],
     );
 
     const timetables = timetablesApi.effective;
@@ -314,17 +403,33 @@ const ClassDetail = () => {
         ? personnelApi.byId.get(classItem.homeroomTeacherId)
         : undefined;
 
-    const studentCount = studyingStudents.length;
+    const grade = classItem.gradeId
+        ? gradesApi.byId.get(classItem.gradeId)
+        : undefined;
 
-    const maleCount = studyingStudents.filter(
-        (student) => student.gender === "male",
-    ).length;
+    const stats = rosterStats ?? {
+        total: 0,
+        male: 0,
+        female: 0,
+        capacity: classItem.capacity ?? 40,
+        remaining: classItem.capacity ?? 40,
+        fillRate: 0,
+    };
 
-    const femaleCount = studyingStudents.filter(
-        (student) => student.gender === "female",
-    ).length;
+    const studentCount = stats.total;
 
-    const capacity = classItem.capacity ?? 40;
+    const maleCount = stats.male;
+
+    const femaleCount = stats.female;
+
+    const capacity = stats.capacity;
+
+    const warnings = buildClassWarnings(stats, {
+        homeroomTeacherId: classItem.homeroomTeacherId,
+        needs,
+        netPending: enrolment.netPending,
+        ...(rosterIntegrity ? { integrity: rosterIntegrity } : {}),
+    });
 
     const kpis = [
         {
@@ -341,7 +446,7 @@ const ClassDetail = () => {
             icon: <UserOutlined />,
             tone: "green" as const,
             note: "học sinh",
-            tab: "roster" as TabKey,
+            tab: "enrollment" as TabKey,
         },
         {
             title: "GVCN",
@@ -349,7 +454,7 @@ const ClassDetail = () => {
             icon: <ReadOutlined />,
             tone: "purple" as const,
             note: "giáo viên chủ nhiệm",
-            tab: "homeroom" as TabKey,
+            tab: "teachers" as TabKey,
         },
         {
             title: "Môn được phân công",
@@ -373,7 +478,15 @@ const ClassDetail = () => {
             icon: <CalendarOutlined />,
             tone: "blue" as const,
             note: "lượt ghi nhận",
-            tab: "activities" as TabKey,
+            tab: "records" as TabKey,
+        },
+        {
+            title: "Bán trú / 2 buổi",
+            value: `${needs.boarding}/${needs.twoSession}`,
+            icon: <HomeOutlined />,
+            tone: "orange" as const,
+            note: "học sinh",
+            tab: "needs" as TabKey,
         },
     ];
 
@@ -570,6 +683,133 @@ const ClassDetail = () => {
         },
     ];
 
+    const enrolmentColumns: ColumnsType<EnrolmentChange> = [
+        {
+            title: "Học sinh",
+            dataIndex: "studentName",
+        },
+        {
+            title: "Loại",
+            dataIndex: "changeType",
+            width: 140,
+            render: (value: EnrolmentChange["changeType"]) => (
+                <Tag color={value === "increase" ? "green" : "orange"}>
+                    {value === "increase" ? "Tăng sĩ số" : "Giảm sĩ số"}
+                </Tag>
+            ),
+        },
+        {
+            title: "Hiệu lực",
+            dataIndex: "effectiveDate",
+            width: 130,
+            render: (value: string) =>
+                new Date(`${value}T00:00:00`).toLocaleDateString("vi-VN"),
+        },
+        {
+            title: "Lý do",
+            dataIndex: "reason",
+        },
+        {
+            title: "Trạng thái",
+            dataIndex: "status",
+            width: 130,
+            render: (value: string) => (
+                <Tag color={value === "pending" ? "orange" : "green"}>
+                    {value === "pending" ? "Chờ duyệt" : "Đã xử lý"}
+                </Tag>
+            ),
+        },
+    ];
+
+    const movementColumns: ColumnsType<StudentMovement> = [
+        {
+            title: "Loại",
+            dataIndex: "type",
+            width: 170,
+            render: (value: StudentMovement["type"]) => (
+                <Tag>{MOVEMENT_NAME[value] ?? value}</Tag>
+            ),
+        },
+        {
+            title: "Từ lớp",
+            dataIndex: "fromClassId",
+            width: 190,
+            render: (value: string | undefined) =>
+                classesApi.byId.get(value ?? "")?.name ?? "—",
+        },
+        {
+            title: "Đến lớp",
+            dataIndex: "toClassId",
+            width: 190,
+            render: (value: string | undefined) =>
+                classesApi.byId.get(value ?? "")?.name ?? "—",
+        },
+        {
+            title: "Hiệu lực",
+            dataIndex: "effectiveDate",
+            width: 130,
+            render: (value: string) =>
+                new Date(`${value}T00:00:00`).toLocaleDateString("vi-VN"),
+        },
+        {
+            title: "Lý do",
+            dataIndex: "reason",
+        },
+    ];
+
+    const needColumns: ColumnsType<typeof rosterRows[number]> = [
+        {
+            title: "Học sinh",
+            dataIndex: "student",
+            render: (value: typeof rosterRows[number]["student"]) => (
+                <Button
+                    type="link"
+                    size="small"
+                    style={{ padding: 0 }}
+                    onClick={() =>
+                        navigate(`/operations/students/${value.id}?tab=profile`)}
+                >
+                    {value.fullName}
+                </Button>
+            ),
+        },
+        {
+            title: "Mã",
+            dataIndex: ["student", "code"],
+            width: 120,
+        },
+        {
+            title: "Bán trú",
+            dataIndex: ["profile", "boarding"],
+            width: 110,
+            render: (value: boolean | undefined) =>
+                value ? <Tag color="blue">Có</Tag> : <Tag>Không</Tag>,
+        },
+        {
+            title: "2 buổi",
+            dataIndex: ["profile", "twoSession"],
+            width: 100,
+            render: (value: boolean | undefined) =>
+                value ? <Tag color="purple">Có</Tag> : <Tag>Không</Tag>,
+        },
+        {
+            title: "Ăn sáng",
+            dataIndex: ["profile", "mealRequired"],
+            width: 110,
+            render: (value: boolean | undefined) =>
+                value ? <Tag color="orange">Có</Tag> : <Tag>Không</Tag>,
+        },
+        {
+            title: "Bắt đầu",
+            dataIndex: ["profile", "startDate"],
+            width: 130,
+            render: (value: string | undefined) =>
+                value
+                    ? new Date(`${value}T00:00:00`).toLocaleDateString("vi-VN")
+                    : "—",
+        },
+    ];
+
     const tabItems = [
         {
             key: "overview",
@@ -605,7 +845,9 @@ const ClassDetail = () => {
                         </Descriptions.Item>
 
                         <Descriptions.Item label="Khối">
-                            Khối {classItem.grade}
+                            {grade
+                                ? `${grade.name} (${grade.code})`
+                                : `Khối ${classItem.grade}`}
                         </Descriptions.Item>
 
                         <Descriptions.Item label="Năm học">
@@ -675,6 +917,20 @@ const ClassDetail = () => {
                             </Descriptions.Item>
                         )}
                     </Descriptions>
+
+                    {warnings.length > 0 && (
+                        <div className="classes-detail__warnings">
+                            {warnings.map((warning) => (
+                                <Alert
+                                    key={warning.title}
+                                    type={warning.tone}
+                                    showIcon
+                                    message={warning.title}
+                                    description={warning.detail}
+                                />
+                            ))}
+                        </div>
+                    )}
                 </div>
             ),
         },
@@ -683,6 +939,88 @@ const ClassDetail = () => {
             label: "Học sinh",
             children: (
                 <div className="classes-detail__tab">
+                    <div className="classes-detail__students-context">
+                        <strong>
+                            HỌC SINH – LỚP {classItem.name.toUpperCase()}
+                        </strong>
+
+                        <span>
+                            Khối {classItem.grade} ·{" "}
+                            {campusName(
+                                campusesById,
+                                classItem.campusId,
+                            )} · Năm học{" "}
+                            {classItem.academicYear} · GVCN:{" "}
+                            {homeroomTeacher
+                                ? homeroomTeacher.fullName
+                                : "Chưa phân công"}
+                        </span>
+                    </div>
+
+                    {rosterStats && (
+                        <div className="page-kpi">
+                            <StatsCard
+                                title="Sĩ số"
+                                value={`${rosterStats.total} / ${rosterStats.capacity}`}
+                                icon={<TeamOutlined />}
+                                tone="blue"
+                                note={
+                                    rosterStats.total > rosterStats.capacity
+                                        ? "vượt sức chứa"
+                                        : `${rosterStats.fillRate}% sức chứa`
+                                }
+                            />
+
+                            <StatsCard
+                                title="Nam"
+                                value={rosterStats.male}
+                                icon={<UserOutlined />}
+                                tone="blue"
+                                note="học sinh đang học"
+                            />
+
+                            <StatsCard
+                                title="Nữ"
+                                value={rosterStats.female}
+                                icon={<TeamOutlined />}
+                                tone="purple"
+                                note="học sinh đang học"
+                            />
+
+                            <StatsCard
+                                title="Còn trống"
+                                value={rosterStats.remaining}
+                                icon={<ReadOutlined />}
+                                tone="green"
+                                note="chỉ tiêu tiếp nhận"
+                            />
+
+                            <StatsCard
+                                title="Bán trú"
+                                value={needs.boarding}
+                                icon={<HomeOutlined />}
+                                tone="blue"
+                                note="có hồ sơ nhu cầu"
+                            />
+
+                            <StatsCard
+                                title="2 buổi"
+                                value={needs.twoSession}
+                                icon={<CalendarOutlined />}
+                                tone="purple"
+                                note="có hồ sơ nhu cầu"
+                            />
+
+                            <StatsCard
+                                title="Ăn uống"
+                                value={needs.meal}
+                                icon={<EnvironmentOutlined />}
+                                tone="orange"
+                                note="có hồ sơ nhu cầu"
+                            />
+                        </div>
+                    )}
+
                     <StudentList
                         compact
                         schoolId={classItem.schoolId}
@@ -692,101 +1030,97 @@ const ClassDetail = () => {
             ),
         },
         {
-            key: "homeroom",
-            label: "GVCN",
-            children: homeroomTeacher ? (
-                <div className="classes-detail__teacher">
-                    <div className="classes-detail__teacher-card">
-                        <Avatar
-                            size={54}
-                            style={{
-                                backgroundColor:
-                                    homeroomTeacher.gender === "female"
-                                        ? "#eb2f96"
-                                        : "#1677ff",
-                                flexShrink: 0,
-                            }}
-                        >
-                            {toName(homeroomTeacher.fullName)}
-                        </Avatar>
+            key: "teachers",
+            label: "Giáo viên",
+            children: (
+                <div className="classes-detail__tab">
+                    {homeroomTeacher && (
+                        <div className="classes-detail__teacher">
+                            <div className="classes-detail__teacher-card">
+                                <Avatar
+                                    size={54}
+                                    style={{
+                                        backgroundColor:
+                                            homeroomTeacher.gender === "female"
+                                                ? "#eb2f96"
+                                                : "#1677ff",
+                                        flexShrink: 0,
+                                    }}
+                                >
+                                    {toName(homeroomTeacher.fullName)}
+                                </Avatar>
 
-                        <div className="classes-detail__teacher-info">
-                            <div className="classes-detail__teacher-name">
-                                {homeroomTeacher.fullName}
+                                <div className="classes-detail__teacher-info">
+                                    <div className="classes-detail__teacher-name">
+                                        {homeroomTeacher.fullName}
+                                    </div>
+
+                                    <span className="classes-detail__teacher-meta">
+                                        GVCN · {homeroomTeacher.code} ·{" "}
+                                        {homeroomTeacher.roleTitle}
+                                    </span>
+
+                                    <Space
+                                        size={4}
+                                        wrap
+                                        className="classes-detail__teacher-tags"
+                                    >
+                                        {homeroomTeacher.subjectIds.map(
+                                            (subjectId) => (
+                                                <Tag
+                                                    key={subjectId}
+                                                    color="blue"
+                                                >
+                                                    {SUBJECT_NAME.get(subjectId)
+                                                        ?? subjectId}
+                                                </Tag>
+                                            ),
+                                        )}
+                                    </Space>
+                                </div>
                             </div>
 
-                            <span className="classes-detail__teacher-meta">
-                                {homeroomTeacher.code} · {homeroomTeacher.roleTitle}
-                            </span>
-
-                            <Space size={4} wrap className="classes-detail__teacher-tags">
-                                {homeroomTeacher.subjectIds.map((subjectId) => (
-                                    <Tag key={subjectId} color="blue">
-                                        {SUBJECT_NAME.get(subjectId) ?? subjectId}
-                                    </Tag>
-                                ))}
+                            <Space wrap>
+                                <Button
+                                    type="primary"
+                                    icon={<ReadOutlined />}
+                                    onClick={() =>
+                                        navigate(
+                                            `/operations/personnel/${homeroomTeacher.id}?tab=overview`,
+                                        )}
+                                >
+                                    Xem hồ sơ GVCN
+                                </Button>
                             </Space>
                         </div>
-                    </div>
+                    )}
 
-                    <Space wrap>
-                        <Button
-                            type="primary"
-                            icon={<ReadOutlined />}
-                            onClick={() =>
-                                navigate(
-                                    `/operations/personnel/${homeroomTeacher.id}?tab=overview`,
-                                )}
-                        >
-                            Xem hồ sơ GVCN
-                        </Button>
-
-                        <Button
-                            icon={<EditOutlined />}
-                            onClick={() =>
-                                navigate(
-                                    `/operations/personnel/${homeroomTeacher.id}?tab=personal`,
-                                )}
-                        >
-                            Xem phân công giảng dạy
-                        </Button>
-                    </Space>
+                    {assignments.length > 0 ? (
+                        <Table
+                            rowKey="id"
+                            columns={assignmentColumns}
+                            dataSource={assignments}
+                            pagination={{
+                                ...PAGINATION,
+                                pageSize: 8,
+                            }}
+                            size="small"
+                            scroll={{ x: true }}
+                            onRow={(assignment) => ({
+                                onDoubleClick: () =>
+                                    navigate(
+                                        `/operations/personnel/${assignment.personnelId}?tab=personal`,
+                                    ),
+                            })}
+                        />
+                    ) : (
+                        <Alert
+                            type="info"
+                            showIcon
+                            message="Chưa có phân công giảng dạy cho lớp."
+                        />
+                    )}
                 </div>
-            ) : (
-                <Alert
-                    type="warning"
-                    showIcon
-                    message="Lớp chưa được phân công GVCN."
-                />
-            ),
-        },
-        {
-            key: "teachers",
-            label: "Giáo viên bộ môn",
-            children: assignments.length > 0 ? (
-                <Table
-                    rowKey="id"
-                    columns={assignmentColumns}
-                    dataSource={assignments}
-                    pagination={{
-                        ...PAGINATION,
-                        pageSize: 8,
-                    }}
-                    size="small"
-                    scroll={{ x: true }}
-                    onRow={(assignment) => ({
-                        onDoubleClick: () =>
-                            navigate(
-                                `/operations/personnel/${assignment.personnelId}?tab=personal`,
-                            ),
-                    })}
-                />
-            ) : (
-                <Alert
-                    type="info"
-                    showIcon
-                    message="Chưa có phân công giảng dạy cho lớp."
-                />
             ),
         },
         {
@@ -802,6 +1136,7 @@ const ClassDetail = () => {
                     showFilters={false}
                     showClass={false}
                     showRoom
+                    onNavigate={(to) => navigate(to)}
                 />
             ) : (
                 <Alert
@@ -812,41 +1147,8 @@ const ClassDetail = () => {
             ),
         },
         {
-            key: "room",
-            label: "Phòng học",
-            children: (
-                <div className="classes-detail__tab">
-                    <Alert
-                        type="info"
-                        showIcon
-                        message={
-                            room
-                                ? `Phòng chính của lớp: ${room.code} – sức chứa ${room.capacity}.`
-                                : "Lớp chưa được chỉ định phòng học chính."
-                        }
-                        description={
-                            `Cơ sở ${campusName(campusesById, classItem.campusId)} có ` +
-                            `${roomsApi.byCampus.length} phòng học / phòng chức năng.`
-                        }
-                    />
-
-                    <Table
-                        rowKey="id"
-                        columns={roomColumns}
-                        dataSource={roomsApi.byCampus}
-                        pagination={{
-                            ...PAGINATION,
-                            pageSize: 8,
-                        }}
-                        size="small"
-                        scroll={{ x: true }}
-                    />
-                </div>
-            ),
-        },
-        {
-            key: "roster",
-            label: "Sĩ số",
+            key: "enrollment",
+            label: "Tiếp nhận",
             children: (
                 <div className="classes-detail__tab">
                     <Descriptions
@@ -872,22 +1174,16 @@ const ClassDetail = () => {
                         </Descriptions.Item>
 
                         <Descriptions.Item label="Còn trống">
-                            {Math.max(0, capacity - studentCount)}
+                            {stats.remaining}
                         </Descriptions.Item>
 
                         <Descriptions.Item label="Tỷ lệ">
-                            {capacity > 0
-                                ? `${Math.round((studentCount / capacity) * 100)}%`
-                                : "—"}
+                            {capacity > 0 ? `${stats.fillRate}%` : "—"}
                         </Descriptions.Item>
                     </Descriptions>
 
                     <Alert
-                        type={
-                            studentCount >= capacity
-                                ? "warning"
-                                : "success"
-                        }
+                        type={studentCount >= capacity ? "warning" : "success"}
                         showIcon
                         message={
                             studentCount >= capacity
@@ -895,53 +1191,205 @@ const ClassDetail = () => {
                                 : "Lớp còn chỗ tiếp nhận học sinh."
                         }
                     />
+
+                    <Alert
+                        type="info"
+                        showIcon
+                        message={
+                            enrolment.netPending === 0
+                                ? "Không có thay đổi tiếp nhận nào đang chờ duyệt."
+                                : `Còn ${enrolment.netPending} thay đổi tiếp nhận đang chờ duyệt `
+                                    + `(tăng ${enrolment.pendingIn.length}, `
+                                    + `giảm ${enrolment.pendingOut.length}).`
+                        }
+                    />
+
+                    {enrolmentApi.byClass.length > 0 ? (
+                        <Table
+                            rowKey="id"
+                            columns={enrolmentColumns}
+                            dataSource={enrolmentApi.byClass}
+                            pagination={{
+                                ...PAGINATION,
+                                pageSize: 8,
+                            }}
+                            size="small"
+                            scroll={{ x: true }}
+                        />
+                    ) : (
+                        <Empty
+                            image={Empty.PRESENTED_IMAGE_SIMPLE}
+                            description="Lớp chưa có thay đổi tiếp nhận nào."
+                        />
+                    )}
+
+                    {enrolment.movements.length > 0 && (
+                        <Table
+                            rowKey="id"
+                            columns={movementColumns}
+                            dataSource={enrolment.movements}
+                            pagination={{
+                                ...PAGINATION,
+                                pageSize: 8,
+                            }}
+                            size="small"
+                            scroll={{ x: true }}
+                        />
+                    )}
                 </div>
             ),
         },
         {
-            key: "activities",
-            label: "Hoạt động",
-            children: activities.length > 0 ? (
-                <Table
-                    rowKey="id"
-                    columns={activityColumns}
-                    dataSource={activities}
-                    pagination={{
-                        ...PAGINATION,
-                        pageSize: 10,
-                    }}
-                    size="small"
-                    scroll={{ x: true }}
-                />
-            ) : (
-                <Alert
-                    type="info"
-                    showIcon
-                    message="Chưa có ghi nhận hoạt động giảng dạy của lớp."
-                />
+            key: "needs",
+            label: "Nhu cầu",
+            children: (
+                <div className="classes-detail__tab">
+                    <div className="page-kpi">
+                        <StatsCard
+                            title="Bán trú"
+                            value={needs.boarding}
+                            icon={<HomeOutlined />}
+                            tone="blue"
+                            note="học sinh có hồ sơ"
+                        />
+
+                        <StatsCard
+                            title="Học 2 buổi"
+                            value={needs.twoSession}
+                            icon={<CalendarOutlined />}
+                            tone="purple"
+                            note="học sinh có hồ sơ"
+                        />
+
+                        <StatsCard
+                            title="Ăn sáng"
+                            value={needs.meal}
+                            icon={<TeamOutlined />}
+                            tone="orange"
+                            note="học sinh có hồ sơ"
+                        />
+                    </div>
+
+                    <Alert
+                        type={
+                            needs.inactiveProfile > 0 ? "warning" : "info"
+                        }
+                        showIcon
+                        message={
+                            needs.inactiveProfile > 0
+                                ? `${needs.inactiveProfile} hồ sơ bán trú đã hết hiệu lực.`
+                                : "Hồ sơ bán trú của lớp đều đang có hiệu lực."
+                        }
+                        description={
+                            `Lớp ${classTypeLabel.toLowerCase()} của cơ sở `
+                            + `${campusName(campusesById, classItem.campusId)}.`
+                        }
+                    />
+
+                    {rosterRows.length > 0 ? (
+                        <Table
+                            rowKey={(row) => row.student.id}
+                            columns={needColumns}
+                            dataSource={rosterRows}
+                            pagination={{
+                                ...PAGINATION,
+                                pageSize: 10,
+                            }}
+                            size="small"
+                            scroll={{ x: true }}
+                        />
+                    ) : (
+                        <Empty
+                            image={Empty.PRESENTED_IMAGE_SIMPLE}
+                            description="Lớp chưa có học sinh đang học."
+                        />
+                    )}
+                </div>
             ),
         },
         {
-            key: "history",
-            label: "Lịch sử",
-            children: historyApi.byClass.length > 0 ? (
-                <Table
-                    rowKey="id"
-                    columns={historyColumns}
-                    dataSource={historyApi.byClass}
-                    pagination={{
-                        ...PAGINATION,
-                        pageSize: 10,
-                    }}
-                    size="small"
-                    scroll={{ x: true }}
-                />
-            ) : (
-                <Alert
-                    type="info"
-                    showIcon
-                    message="Chưa có ghi nhận lịch sử."
-                />
+            key: "records",
+            label: "Hồ sơ",
+            children: (
+                <div className="classes-detail__tab">
+                    <section className="classes-detail__section">
+                        <h3>Lịch sử khối/lớp học</h3>
+
+                        {historyApi.byClass.length > 0 ? (
+                            <Table
+                                rowKey="id"
+                                columns={historyColumns}
+                                dataSource={historyApi.byClass}
+                                pagination={{
+                                    ...PAGINATION,
+                                    pageSize: 10,
+                                }}
+                                size="small"
+                                scroll={{ x: true }}
+                            />
+                        ) : (
+                            <Alert
+                                type="info"
+                                showIcon
+                                message="Chưa có ghi nhận lịch sử."
+                            />
+                        )}
+                    </section>
+
+                    <section className="classes-detail__section">
+                        <h3>Hoạt động giảng dạy</h3>
+
+                        {activities.length > 0 ? (
+                            <Table
+                                rowKey="id"
+                                columns={activityColumns}
+                                dataSource={activities}
+                                pagination={{
+                                    ...PAGINATION,
+                                    pageSize: 10,
+                                }}
+                                size="small"
+                                scroll={{ x: true }}
+                            />
+                        ) : (
+                            <Alert
+                                type="info"
+                                showIcon
+                                message="Chưa có ghi nhận hoạt động giảng dạy của lớp."
+                            />
+                        )}
+                    </section>
+
+                    <section className="classes-detail__section">
+                        <h3>Phòng học của cơ sở</h3>
+
+                        <Alert
+                            type="info"
+                            showIcon
+                            message={
+                                room
+                                    ? `Phòng chính của lớp: ${room.code} – sức chứa ${room.capacity}.`
+                                    : "Lớp chưa được chỉ định phòng học chính."
+                            }
+                            description={
+                                `Cơ sở ${campusName(campusesById, classItem.campusId)} có `
+                                + `${roomsApi.byCampus.length} phòng học / phòng chức năng.`
+                            }
+                        />
+
+                        <Table
+                            rowKey="id"
+                            columns={roomColumns}
+                            dataSource={roomsApi.byCampus}
+                            pagination={{
+                                ...PAGINATION,
+                                pageSize: 8,
+                            }}
+                            size="small"
+                            scroll={{ x: true }}
+                        />
+                    </section>
+                </div>
             ),
         },
     ];
@@ -972,7 +1420,8 @@ const ClassDetail = () => {
                                 </div>
 
                                 <span className="personnel-detail__identity-meta">
-                                    {classItem.code} · Khối {classItem.grade} ·{" "}
+                                    {classItem.code} ·{" "}
+                                    {grade?.name ?? `Khối ${classItem.grade}`} ·{" "}
                                     {academicYear?.name ?? classItem.academicYear}
                                 </span>
 

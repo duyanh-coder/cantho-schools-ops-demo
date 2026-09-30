@@ -3,16 +3,22 @@ import {
 } from "./classes";
 
 import {
+    canThoPersonnel,
+} from "./personnel";
+
+import {
     canThoRooms,
 } from "./rooms";
 
 import type {
+    SchoolClass,
     TimetableEntry,
     WeekDay,
 } from "../common/types";
 
 import {
     AFTERNOON_PERIODS,
+    PERIOD_TIME,
 } from "../common/types";
 
 
@@ -31,27 +37,101 @@ const DAYS: WeekDay[] = [
     "saturday",
 ];
 
+/**
+ * Tiết trọng tâm khi phân bổ kế hoạch: ưu tiên buổi sáng.
+ *
+ * Cố tình tách khỏi `ALL_PERIODS` để thứ tự ưu tiên của kế hoạch nền
+ * tảng và kế hoạch sinh tự động giữ nguyên khi khung tiết mở rộng
+ * thêm buổi chiều.
+ */
 const PERIODS = [1, 2, 3, 4, 5];
+
+/**
+ * Toàn bộ khung tiết trong tuần: buổi sáng 1-5 và buổi chiều 6-10.
+ *
+ * Ô trống của thời khóa biểu được quét trên khung này nên mọi lớp đều
+ * có thể nhận tiết ở cả hai buổi, không riêng buổi sáng.
+ */
+const ALL_PERIODS: number[] = PERIOD_TIME.map((item) => item.period);
 
 const AFTERNOON_SLOT_PERIODS = AFTERNOON_PERIODS.map(
     (item) => item.period,
 );
 
 
-const SUBJECT_TEACHERS: Record<string, string[]> = {
-    math: [
-        "can-tho-personnel-003",
-        "can-tho-personnel-006",
-    ],
-    literature: [
-        "can-tho-personnel-001",
-        "can-tho-personnel-002",
-        "can-tho-personnel-008",
-    ],
-    english: ["can-tho-personnel-004"],
-    physics: ["can-tho-personnel-005"],
-    biology: ["can-tho-personnel-007"],
+/**
+ * Thời khóa biểu chỉ xếp cho một phần lớp của từng cơ sở (tổng 64 lớp).
+ * Phần lớp còn lại chưa có thời khóa biểu để màn hình lớp học còn trạng thái
+ * "chờ xếp thời khóa biểu" và cảnh báo thiếu phân công hoạt động đúng như
+ * tình huống năm học mới.
+ */
+const TKB_QUOTA_BY_CAMPUS: Record<string, number> = {
+    "campus-main": 18,
+    "campus-an-lac": 12,
+    "campus-chu-van-an": 11,
+    "campus-huynh-thuc-khang": 9,
+    "campus-thoi-binh": 8,
+    "campus-tran-hung-dao": 6,
 };
+
+const TKB_SUBJECTS = [
+    "math",
+    "literature",
+    "english",
+    "physics",
+    "biology",
+] as const;
+
+const isManagerByRole = (roleTitle: string): boolean =>
+    roleTitle.toLowerCase().includes("hiệu trưởng");
+
+/**
+ * Kho giáo viên theo cơ sở và môn, lấy từ 204 giáo viên có sẵn trong
+ * `personnel.ts`.
+ *
+ * Mỗi giáo viên chỉ được xếp dạy ở một cơ sở duy nhất trong kế hoạch: giáo
+ * viên nhiều cơ sở sẽ chiếm hết lịch và làm phát sinh cảnh báo đi nhiều cơ
+ * sở ở khắp nơi. Cảnh báo đa cơ sở còn lại đến từ nhóm giáo viên cố ý dạy
+ * liên cơ sở ở `BASE_PLAN` và các kịch bản thời khóa biểu.
+ */
+const teachersByCampusAndSubject = ((): Map<string, string[]> => {
+    const map = new Map<string, string[]>();
+
+    const used = new Set<string>();
+
+    for (const subjectId of TKB_SUBJECTS) {
+        for (const [campusId, quota] of Object.entries(TKB_QUOTA_BY_CAMPUS)) {
+            const wanted = Math.max(1, Math.round(quota / 6));
+
+            const pool = canThoPersonnel
+                .filter((person) =>
+                    person.schoolId === SCHOOL_001 &&
+                    person.status === "active" &&
+                    !isManagerByRole(person.roleTitle) &&
+                    !used.has(person.id) &&
+                    person.subjectIds.includes(subjectId) &&
+                    person.campusIds.includes(campusId))
+                .slice(0, wanted)
+                .map((person) => {
+                    used.add(person.id);
+
+                    return person.id;
+                });
+
+            if (pool.length > 0) {
+                map.set(`${campusId}|${subjectId}`, pool);
+            }
+        }
+    }
+
+    return map;
+})();
+
+const subjectTeachersOf = (
+    campusId: string,
+    subjectId: string,
+): string[] =>
+    teachersByCampusAndSubject.get(`${campusId}|${subjectId}`) ?? [];
 
 const CYCLE_A = [
     "math",
@@ -86,8 +166,53 @@ const CYCLE_C = [
     "literature",
 ];
 
+/** `canThoClasses` đã được sắp xếp ổn định, nên thứ tự mảng là thứ tự ưu tiên. */
+const schoolClasses: SchoolClass[] = canThoClasses.filter(
+    (item) => item.schoolId === SCHOOL_001,
+);
+
+const classOrder = new Map<string, number>(
+    schoolClasses.map((item, index) => [item.id, index]),
+);
+
 export const classSeq = (classId: string): number =>
-    Number.parseInt(classId.slice("can-tho-class-".length), 10);
+    classOrder.get(classId) ?? Number.MAX_SAFE_INTEGER;
+
+/**
+ * Chọn lớp được xếp thời khóa biểu: ưu tiên lớp đặc biệt (bán trú, hai
+ * buổi, chuyên) rồi tới lớp thường, tới đủ hạn mức của từng cơ sở.
+ */
+const coveredClasses: SchoolClass[] = (() => {
+    const byCampus = new Map<string, SchoolClass[]>();
+
+    for (const classItem of schoolClasses) {
+        const list = byCampus.get(classItem.campusId) ?? [];
+
+        list.push(classItem);
+
+        byCampus.set(classItem.campusId, list);
+    }
+
+    const picked: SchoolClass[] = [];
+
+    for (const [campusId, list] of byCampus) {
+        const quota = TKB_QUOTA_BY_CAMPUS[campusId] ?? 0;
+
+        const special = list.filter(
+            (classItem) =>
+                classItem.classType !== undefined &&
+                classItem.classType !== "REGULAR",
+        );
+
+        const regular = list.filter(
+            (classItem) => classItem.classType === "REGULAR",
+        );
+
+        picked.push(...[...special, ...regular].slice(0, quota));
+    }
+
+    return picked;
+})();
 
 const padIndex = (value: number): string =>
     String(value).padStart(3, "0");
@@ -105,11 +230,6 @@ for (const room of canThoRooms) {
 
     roomsByCampus.set(room.campusId, list);
 }
-
-const schoolClasses = canThoClasses
-    .filter((item) => item.schoolId === SCHOOL_001)
-    .slice()
-    .sort((a, b) => classSeq(a.id) - classSeq(b.id));
 
 const campusByClass = new Map(
     schoolClasses.map((item) => [item.id, item.campusId]),
@@ -130,7 +250,8 @@ const roomBusy = new Set<string>();
 const slotIndex = (
     day: WeekDay,
     period: number,
-): number => DAYS.indexOf(day) * PERIODS.length + PERIODS.indexOf(period);
+): number => DAYS.indexOf(day) * PERIODS.length
+    + Math.max(0, PERIODS.indexOf(period));
 
 const isFree = (
     slot: Slot,
@@ -169,22 +290,42 @@ const claim = (
     roomBusy.add(`${entry.roomId}|${entry.dayOfWeek}|${entry.period}`);
 };
 
+/**
+ * Toàn bộ khung tiết trong tuần: buổi sáng 1-5 và buổi chiều 6-10.
+ *
+ * Khung này dành cho kịch bản cố ý, được xếp sau cùng nên có thể rơi
+ * vào bất kỳ ô nào còn trống.
+ */
 const allSlots = (): Slot[] =>
+    DAYS.flatMap((day) =>
+        ALL_PERIODS.map((period) => ({ day, period })));
+
+/**
+ * Khung tiết buổi sáng.
+ *
+ * Kế hoạch nền tảng và kế hoạch sinh tự động chỉ quét khung này để giữ
+ * nguyên phân bố cũ và không tranh chỗ với kịch bản buổi chiều. Tiết
+ * chiều do `buildDayFill` cấp thêm.
+ */
+const morningSlots = (): Slot[] =>
     DAYS.flatMap((day) =>
         PERIODS.map((period) => ({ day, period })));
 
 /**
  * Tìm ô trống theo thứ tự ưu tiên xoay vòng để lớp không dồn tiết
  * vào cùng một ngày.
+ *
+ * Mặc định quét khung tiết buổi sáng; truyền `slots` khác để quét khung
+ * riêng. `offset` luôn tính trên khung tiết buổi sáng nên thứ tự ưu
+ * tiên của kế hoạch không đổi theo khung được quét.
  */
 const findFreeSlot = (
     classId: string,
     teacherId: string,
     offset: number,
+    slots: Slot[] = morningSlots(),
 ): Slot | null => {
     const campusId = campusByClass.get(classId) ?? "campus-main";
-
-    const slots = allSlots();
 
     const start = slots.length === 0
         ? 0
@@ -335,7 +476,7 @@ const buildGenerated = (): TimetableEntry[] => {
 
     let index = 0;
 
-    schoolClasses.forEach((classItem, classIndex) => {
+    coveredClasses.forEach((classItem, classIndex) => {
         const plan: string[] = [
             CYCLE_A[classIndex % CYCLE_A.length],
             CYCLE_B[classIndex % CYCLE_B.length],
@@ -346,7 +487,11 @@ const buildGenerated = (): TimetableEntry[] => {
         }
 
         plan.forEach((subjectId, lessonIndex) => {
-            const pool = SUBJECT_TEACHERS[subjectId] ?? [];
+            const pool = subjectTeachersOf(classItem.campusId, subjectId);
+
+            if (pool.length === 0) {
+                return;
+            }
 
             const teacherId = pool[(classIndex + lessonIndex) % pool.length];
 
@@ -765,6 +910,142 @@ const buildAdjustment = (): TimetableEntry[] => {
     return [entry];
 };
 
+/**
+ * Chọn môn và giáo viên cho một tiết bổ sung, bám theo đúng vòng môn mà
+ * `buildGenerated` đang dùng cho lớp đó.
+ */
+const fillLessonOf = (
+    classItem: SchoolClass,
+    classIndex: number,
+    dayIndex: number,
+): { subjectId: string; teacherId: string } | null => {
+    const plan: string[] = [
+        CYCLE_A[classIndex % CYCLE_A.length],
+        CYCLE_B[classIndex % CYCLE_B.length],
+    ];
+
+    if (classItem.grade >= 8) {
+        plan.push(CYCLE_C[classIndex % CYCLE_C.length]);
+    }
+
+    for (const subjectId of plan) {
+        const pool = subjectTeachersOf(classItem.campusId, subjectId);
+
+        if (pool.length > 0) {
+            return {
+                subjectId,
+                teacherId: pool[(classIndex + dayIndex) % pool.length],
+            };
+        }
+    }
+
+    return null;
+};
+
+/**
+ * Lấp tiết cho những ngày trong tuần lớp chưa có tiết nào.
+ *
+ * Kế hoạch nền tảng và kế hoạch sinh tự động bám tiết buổi sáng, nên
+ * một lớp có thể trống trọn cột của một ngày. Mỗi lớp được cấp phụ
+ * một tiết cho từng ngày còn trống, ưu tiên buổi chiều để dải "Buổi
+ * chiều" trên lưới có dữ liệu ở hầu hết lớp thay vì toàn ô trống.
+ *
+ * Pass chạy sau mọi kịch bản cố ý nên không chiếm ô mà kịch bản cần,
+ * và vẫn dùng `isFree` / `claim` sẵn có nên không phát sinh trùng lịch
+ * lớp, giáo viên hay phòng.
+ */
+const buildDayFill = (): TimetableEntry[] => {
+    const daysByClass = new Map<string, Set<WeekDay>>();
+
+    for (const key of classBusy) {
+        const [classId, day] = key.split("|");
+
+        if (classId === undefined || day === undefined) {
+            continue;
+        }
+
+        const days = daysByClass.get(classId) ?? new Set<WeekDay>();
+
+        days.add(day as WeekDay);
+
+        daysByClass.set(classId, days);
+    }
+
+    const entries: TimetableEntry[] = [];
+
+    let index = 0;
+
+    coveredClasses.forEach((classItem, classIndex) => {
+        const days = daysByClass.get(classItem.id) ?? new Set<WeekDay>();
+
+        daysByClass.set(classItem.id, days);
+
+        const campusId = campusByClass.get(classItem.id) ?? "campus-main";
+
+        DAYS.forEach((day, dayIndex) => {
+            if (days.has(day)) {
+                return;
+            }
+
+            const lesson = fillLessonOf(classItem, classIndex, dayIndex);
+
+            if (lesson === null) {
+                return;
+            }
+
+            // Ưu tiên buổi chiều trước, quay lại toàn khung tiết khi hết.
+            let slot: Slot | null = null;
+
+            for (const period of AFTERNOON_SLOT_PERIODS) {
+                const candidate: Slot = { day, period };
+
+                if (isFree(candidate, classItem.id, lesson.teacherId, campusId)) {
+                    slot = candidate;
+
+                    break;
+                }
+            }
+
+            if (slot === null) {
+                slot = findFreeSlot(
+                    classItem.id,
+                    lesson.teacherId,
+                    slotIndex(
+                        day,
+                        PERIODS[(classIndex + dayIndex) % PERIODS.length],
+                    ),
+                );
+            }
+
+            if (slot === null) {
+                return;
+            }
+
+            const entry = buildEntry(
+                `can-tho-timetable-f${padIndex(index + 1)}`,
+                classItem.id,
+                lesson.teacherId,
+                lesson.subjectId,
+                slot,
+                0,
+            );
+
+            claim(entry);
+
+            days.add(day);
+
+            entries.push({
+                ...entry,
+                status: statusFor(index),
+            });
+
+            index += 1;
+        });
+    });
+
+    return entries;
+};
+
 export const plannedBaseEntries: TimetableEntry[] = buildBase();
 
 export const plannedGeneratedEntries: TimetableEntry[] = buildGenerated();
@@ -776,12 +1057,20 @@ export const plannedAdjustmentEntries: TimetableEntry[] = buildAdjustment();
 
 export const plannedScenarioEntries: TimetableEntry[] = buildScenarios();
 
+/**
+ * Pass lấp ngày trống đặt cuối danh sách: mọi kịch bản cố ý đã chiếm
+ * ô của mình trước, nên tiết bổ sung không làm lệch bất kỳ kịch bản
+ * nào.
+ */
+export const plannedDayFillEntries: TimetableEntry[] = buildDayFill();
+
 export const plannedTimetables: TimetableEntry[] = [
     ...plannedBaseEntries,
     ...plannedGeneratedEntries,
     ...plannedAfternoonEntries,
     ...plannedAdjustmentEntries,
     ...plannedScenarioEntries,
+    ...plannedDayFillEntries,
 ];
 
 const winners = new Map<string, TimetableEntry>();

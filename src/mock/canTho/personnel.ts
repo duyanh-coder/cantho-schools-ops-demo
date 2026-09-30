@@ -156,6 +156,12 @@ const pad2 = (value: number): string => {
     return String(value).padStart(2, "0");
 };
 
+/**
+ * Số thứ tự khởi tạo cho nhóm nhân sự sinh thêm. Phải lớn hơn số nhân sự viết
+ * tay trong `basePersonnel` để không trùng `id`.
+ */
+const GENERATED_ID_START = 21;
+
 const toAscii = (value: string): string => {
     return value
         .normalize("NFD")
@@ -210,6 +216,17 @@ export const canThoPersonnel: Personnel[] = [
     { id: "can-tho-personnel-016", schoolId: "can-tho-school-004", code: "CT-CBCS-016", fullName: "Lâm Thị Quỳnh", gender: "female", dob: "1985-04-28", roleTitle: "Giáo viên Hóa học", degree: "Thạc sĩ Hóa học", subjectIds: ["chemistry"], campusIds: ["can-tho-campus-010"], phone: "0907222111", email: "quynh.lam@caikhe.edu.vn", isExcellentTeacher: false, achievements: "GV giỏi cấp trường 2024", status: "active" },
 
     { id: "can-tho-personnel-017", schoolId: "can-tho-school-004", code: "CT-CBCS-017", fullName: "Ngô Văn Hân", gender: "male", dob: "1989-07-06", roleTitle: "Giáo viên Tin học", degree: "Cử nhân Công nghệ thông tin", subjectIds: ["math"], campusIds: ["can-tho-campus-010"], phone: "0919666777", email: "han.ngo@caikhe.edu.vn", isExcellentTeacher: false, achievements: "Phụ trách CLB Tin học trẻ", status: "active" },
+
+    /**
+     * Bổ sung giáo viên cho 3 trường ngoài Ninh Kiều: mỗi lớp phải có đúng một
+     * GVCN đang công tác thuộc đúng trường và đúng cơ sở, nên số giáo viên phải
+     * đủ số lớp của trường.
+     */
+    { id: "can-tho-personnel-018", schoolId: "can-tho-school-002", code: "CT-CBCS-018", fullName: "Đỗ Thị Mai", gender: "female", dob: "1991-02-18", roleTitle: "Giáo viên Lịch sử", degree: "Cử nhân Lịch sử", subjectIds: ["history"], campusIds: ["can-tho-campus-007", "can-tho-campus-008"], phone: "0902111444", email: "mai.do@cairang.edu.vn", isExcellentTeacher: false, achievements: "GV trẻ cống hiến 2025", status: "active" },
+
+    { id: "can-tho-personnel-019", schoolId: "can-tho-school-003", code: "CT-CBCS-019", fullName: "Trương Văn Kiệt", gender: "male", dob: "1992-05-30", roleTitle: "Giáo viên Thể dục", degree: "Cử nhân Thể dục thể thao", subjectIds: ["physical-education"], campusIds: ["can-tho-campus-009"], phone: "0933777555", email: "kiet.truong@binhthuy.edu.vn", isExcellentTeacher: false, achievements: "Huấn luyện đội tuyển bơi trường", status: "active" },
+
+    { id: "can-tho-personnel-020", schoolId: "can-tho-school-004", code: "CT-CBCS-020", fullName: "Lý Thị Hồng Vân", gender: "female", dob: "1993-10-09", roleTitle: "Giáo viên Ngữ văn", degree: "Cử nhân Sư phạm Ngữ văn", subjectIds: ["literature"], campusIds: ["can-tho-campus-010"], phone: "0944555666", email: "van.ly@caikhe.edu.vn", isExcellentTeacher: false, achievements: "GV giỏi cấp quận 2025", status: "active" },
 ];
 
 const teacherSubjects: string[][] = SUBJECT_SPREAD.flatMap(
@@ -244,9 +261,9 @@ for (const manager of MANAGER_ROLES) {
     const emailSlug = `${toAscii(fullName.split(" ").slice(1).join(""))}.${toAscii(fullName.split(" ")[0])}`;
 
     generated.push({
-        id: `can-tho-personnel-${pad3(18 + recordIndex)}`,
+        id: `can-tho-personnel-${pad3(GENERATED_ID_START + recordIndex)}`,
         schoolId: SCHOOL_001,
-        code: `CT-CBCS-${pad3(18 + recordIndex)}`,
+        code: `CT-CBCS-${pad3(GENERATED_ID_START + recordIndex)}`,
         fullName,
         gender,
         dob: `${1980 + (nameIndexFemale + nameIndexMale) % 10}-${pad2(1 + ((nameIndexFemale + nameIndexMale) % 12))}-${pad2(1 + ((nameIndexFemale + nameIndexMale) % 28))}`,
@@ -258,7 +275,7 @@ for (const manager of MANAGER_ROLES) {
             : undefined,
         campusIds: SCHOOL_001_CAMPUSES,
         phone: `091${String(4000000 + recordIndex * 137).padStart(7, "0")}`,
-        email: `${emailSlug}.${pad3(18 + recordIndex)}@ninhkieu.edu.vn`,
+        email: `${emailSlug}.${pad3(GENERATED_ID_START + recordIndex)}@ninhkieu.edu.vn`,
         address: `${90 + recordIndex * 3} ${"Trần Quốc Toản"}, quận Ninh Kiều, TP. Cần Thơ`,
         wardId: CAMPUS_WARD["campus-main"],
         careerStartDate: "2008-09-01",
@@ -279,9 +296,9 @@ for (let staffIndex = 0; staffIndex < 22; staffIndex += 1) {
     const campusIds = STAFF_CAMPUS_PATTERNS[staffIndex % STAFF_CAMPUS_PATTERNS.length];
 
     generated.push({
-        id: `can-tho-personnel-${pad3(18 + recordIndex)}`,
+        id: `can-tho-personnel-${pad3(GENERATED_ID_START + recordIndex)}`,
         schoolId: SCHOOL_001,
-        code: `CT-CBCS-${pad3(18 + recordIndex)}`,
+        code: `CT-CBCS-${pad3(GENERATED_ID_START + recordIndex)}`,
         fullName,
         gender,
         dob: `${1978 + (staffIndex % 16)}-${pad2(1 + (staffIndex % 12))}-${pad2(1 + (staffIndex % 28))}`,
@@ -290,7 +307,7 @@ for (let staffIndex = 0; staffIndex < 22; staffIndex += 1) {
         subjectIds: [],
         campusIds,
         phone: `091${String(4000000 + recordIndex * 137).padStart(7, "0")}`,
-        email: `${emailSlug}.${pad3(18 + recordIndex)}@ninhkieu.edu.vn`,
+        email: `${emailSlug}.${pad3(GENERATED_ID_START + recordIndex)}@ninhkieu.edu.vn`,
         address: `${30 + staffIndex * 2} ${"Hòa Bình"}, quận Ninh Kiều, TP. Cần Thơ`,
         wardId: CAMPUS_WARD[campusIds[0]],
         careerStartDate: "2008-09-01",
@@ -314,9 +331,9 @@ for (let teacherIndex = 0; teacherIndex < 204; teacherIndex += 1) {
     const isMaster = teacherIndex % 6 === 0;
 
     generated.push({
-        id: `can-tho-personnel-${pad3(18 + recordIndex)}`,
+        id: `can-tho-personnel-${pad3(GENERATED_ID_START + recordIndex)}`,
         schoolId: SCHOOL_001,
-        code: `CT-CBCS-${pad3(18 + recordIndex)}`,
+        code: `CT-CBCS-${pad3(GENERATED_ID_START + recordIndex)}`,
         fullName,
         gender,
         dob: `${1985 + (teacherIndex % 15)}-${pad2(1 + (teacherIndex % 12))}-${pad2(1 + (teacherIndex % 28))}`,
@@ -326,7 +343,7 @@ for (let teacherIndex = 0; teacherIndex < 204; teacherIndex += 1) {
         teamId: TEAM_BY_SUBJECT[subjectId],
         campusIds,
         phone: `091${String(4000000 + recordIndex * 137).padStart(7, "0")}`,
-        email: `${emailSlug}.${pad3(18 + recordIndex)}@ninhkieu.edu.vn`,
+        email: `${emailSlug}.${pad3(GENERATED_ID_START + recordIndex)}@ninhkieu.edu.vn`,
         address: `${teacherIndex % 200 + 1} ${["Nguyễn Văn Cừ", "Trần Hưng Đạo", "Mậu Thân", "30 tháng 4", "Lý Tự Trọng", "Nguyễn Trãi"][teacherIndex % 6]}, quận Ninh Kiều, TP. Cần Thơ`,
         wardId: CAMPUS_WARD[campusIds[0]],
         careerStartDate: `${2009 + (teacherIndex % 12)}-09-01`,

@@ -1,6 +1,8 @@
 
 export * from "./subjects";
 
+export * from "./personnelRole";
+
 export type {
     Region,
     GeoPoint,

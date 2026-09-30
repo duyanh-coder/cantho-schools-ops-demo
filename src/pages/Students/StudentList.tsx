@@ -78,6 +78,10 @@ import {
 } from "@/store/usePersonnel";
 
 import {
+    useBoardingProfiles,
+} from "@/store/useBoardingProfiles";
+
+import {
     useStudentHistory,
 } from "@/store/useStudentHistory";
 
@@ -198,6 +202,8 @@ const StudentList = ({
 
     const historyApi = useStudentHistory();
 
+    const boardingApi = useBoardingProfiles();
+
     const gradeOptions = useCatalogOptions("grade");
 
     const genderOptions = useCatalogOptions("gender");
@@ -229,6 +235,22 @@ const StudentList = ({
 
     const classes = classesApi.bySchool;
 
+    const rosterYear = scopedClass?.academicYear ?? CURRENT_ACADEMIC_YEAR;
+
+    /**
+     * Nhu cầu (bán trú / 2 buổi / ăn uống) chỉ đọc từ BoardingProfile
+     * của năm học đang xem, không nhân bản sang Student.
+     */
+    const profileByStudent = useMemo(
+        () => new Map(
+            boardingApi.items
+                .filter((profile) =>
+                    profile.academicYearId === rosterYear)
+                .map((profile) => [profile.studentId, profile] as const),
+        ),
+        [boardingApi.items, rosterYear],
+    );
+
     const yearOptions = useMemo(
         () => yearsApi.items.map((year) => ({
             value: year.id,
@@ -242,6 +264,16 @@ const StudentList = ({
             value: ward.id,
             label: ward.name,
         })),
+        [],
+    );
+
+    const needOptions = useMemo(
+        () => [
+            { value: "boarding", label: "Bán trú" },
+            { value: "twoSession", label: "2 buổi" },
+            { value: "mealRequired", label: "Ăn uống" },
+            { value: "any", label: "Có nhu cầu" },
+        ],
         [],
     );
 
@@ -284,7 +316,12 @@ const StudentList = ({
         useState<string | undefined>(() => readDeepParam("gender"));
 
     const [statusFilter, setStatusFilter] =
-        useState<string | undefined>(() => readDeepParam("status"));
+        useState<string | undefined>(() =>
+            readDeepParam("status")
+            ?? (classId ? "studying" : undefined));
+
+    const [needFilter, setNeedFilter] =
+        useState<string | undefined>(() => readDeepParam("need"));
 
     const [keyword, setKeyword] = useState("");
 
@@ -404,6 +441,27 @@ const StudentList = ({
                 return false;
             }
 
+            if (needFilter) {
+                const profile = profileByStudent.get(student.id);
+
+                const matched =
+                    (needFilter === "boarding" && profile?.boarding)
+                    || (needFilter === "twoSession" && profile?.twoSession)
+                    || (needFilter === "mealRequired" && profile?.mealRequired)
+                    || (
+                        needFilter === "any"
+                        && Boolean(
+                            profile?.boarding
+                            || profile?.twoSession
+                            || profile?.mealRequired,
+                        )
+                    );
+
+                if (!matched) {
+                    return false;
+                }
+            }
+
             if (kw) {
                 const classItem = student.classId
                     ? classesApi.byId.get(student.classId)
@@ -437,9 +495,17 @@ const StudentList = ({
         wardFilter,
         genderFilter,
         statusFilter,
+        needFilter,
+        profileByStudent,
     ]);
 
     const kpis = useMemo(() => {
+        // Trong context lớp, KPI thuộc về ClassDetail: số ở đây phản ánh bộ lọc
+        // tìm kiếm nên có thể lệch với sĩ số của lớp.
+        if (compact) {
+            return [];
+        }
+
         const total = filtered.length;
 
         const maleCount = filtered.filter(
@@ -508,7 +574,7 @@ const StudentList = ({
                 note: "hoàn thành THCS",
             },
         ];
-    }, [filtered]);
+    }, [compact, filtered]);
 
     const handleClearFilters = () => {
         setKeyword("");
@@ -533,7 +599,9 @@ const StudentList = ({
 
         setGenderFilter(undefined);
 
-        setStatusFilter(undefined);
+        setNeedFilter(undefined);
+
+        setStatusFilter(classId ? "studying" : undefined);
 
         const params = new URLSearchParams();
 
@@ -560,6 +628,7 @@ const StudentList = ({
         form.setFieldsValue({
             academicYear: scopedClass?.academicYear ?? academicYear,
             campusId: scopedClass?.campusId ?? campusFilter ?? campuses[0]?.id ?? "campus-main",
+            classId: scopedClass?.id ?? classFilter,
             grade: scopedClass?.grade !== undefined
                 ? String(scopedClass.grade)
                 : undefined,
@@ -599,15 +668,50 @@ const StudentList = ({
     const handleFinish = (
         values: Record<string, unknown>,
     ) => {
-        const selectedClass = classFilter
-            ? classesApi.byId.get(classFilter)
+        const formClassId = values.classId
+            ? String(values.classId)
             : undefined;
+
+        const targetClassId = classId ?? formClassId ?? classFilter;
+
+        const selectedClass = targetClassId
+            ? classesApi.byId.get(targetClassId)
+            : undefined;
+
+        if (targetClassId && !selectedClass) {
+            message.error("Lớp đã chọn không tồn tại");
+
+            return;
+        }
+
+        if (selectedClass && selectedClass.schoolId !== schoolId) {
+            message.error("Lớp đã chọn không thuộc trường đang xem");
+
+            return;
+        }
+
+        if (String(values.status) === "studying" && !selectedClass) {
+            message.error("Học sinh đang học phải thuộc một lớp");
+
+            return;
+        }
 
         if (editing) {
             const updated = {
                 ...editing,
                 ...values,
-                grade: values.grade ? Number(values.grade) : undefined,
+                classId: selectedClass?.id ?? editing.classId,
+                campusId: selectedClass
+                    ? selectedClass.campusId
+                    : editing.campusId,
+                academicYear: selectedClass
+                    ? selectedClass.academicYear
+                    : editing.academicYear,
+                grade: selectedClass
+                    ? selectedClass.grade
+                    : (values.grade
+                        ? Number(values.grade)
+                        : undefined),
                 schoolId,
             } as Student;
 
@@ -645,9 +749,13 @@ const StudentList = ({
                 address: String(values.address ?? ""),
                 guardianPhone: String(values.guardianPhone ?? ""),
                 grade: values.grade ? Number(values.grade) : undefined,
-                campusId: String(values.campusId),
+                campusId: selectedClass
+                    ? selectedClass.campusId
+                    : String(values.campusId),
                 classId: selectedClass?.id,
-                academicYear: String(values.academicYear),
+                academicYear: selectedClass
+                    ? selectedClass.academicYear
+                    : String(values.academicYear),
                 wardId: values.wardId ? String(values.wardId) : undefined,
                 birthPlace: values.birthPlace ? String(values.birthPlace) : undefined,
                 ethnicity: values.ethnicity ? String(values.ethnicity) : undefined,
@@ -755,6 +863,51 @@ const StudentList = ({
                             : undefined;
 
                         return ward?.name ?? <span className="students-muted">—</span>;
+                    },
+                },
+                {
+                    title: "Nhu cầu",
+                    key: "__need",
+                    width: 190,
+                    render: (_: unknown, student: Student) => {
+                        const profile = profileByStudent.get(student.id);
+
+                        if (!profile) {
+                            return (
+                                <span className="students-muted">—</span>
+                            );
+                        }
+
+                        const tags = [
+                            profile.boarding
+                                ? { key: "boarding", color: "blue", label: "Bán trú" }
+                                : undefined,
+                            profile.twoSession
+                                ? { key: "two", color: "purple", label: "2 buổi" }
+                                : undefined,
+                            profile.mealRequired
+                                ? { key: "meal", color: "orange", label: "Ăn uống" }
+                                : undefined,
+                        ].filter(
+                            (tag): tag is { key: string; color: string; label: string } =>
+                                Boolean(tag),
+                        );
+
+                        if (tags.length === 0) {
+                            return (
+                                <span className="students-muted">Không có</span>
+                            );
+                        }
+
+                        return (
+                            <Space size={4} wrap>
+                                {tags.map((tag) => (
+                                    <Tag key={tag.key} color={tag.color}>
+                                        {tag.label}
+                                    </Tag>
+                                ))}
+                            </Space>
+                        );
                     },
                 },
             ]
@@ -1163,16 +1316,6 @@ const StudentList = ({
                 </header>
             )}
 
-            {scopedClass && (
-                <div className="students-list__context">
-                    <strong>HỌC SINH</strong>
-
-                    <span>Lớp {scopedClass.name} · Khối {scopedClass.grade} ·{" "}
-                        {campusName(campusesById, scopedClass.campusId)} —{" "}
-                        Năm học {scopedClass.academicYear}</span>
-                </div>
-            )}
-
             {kpis.length > 0 && (
                 <div className="page-kpi">
                     {kpis.map((kpi) => (
@@ -1320,6 +1463,19 @@ const StudentList = ({
 
                     <Select
                         allowClear
+                        placeholder="Nhu cầu"
+                        options={needOptions}
+                        value={needFilter}
+                        onChange={(value) => {
+                            setNeedFilter(value);
+
+                            syncParam("need", value);
+                        }}
+                        className="crud-panel__filter"
+                    />
+
+                    <Select
+                        allowClear
                         placeholder="Trạng thái"
                         options={statusOptions}
                         value={statusFilter}
@@ -1457,6 +1613,45 @@ const StudentList = ({
                         {!classId && (
                             <Form.Item name="grade" label="Khối">
                                 <Select options={gradeOptionsForStats} allowClear />
+                            </Form.Item>
+                        )}
+
+                        {classId ? (
+                            <Form.Item label="Lớp">
+                                <Tag color="blue">
+                                    {scopedClass
+                                        ? `${scopedClass.name} – ${campusName(campusesById, scopedClass.campusId)}`
+                                        : "Lớp đang chọn"}
+                                </Tag>
+                            </Form.Item>
+                        ) : (
+                            <Form.Item
+                                name="classId"
+                                label="Lớp"
+                                rules={[
+                                    {
+                                        validator: (_, value: string | undefined) => {
+                                            if (form.getFieldValue("status") === "studying" && !value) {
+                                                return Promise.reject(
+                                                    new Error("Học sinh đang học phải thuộc một lớp"),
+                                                );
+                                            }
+
+                                            return Promise.resolve();
+                                        },
+                                    },
+                                ]}
+                            >
+                                <Select
+                                    allowClear
+                                    showSearch
+                                    optionFilterProp="label"
+                                    placeholder="Chọn lớp"
+                                    options={classesOfCampusGrade.map((classItem) => ({
+                                        value: classItem.id,
+                                        label: `${classItem.name} - ${campusName(campusesById, classItem.campusId)}`,
+                                    }))}
+                                />
                             </Form.Item>
                         )}
 

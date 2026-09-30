@@ -28,13 +28,6 @@ export const ROLE_GUIDES: RoleGuide[] = [
             "Với vai trò lãnh đạo (Sở / Phòng / Ban giám hiệu), bạn tập trung vào điều hành, giám sát và ra quyết định.",
         features: [
             {
-                key: "alerts",
-                title: "Cảnh báo",
-                path: "/operations/alerts",
-                flow: "Vào Cảnh báo → xem mức nguy hiểm → theo dõi trạng thái xử lý.",
-                iconKey: "warning",
-            },
-            {
                 key: "reports",
                 title: "Báo cáo",
                 path: "/operations/reports",
@@ -109,8 +102,8 @@ export const ROLE_GUIDES: RoleGuide[] = [
             {
                 key: "students",
                 title: "Học sinh",
-                path: "/operations/schools?tab=students",
-                flow: "Vào Trường & Phân hiệu → tab Học sinh → chọn cơ sở/khối/lớp → tìm theo tên → xem hồ sơ, học bạ và quá trình học tập.",
+                path: "/operations/schools?tab=classes",
+                flow: "Vào Trường & Phân hiệu → tab Lớp học → mở chi tiết lớp → tab Học sinh → tìm theo tên → xem hồ sơ, học bạ và quá trình học tập.",
                 iconKey: "student",
             },
             {

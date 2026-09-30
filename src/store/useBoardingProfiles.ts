@@ -21,6 +21,9 @@ import type {
 
 export const BOARDING_PROFILES_STORAGE_KEY = "can-tho-boarding-profiles";
 
+/** Seed 1: khóa cache cũ để hồ sơ nhu cầu khớp năm học của lớp. */
+export const BOARDING_PROFILES_SEED_VERSION = 1;
+
 export interface BoardingProfilesApi extends CrudApi<BoardingProfile> {
     byStudent: BoardingProfile[];
 }
@@ -31,6 +34,7 @@ export function useBoardingProfiles(
     const base = useCrud<BoardingProfile>(
         BOARDING_PROFILES_STORAGE_KEY,
         canThoBoardingProfiles,
+        BOARDING_PROFILES_SEED_VERSION,
     );
 
     const byStudent = useMemo(

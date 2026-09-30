@@ -727,6 +727,12 @@
 
     font-size: 12px;
 
+    label {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+
     &:last-child {
         margin-bottom: 0;
     }
@@ -812,6 +818,197 @@
             rgba(15, 23, 42, 0.58);
 
         font-size: 11px;
+    }
+}
+
+
+/* =========================
+   CAMPUS DETAIL (16 fields)
+========================= */
+
+.gis-campus-detail {
+    &__head {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+
+        margin-bottom: 14px;
+
+        align-items: flex-start;
+
+        h3 {
+            margin: 0;
+
+            color:
+                rgba(15, 23, 42, 0.9);
+
+            font-size: 16px;
+            line-height: 1.45;
+        }
+    }
+
+    &__grid {
+        display: flex;
+        flex-direction: column;
+
+        margin-bottom: 16px;
+
+        border-top:
+            1px solid rgba(15, 23, 42, 0.06);
+    }
+
+    &__row {
+        display: grid;
+
+        grid-template-columns: 116px 1fr;
+
+        gap: 10px;
+
+        align-items: start;
+
+        padding: 8px 0;
+
+        border-bottom:
+            1px solid rgba(15, 23, 42, 0.06);
+
+        font-size: 12px;
+
+        >span {
+            color:
+                rgba(15, 23, 42, 0.55);
+        }
+
+        >strong {
+            overflow-wrap: anywhere;
+
+            color:
+                rgba(15, 23, 42, 0.88);
+
+            font-weight: 600;
+        }
+    }
+}
+
+
+/* =========================
+   BUSINESS WARD STATS
+========================= */
+
+.gis-ward-stats {
+    &__hint {
+        margin:
+            -10px 0 12px;
+
+        color:
+            rgba(15, 23, 42, 0.5);
+
+        font-size: 11px;
+        line-height: 1.5;
+    }
+
+    &__row {
+        display: flex;
+
+        flex-direction: column;
+
+        gap: 6px;
+
+        width: 100%;
+
+        padding: 10px;
+
+        border: 1px solid rgba(15, 23, 42, 0.08);
+        border-radius: 10px;
+
+        background: rgba(15, 23, 42, 0.02);
+
+        cursor: pointer;
+
+        text-align: left;
+
+        transition:
+            border-color 0.15s ease,
+            background 0.15s ease;
+
+        & + & {
+            margin-top: 8px;
+        }
+
+        &:hover {
+            border-color: rgba(8, 145, 178, 0.4);
+        }
+
+        &.is-active {
+            border-color: #0891b2;
+
+            background: rgba(8, 145, 178, 0.08);
+        }
+    }
+
+    &__name {
+        display: flex;
+        flex-direction: column;
+
+        strong {
+            color:
+                rgba(15, 23, 42, 0.88);
+
+            font-size: 13px;
+        }
+
+        span {
+            color:
+                rgba(15, 23, 42, 0.52);
+
+            font-size: 11px;
+        }
+    }
+
+    &__metrics {
+        display: flex;
+        flex-wrap: wrap;
+
+        gap: 6px;
+
+        span {
+            padding: 3px 8px;
+
+            border-radius: 999px;
+
+            background: rgba(8, 145, 178, 0.1);
+
+            color: #0e7490;
+
+            font-size: 11px;
+            font-weight: 600;
+        }
+    }
+
+    &__total {
+        display: flex;
+        flex-direction: column;
+
+        gap: 4px;
+
+        margin-top: 12px;
+
+        padding-top: 12px;
+
+        border-top:
+            1px solid rgba(15, 23, 42, 0.06);
+
+        span {
+            color:
+                rgba(15, 23, 42, 0.52);
+
+            font-size: 11px;
+        }
+
+        strong {
+            color: #0e7490;
+
+            font-size: 12px;
+        }
     }
 }
 

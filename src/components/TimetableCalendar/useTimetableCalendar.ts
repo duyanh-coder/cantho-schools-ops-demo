@@ -7,6 +7,10 @@ import type {
     TimetableConflictType,
 } from "@/mock/common/types";
 
+import {
+    subjectTone,
+} from "./lookups";
+
 import type {
     TimetableCalendarModel,
     UseTimetableCalendarOptions,
@@ -68,8 +72,24 @@ export const useTimetableCalendar = ({
     const effectiveWeek = resolveCalendarWeek(filters?.week, week);
 
     const days = useMemo(
-        () => buildCalendarDays(semester, effectiveWeek, todayValue),
-        [semester, effectiveWeek, todayValue],
+        () => {
+            const weekDays = buildCalendarDays(
+                semester,
+                effectiveWeek,
+                todayValue,
+            );
+
+            // Chọn một thứ trong tuần thì lưới chỉ còn cột của thứ đó,
+            // bỏ trống nghĩa là xem cả tuần.
+            const dayFilter = filters?.dayOfWeek;
+
+            if (!dayFilter) {
+                return weekDays;
+            }
+
+            return weekDays.filter((day) => day.day === dayFilter);
+        },
+        [semester, effectiveWeek, todayValue, filters?.dayOfWeek],
     );
 
     const scopedConflicts = useMemo(
@@ -118,8 +138,8 @@ export const useTimetableCalendar = ({
     }, [visibleConflicts]);
 
     const sessions = useMemo(
-        () => deriveSessionBlocks(events),
-        [events],
+        () => deriveSessionBlocks(events, filters?.session),
+        [events, filters?.session],
     );
 
     const currentSlot = useMemo(
@@ -133,6 +153,26 @@ export const useTimetableCalendar = ({
             subjects: new Set(events.map((event) => event.subjectId)),
         }),
         [events],
+    );
+
+    /**
+     * Chú giải màu theo môn: chỉ liệt kê môn đang có tiết trong tuần đang
+     * xem để chú giải luôn khớp với lưới.
+     */
+    const legend = useMemo(
+        () => [...scope.subjects]
+            .map((subjectId) => {
+                const event = events.find((item) =>
+                    item.subjectId === subjectId);
+
+                return {
+                    subjectId,
+                    subjectName: event?.subjectName ?? subjectId,
+                    tone: subjectTone(subjectId),
+                };
+            })
+            .sort((a, b) => a.subjectName.localeCompare(b.subjectName)),
+        [events, scope.subjects],
     );
 
     return {
@@ -150,6 +190,7 @@ export const useTimetableCalendar = ({
         totalClasses: scope.classes.size,
         totalSubjects: scope.subjects.size,
         totalConflicts: visibleConflicts.length,
+        legend,
     };
 };
 

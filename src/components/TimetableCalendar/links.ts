@@ -11,7 +11,9 @@ export interface TimetableEventLink {
 
 /**
  * Đường dẫn sẵn sàng để màn hình cha xử lý điều hướng sâu tới đơn vị
- * liên quan. Lớp hiển thị không tự điều hướng để không phụ thuộc router.
+ * liên quan. Ngữ cảnh hiển thị không tự điều hướng để không phụ thuộc
+ * router. Môi trường chưa có route riêng cho phòng học nên phòng dẫn về
+ * cơ sở chứa phòng đó.
  */
 export const linksOfEvent = (
     event: TimetableEvent,
@@ -19,7 +21,7 @@ export const linksOfEvent = (
 ): TimetableEventLink[] => {
     const links: TimetableEventLink[] = [];
 
-    if (mode !== "class") {
+    if (mode !== "class" && mode !== "student") {
         links.push({
             label: "Hồ sơ lớp",
             to: `/operations/classes/${event.classId}`,
@@ -36,6 +38,13 @@ export const linksOfEvent = (
     if (mode !== "campus") {
         links.push({
             label: "Cơ sở",
+            to: `/operations/campuses/${event.campusId}`,
+        });
+    }
+
+    if (mode !== "room") {
+        links.push({
+            label: `Phòng ${event.roomCode} tại ${event.campusName}`,
             to: `/operations/campuses/${event.campusId}`,
         });
     }

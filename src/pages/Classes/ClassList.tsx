@@ -1,6 +1,7 @@
 import {
     ApartmentOutlined,
     BookOutlined,
+    DeleteOutlined,
     EditOutlined,
     EyeOutlined,
     HistoryOutlined,
@@ -24,6 +25,7 @@ import {
     Input,
     InputNumber,
     Modal,
+    Popconfirm,
     Select,
     Space,
     Table,
@@ -56,6 +58,10 @@ import {
     canThoMockData,
 } from "@/mock";
 
+import {
+    gradeIdOf,
+} from "@/mock/canTho/grades";
+
 import type {
     Campus,
     ClassType,
@@ -81,7 +87,14 @@ import {
 } from "@/store/useClassHistory";
 
 import {
+    classDraftBlockers,
+    classIdOf,
     useClasses,
+} from "@/store/useClasses";
+
+import type {
+    ClassDraft,
+    ClassReferences,
 } from "@/store/useClasses";
 
 import {
@@ -89,8 +102,16 @@ import {
 } from "@/store/usePersonnel";
 
 import {
+    usePersonnelAssignments,
+} from "@/store/usePersonnelAssignments";
+
+import {
     useRooms,
 } from "@/store/useRooms";
+
+import {
+    GradeManagerModal,
+} from "./GradeManagerModal";
 
 import "./style.scss";
 
@@ -161,6 +182,8 @@ const ClassList = ({
 
     const personnelApi = usePersonnel();
 
+    const assignmentsApi = usePersonnelAssignments();
+
     const roomsApi = useRooms();
 
     const historyApi = useClassHistory();
@@ -216,6 +239,8 @@ const ClassList = ({
 
     const [statusClass, setStatusClass] = useState<SchoolClass | null>(null);
 
+    const [gradeOpen, setGradeOpen] = useState(false);
+
     const [form] = Form.useForm<Record<string, unknown>>();
 
     const campusOptions = useMemo(
@@ -246,9 +271,13 @@ const ClassList = ({
         [items, gradeOptions],
     );
 
+    /**
+     * Xem "Tất cả trường" thì `schoolId` rỗng: vẫn phải ra danh sách nhân sự
+     * để bộ lọc GVCN và ô chọn GVCN trong form không bị trống.
+     */
     const personnelOptions = useMemo(
         () => personnelApi.items
-            .filter((item) => item.schoolId === schoolId)
+            .filter((item) => !schoolId || item.schoolId === schoolId)
             .map((item) => ({
                 value: item.id,
                 label: `${item.fullName} (${item.code})`,
@@ -498,54 +527,83 @@ const ClassList = ({
         setOpen(true);
     };
 
-    const validateCodeUniqueness = (
-        item: SchoolClass,
-    ): string | null => {
-        const duplicate = items.find(
-            (entry) =>
-                entry.id !== item.id &&
-                entry.academicYear === item.academicYear &&
-                entry.campusId === item.campusId &&
-                entry.code.trim().toLowerCase() ===
-                    item.code.trim().toLowerCase(),
-        );
+    const classReferences = useMemo<ClassReferences>(() => ({
+        studentClassIds: new Set(
+            canThoMockData.students
+                .map((student) => student.classId)
+                .filter((id): id is string => Boolean(id)),
+        ),
+        timetableClassIds: new Set(
+            canThoMockData.timetables
+                .map((entry) => entry.classId)
+                .filter((id): id is string => Boolean(id)),
+        ),
+        assignmentClassIds: new Set(
+            assignmentsApi.items
+                .map((assignment) => assignment.classId)
+                .filter((id): id is string => Boolean(id)),
+        ),
+        historyClassIds: new Set(
+            historyApi.items
+                .map((record) => record.classId)
+                .filter((id): id is string => Boolean(id)),
+        ),
+    }), [assignmentsApi.items, historyApi.items]);
 
-        return duplicate
-            ? "Mã lớp đã tồn tại trong cùng cơ sở và năm học"
-            : null;
+    const handleDelete = (classItem: SchoolClass) => {
+        const error = classesApi.removeClass(classItem.id, classReferences);
+
+        if (error) {
+            message.warning(error);
+
+            return;
+        }
+
+        message.success(`Đã xóa lớp ${classItem.name}`);
     };
+
+    const draftOf = (values: Record<string, unknown>): ClassDraft => ({
+        schoolId,
+        campusId: String(values.campusId ?? ""),
+        code: String(values.code ?? ""),
+        name: String(values.name ?? ""),
+        grade: Number(values.grade),
+        academicYear: String(values.academicYear ?? ""),
+        homeroomTeacherId: values.homeroomTeacherId
+            ? String(values.homeroomTeacherId)
+            : undefined,
+        roomId: values.roomId ? String(values.roomId) : undefined,
+        note: values.note ? String(values.note) : undefined,
+        classType: (String(values.classType) || "REGULAR") as ClassType,
+        capacity: Number(values.capacity ?? 40),
+        status: String(values.status ?? "active") as SchoolClass["status"],
+    });
 
     const handleFinish = (
         values: Record<string, unknown>,
     ) => {
         const actor = "Ban Giám hiệu";
 
-        const base = {
-            schoolId,
-            classType: (String(values.classType) || "REGULAR") as ClassType,
-            capacity: Number(values.capacity ?? 40),
-            status: String(values.status ?? "active"),
-        };
+        const draft = draftOf(values);
 
         if (editing) {
-            const updated = {
-                ...editing,
-                ...base,
-                ...values,
-                grade: Number(values.grade),
-            } as SchoolClass;
+            const blockers = classDraftBlockers({
+                ...draft,
+                id: editing.id,
+            }, {
+                classes: items.filter((item) => item.id !== editing.id),
+                personnel: personnelApi.items,
+            });
 
-            const duplicateError = validateCodeUniqueness(updated);
-
-            if (duplicateError) {
-                message.error(duplicateError);
+            if (blockers.length > 0) {
+                message.error(blockers.join(" "));
 
                 return;
             }
 
             const currentStudents = studentCountByClassId.get(editing.id) ?? 0;
 
-            const nextCapacity = Number(updated.capacity ?? 40);
+            const nextCapacity = Number(draft.capacity ?? 40);
 
             if (currentStudents > nextCapacity) {
                 message.error(
@@ -554,6 +612,13 @@ const ClassList = ({
 
                 return;
             }
+
+            const updated: SchoolClass = {
+                ...editing,
+                ...draft,
+                capacity: nextCapacity,
+                gradeId: gradeIdOf(draft.schoolId, draft.grade),
+            };
 
             classesApi.update(updated);
 
@@ -585,28 +650,27 @@ const ClassList = ({
 
             message.success("Đã cập nhật thông tin lớp");
         } else {
-            const id = `can-tho-class-${Date.now().toString(36)}`;
+            const id = classIdOf(
+                draft.schoolId,
+                draft.academicYear,
+                draft.code,
+            );
 
-            const created = {
-                ...base,
-                ...values,
-                id,
-                grade: Number(values.grade),
-                name: String(values.name),
-                code: String(values.code),
-                campusId: String(values.campusId),
-                academicYear: String(values.academicYear),
-            } as SchoolClass;
+            const error = classesApi.createClass(draft, personnelApi.items);
 
-            const duplicateError = validateCodeUniqueness(created);
-
-            if (duplicateError) {
-                message.error(duplicateError);
+            if (error) {
+                message.error(error);
 
                 return;
             }
 
-            classesApi.create(created);
+            const created = classesApi.byId.get(id);
+
+            if (!created) {
+                message.error("Không tạo được lớp học.");
+
+                return;
+            }
 
             historyApi.create({
                 id: `class-history-${Date.now().toString(36)}`,
@@ -733,12 +797,23 @@ const ClassList = ({
             dataIndex: "homeroomTeacherId",
             width: 230,
             render: (value: string | undefined) => {
-                const teacher = value
-                    ? personnelApi.byId.get(value)
-                    : undefined;
+                if (!value) {
+                    return <span className="classes-muted">Chưa phân công</span>;
+                }
+
+                const teacher = personnelApi.byId.get(value);
 
                 if (!teacher) {
-                    return <span className="classes-muted">Chưa phân công</span>;
+                    /**
+                     * Có id nhưng không tra được hồ sơ: hiện luôn id để không
+                     * mất dấu vết, không hiển thị chung "Chưa phân công" với
+                     * trường hợp thật sự chưa có GVCN.
+                     */
+                    return (
+                        <span className="classes-muted" title="Không tìm thấy hồ sơ nhân sự">
+                            {`Không tìm thấy GV (${value})`}
+                        </span>
+                    );
                 }
 
                 return (
@@ -839,10 +914,10 @@ const ClassList = ({
                             {
                                 key: "history",
                                 icon: <HistoryOutlined />,
-                                label: "Xem lịch sử",
+                                label: "Xem hồ sơ lớp",
                                 onClick: () =>
                                     navigate(
-                                        `/operations/classes/${classItem.id}?tab=history`,
+                                        `/operations/classes/${classItem.id}?tab=records`,
                                     ),
                             },
                             {
@@ -853,6 +928,25 @@ const ClassList = ({
                                 icon: <SwapOutlined />,
                                 label: "Đổi trạng thái",
                                 onClick: () => openStatusChange(classItem),
+                            },
+                            {
+                                key: "delete",
+                                icon: <DeleteOutlined />,
+                                danger: true,
+                                label: (
+                                    <Popconfirm
+                                        title={`Xóa lớp ${classItem.name}?`}
+                                        description="Chỉ xóa được khi lớp không còn tham chiếu nào."
+                                        okText="Xóa"
+                                        cancelText="Hủy"
+                                        okButtonProps={{ danger: true }}
+                                        onConfirm={() => handleDelete(classItem)}
+                                    >
+                                        <span onClick={(event) => event.stopPropagation()}>
+                                            Xóa lớp
+                                        </span>
+                                    </Popconfirm>
+                                ),
                             },
                         ],
                     }}
@@ -930,6 +1024,13 @@ const ClassList = ({
                             title="Xóa bộ lọc"
                         >
                             Xóa bộ lọc
+                        </Button>
+
+                        <Button
+                            icon={<BookOutlined />}
+                            onClick={() => setGradeOpen(true)}
+                        >
+                            Quản lý khối
                         </Button>
 
                         <Button
@@ -1134,9 +1235,18 @@ const ClassList = ({
                             <Select options={classTypeOptions} />
                         </Form.Item>
 
-                        <Form.Item name="homeroomTeacherId" label="GVCN (chủ nhiệm)">
+                        <Form.Item
+                            name="homeroomTeacherId"
+                            label="GVCN (chủ nhiệm)"
+                            required
+                            rules={[
+                                {
+                                    required: true,
+                                    message: "Vui lòng chọn giáo viên chủ nhiệm",
+                                },
+                            ]}
+                        >
                             <Select
-                                allowClear
                                 showSearch
                                 optionFilterProp="label"
                                 options={personnelOptions}
@@ -1212,10 +1322,16 @@ const ClassList = ({
                     <Alert
                         type="info"
                         showIcon
-                        message="Không xóa lớp: chỉ chuyển trạng thái để bảo toàn lịch sử."
+                        message="Xóa lớp chỉ được phép khi lớp không còn học sinh, thời khóa biểu, phân công giảng dạy hay biến động. Nếu không, hãy chuyển trạng thái để bảo toàn lịch sử."
                     />
                 </Form>
             </Modal>
+
+            <GradeManagerModal
+                open={gradeOpen}
+                schoolId={schoolId}
+                onClose={() => setGradeOpen(false)}
+            />
         </div>
     );
 };

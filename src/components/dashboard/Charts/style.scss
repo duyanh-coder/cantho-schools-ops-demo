@@ -1,0 +1,380 @@
+.chart-card {
+    padding: 18px;
+
+    border:
+        1px solid rgba(15, 23, 42, 0.08);
+    border-radius: 16px;
+
+    background:
+        rgba(255, 255, 255, 0.86);
+
+    box-shadow:
+        0 10px 26px rgba(15, 23, 42, 0.05);
+
+    &__head {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+
+        gap: 12px;
+
+        margin-bottom: 16px;
+
+        h3 {
+            margin: 0;
+
+            color: rgba(15, 23, 42, 0.88);
+
+            font-size: 14px;
+            font-weight: 700;
+        }
+
+        span {
+            color: rgba(15, 23, 42, 0.5);
+
+            font-size: 11px;
+        }
+
+        em {
+            color: rgba(15, 23, 42, 0.42);
+
+            font-size: 11px;
+            font-style: normal;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+    }
+
+    &__body {
+        min-height: 40px;
+    }
+}
+
+
+.chart-empty {
+    margin: 0;
+
+    padding: 24px 0;
+
+    color: rgba(15, 23, 42, 0.45);
+
+    font-size: 12px;
+    text-align: center;
+}
+
+
+/* =========================
+   COLUMN CHART
+========================= */
+
+.chart-columns {
+    &__plot {
+        display: flex;
+        align-items: flex-end;
+        gap: 10px;
+
+        min-height: 200px;
+
+        overflow-x: auto;
+    }
+
+    &__slot {
+        display: flex;
+
+        flex: 1 0 44px;
+
+        flex-direction: column;
+        align-items: center;
+        justify-content: flex-end;
+
+        gap: 4px;
+
+        height: 200px;
+    }
+
+    &__value {
+        color: rgba(15, 23, 42, 0.62);
+
+        font-size: 11px;
+        font-weight: 700;
+    }
+
+    &__bar {
+        width: 100%;
+
+        max-width: 46px;
+
+        min-height: 2px;
+
+        border-radius: 6px 6px 0 0;
+
+        transition: height 0.25s ease;
+    }
+
+    &__label {
+        color: rgba(15, 23, 42, 0.55);
+
+        font-size: 11px;
+        white-space: nowrap;
+    }
+}
+
+
+/* =========================
+   BAR LIST
+========================= */
+
+.chart-barlist {
+    display: flex;
+    flex-direction: column;
+
+    gap: 10px;
+
+    &__row {
+        display: grid;
+
+        grid-template-columns: 128px 1fr;
+
+        gap: 10px;
+
+        align-items: center;
+    }
+
+    &__label {
+        overflow: hidden;
+
+        color: rgba(15, 23, 42, 0.7);
+
+        font-size: 12px;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    &__track {
+        position: relative;
+
+        display: flex;
+        align-items: center;
+
+        gap: 8px;
+
+        height: 20px;
+    }
+
+    &__fill {
+        height: 10px;
+
+        min-width: 2px;
+
+        border-radius: 999px;
+
+        transition: width 0.25s ease;
+    }
+
+    em {
+        color: rgba(15, 23, 42, 0.62);
+
+        font-size: 11px;
+        font-style: normal;
+        font-weight: 700;
+        white-space: nowrap;
+    }
+}
+
+
+/* =========================
+   DONUT
+========================= */
+
+.chart-donut {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    gap: 14px;
+
+    &__svg {
+        width: 168px;
+        height: 168px;
+
+        transform: rotate(-90deg);
+    }
+
+    &__track {
+        stroke: rgba(15, 23, 42, 0.07);
+
+        stroke-width: 6;
+    }
+
+    &__segment {
+        stroke-width: 6;
+
+        stroke-linecap: butt;
+    }
+
+    &__center-value {
+        fill: rgba(15, 23, 42, 0.88);
+
+        font-size: 7px;
+        font-weight: 700;
+        text-anchor: middle;
+        transform: rotate(90deg);
+        transform-origin: 21px 21px;
+    }
+
+    &__center-label {
+        fill: rgba(15, 23, 42, 0.45);
+
+        font-size: 3.2px;
+        text-anchor: middle;
+        transform: rotate(90deg);
+        transform-origin: 21px 21px;
+    }
+
+    &__legend {
+        display: flex;
+        flex-direction: column;
+
+        gap: 6px;
+
+        width: 100%;
+
+        margin: 0;
+
+        padding: 0;
+
+        list-style: none;
+
+        li {
+            display: grid;
+
+            grid-template-columns: 10px 1fr auto;
+
+            gap: 8px;
+
+            align-items: center;
+
+            font-size: 12px;
+        }
+    }
+
+    &__dot {
+        width: 8px;
+        height: 8px;
+
+        border-radius: 50%;
+    }
+
+    &__legend em {
+        overflow: hidden;
+
+        color: rgba(15, 23, 42, 0.68);
+
+        font-style: normal;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    &__legend strong {
+        display: flex;
+        align-items: baseline;
+
+        gap: 6px;
+
+        color: rgba(15, 23, 42, 0.85);
+
+        font-size: 12px;
+
+        small {
+            color: rgba(15, 23, 42, 0.42);
+
+            font-size: 10px;
+            font-weight: 600;
+        }
+    }
+}
+
+
+/* =========================
+   STACKED BARS
+========================= */
+
+.chart-stacked {
+    display: flex;
+    flex-direction: column;
+
+    gap: 9px;
+
+    &__legend {
+        display: flex;
+        flex-wrap: wrap;
+
+        gap: 12px;
+
+        margin-bottom: 2px;
+
+        span {
+            display: flex;
+            align-items: center;
+
+            gap: 5px;
+
+            color: rgba(15, 23, 42, 0.6);
+
+            font-size: 11px;
+        }
+
+        i {
+            width: 8px;
+            height: 8px;
+
+            border-radius: 2px;
+        }
+    }
+
+    &__row {
+        display: grid;
+
+        grid-template-columns: 128px 1fr 56px;
+
+        gap: 10px;
+
+        align-items: center;
+    }
+
+    &__label {
+        overflow: hidden;
+
+        color: rgba(15, 23, 42, 0.7);
+
+        font-size: 12px;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    &__track {
+        display: flex;
+
+        gap: 2px;
+
+        height: 14px;
+
+        border-radius: 4px;
+
+        overflow: hidden;
+    }
+
+    &__part {
+        min-width: 3px;
+    }
+
+    &__total {
+        color: rgba(15, 23, 42, 0.62);
+
+        font-size: 11px;
+        font-style: normal;
+        font-weight: 700;
+        text-align: right;
+        white-space: nowrap;
+    }
+}

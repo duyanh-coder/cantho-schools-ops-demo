@@ -21,6 +21,9 @@ import type {
 
 export const PERSONNEL_STORAGE_KEY = "can-tho-personnel";
 
+/** Seed 2: thêm 3 giáo viên cho trường ngoài Ninh Kiều và dịch chuỗi id sinh tự động. */
+export const PERSONNEL_SEED_VERSION = 2;
+
 export interface PersonnelApi extends CrudApi<Personnel> {
     byId: Map<string, Personnel>;
 }
@@ -29,6 +32,7 @@ export function usePersonnel(): PersonnelApi {
     const base = useCrud<Personnel>(
         PERSONNEL_STORAGE_KEY,
         canThoMockData.personnel,
+        PERSONNEL_SEED_VERSION,
     );
 
     const byId = useMemo(

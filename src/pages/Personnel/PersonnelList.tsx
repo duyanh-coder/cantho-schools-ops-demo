@@ -57,7 +57,10 @@ import {
 } from "@/mock";
 
 import {
+    groupPersonnel,
+    personnelGroupOf,
     subjects,
+    summarizePersonnel,
 } from "@/mock/common";
 
 import type {
@@ -98,14 +101,6 @@ import "./style.scss";
 
 
 const SCHOOL_ID = "can-tho-school-001";
-
-
-const MANAGER_KEYWORDS = [
-    "Hiệu trưởng",
-    "Phó hiệu trưởng",
-    "Tổ trưởng chuyên môn",
-    "Trưởng khối",
-];
 
 
 type TabKey =
@@ -284,38 +279,12 @@ const PersonnelList = ({
     );
 
     const structureGroups = useMemo(() => {
-        const isManager = (item: Personnel) =>
-            MANAGER_KEYWORDS.some((title) => item.roleTitle.includes(title));
-
-        const isTeacher = (item: Personnel) =>
-            !isManager(item) &&
-            item.subjectIds.length > 0;
-
-        const managerPool = items.filter(isManager);
-
-        const teacherPool = items.filter(isTeacher);
-
-        const staffPool = items.filter(
-            (item) => !isManager(item) && !isTeacher(item),
-        );
-
-        return [
-            {
-                key: "manager",
-                label: "Cán bộ quản lý",
-                pool: managerPool,
-            },
-            {
-                key: "teacher",
-                label: "Giáo viên",
-                pool: teacherPool,
-            },
-            {
-                key: "staff",
-                label: "Nhân viên",
-                pool: staffPool,
-            },
-        ];
+        return groupPersonnel(items).map((group) => ({
+            ...group,
+            pool: items.filter(
+                (item) => personnelGroupOf(item) === group.group,
+            ),
+        }));
     }, [items]);
 
     const assignmentCounts = useMemo(
@@ -425,15 +394,13 @@ const PersonnelList = ({
     const [form] = Form.useForm<Record<string, unknown>>();
 
     const kpis = useMemo(() => {
-        const teacherCount = items.filter(
-            (item) => item.subjectIds.length > 0,
-        ).length;
+        const roleSummary = summarizePersonnel(items);
 
-        const managerCount = items.filter((item) =>
-            ["Hiệu trưởng", "Phó hiệu trưởng", "Tổ trưởng chuyên môn", "Trưởng khối"].some(
-                (title) => item.roleTitle.includes(title),
-            ),
-        ).length;
+        const teacherCount = roleSummary.teachers;
+
+        const managerCount = roleSummary.managers;
+
+        const staffCount = roleSummary.staff;
 
         const honourCount = items.filter(
             (item) => item.isExcellentTeacher,
@@ -460,7 +427,7 @@ const PersonnelList = ({
                 value: teacherCount,
                 icon: <BookOutlined />,
                 tone: "green" as const,
-                note: "có môn giảng dạy",
+                note: "có môn, không thuộc cán bộ quản lý",
             },
             {
                 title: "Cán bộ quản lý",
@@ -468,6 +435,13 @@ const PersonnelList = ({
                 icon: <IdcardOutlined />,
                 tone: "purple" as const,
                 note: "Ban Giám hiệu & tổ trưởng",
+            },
+            {
+                title: "Nhân viên",
+                value: staffCount,
+                icon: <UserOutlined />,
+                tone: "blue" as const,
+                note: "không giao môn, không quản lý",
             },
             {
                 title: "Đạt danh hiệu",
@@ -888,9 +862,9 @@ const PersonnelList = ({
 
     const structureRows = useMemo(
         () => structureGroups.map((group) => ({
-            key: group.key,
+            key: group.group,
             label: group.label,
-            count: group.pool.length,
+            count: group.count,
             male: group.pool.filter((item) => item.gender === "male").length,
             female: group.pool.filter((item) => item.gender === "female").length,
             active: group.pool.filter((item) => item.status === "active").length,

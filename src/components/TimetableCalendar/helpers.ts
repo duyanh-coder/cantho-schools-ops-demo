@@ -299,6 +299,13 @@ export const applyCalendarFilters = (
         }
 
         if (
+            filters.dayOfWeek !== undefined &&
+            entry.dayOfWeek !== filters.dayOfWeek
+        ) {
+            return false;
+        }
+
+        if (
             filters.grade !== undefined &&
             lookups?.classById.get(entry.classId)?.grade !== filters.grade
         ) {
@@ -396,25 +403,33 @@ export const groupConflictsBySlot = (
 };
 
 /**
- * Chỉ render những buổi và tiết thực sự có dữ liệu trong tuần đang
- * xem, nên lớp học thường chỉ hiện buổi sáng còn lớp hai buổi hiện
- * đủ cả hai buổi. Khi lọc theo buổi thì lưới chỉ còn buổi đó và nếu
- * không có tiết nào, tầng hiển thị dùng trạng thái rỗng kèm nút xoá bộ
- * lọc thay vì một bảng toàn ô trống.
+ * Bố cục lưới là cố định theo khung tiết chuẩn, không co lại theo dữ
+ * liệu: dải "Buổi sáng" luôn nằm trên tiết 1-5 và dải "Buổi chiều"
+ * luôn nằm trên tiết 6-10. Nhờ vậy mọi lớp - kể cả lớp chỉ học sáng -
+ * dùng chung một lưới, và tiết số không bị đánh lại theo dữ liệu.
+ *
+ * Khi người dùng lọc theo buổi thì chỉ dựng buổi đang chọn với đủ tiết
+ * của buổi đó. Không có tiết nào thì trả về mảng rỗng để tầng hiển
+ * thị dùng trạng thái rỗng kèm nút xoá bộ lọc thay vì một bảng toàn
+ * ô trống.
  */
 export const deriveSessionBlocks = (
     events: TimetableEvent[],
+    sessionFilter?: TimetableSession,
 ): TimetableSessionBlock[] => {
-    const usedPeriods = new Set(events.map((event) => event.period));
+    if (events.length === 0) {
+        return [];
+    }
 
-    return SESSION_ORDER
-        .map((session) => ({
-            session,
-            label: SESSION_LABELS[session],
-            periods: periodsBySession(session).filter((item) =>
-                usedPeriods.has(item.period)),
-        }))
-        .filter((block) => block.periods.length > 0);
+    const sessions = sessionFilter === undefined
+        ? SESSION_ORDER
+        : SESSION_ORDER.filter((session) => session === sessionFilter);
+
+    return sessions.map((session) => ({
+        session,
+        label: SESSION_LABELS[session],
+        periods: periodsBySession(session),
+    }));
 };
 
 export const hasSchedule = (
@@ -516,6 +531,7 @@ export const optionScopeOf = (
         academicYearId: filters.academicYearId,
         semesterId: filters.semesterId,
         session: filters.session,
+        dayOfWeek: filters.dayOfWeek,
         campusId: filters.campusId,
         grade: filters.grade,
         teacherId: filters.teacherId,

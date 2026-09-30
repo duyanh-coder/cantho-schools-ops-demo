@@ -1,79 +1,14 @@
-import {
-  AppstoreOutlined,
-  BarChartOutlined,
-  CalendarOutlined,
-  EnvironmentOutlined,
-  FileTextOutlined,
-  RobotOutlined,
-  SolutionOutlined,
-  WarningOutlined,
-} from "@ant-design/icons";
-
 import { Layout, Menu } from "antd";
 
 import type { MenuProps } from "antd";
 
 import { useLocation, useNavigate } from "react-router-dom";
 
-import { CATALOG_DEFS } from "@/config/catalogs";
+import { MENU_ITEMS } from "@/components/dashboard/Sidebar/menuItems";
 
 import "./style.scss";
 
-type MenuItem = Required<MenuProps>["items"][number];
-
 const { Sider } = Layout;
-
-const catalogMenuItems: MenuItem[] = CATALOG_DEFS.map((catalog) => ({
-  key: `/operations/catalogs?key=${catalog.key}`,
-  label: catalog.title,
-}));
-
-const menuItems: MenuItem[] = [
-  {
-    key: "/operations/schools",
-    icon: <SolutionOutlined />,
-    label: "Trường & Phân hiệu",
-  },
-  {
-    key: "/operations/documents",
-    icon: <FileTextOutlined />,
-    label: "Văn bản điện tử",
-  },
-  {
-    key: "/operations/timetable",
-    icon: <CalendarOutlined />,
-    label: "Thời khóa biểu",
-  },
-  {
-    key: "/operations/gis",
-    icon: <EnvironmentOutlined />,
-    label: "Bản đồ GIS",
-  },
-  {
-    key: "/operations/reports",
-    icon: <BarChartOutlined />,
-    label: "Báo cáo",
-  },
-  {
-    key: "/operations/alerts",
-    icon: <WarningOutlined />,
-    label: "Cảnh báo",
-  },
-  {
-    key: "/operations/chatbot",
-    icon: <RobotOutlined />,
-    label: "Trợ lý AI",
-  },
-  {
-    type: "divider",
-  },
-  {
-    key: "/operations/catalogs",
-    icon: <AppstoreOutlined />,
-    label: "Danh mục",
-    children: catalogMenuItems,
-  },
-];
 
 interface DashboardSidebarProps {
   collapsed: boolean;
@@ -134,7 +69,7 @@ const DashboardSidebar = ({
       <Menu
         mode="inline"
         selectedKeys={[menuSelectedKey]}
-        items={menuItems}
+        items={MENU_ITEMS}
         onClick={handleMenuClick}
         className="dashboard-sidebar__menu"
       />

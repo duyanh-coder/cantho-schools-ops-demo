@@ -1,0 +1,81 @@
+.reports-tabs {
+    &__label {
+        display: flex;
+
+        align-items: center;
+
+        gap: 6px;
+    }
+}
+
+
+.reports-toolbar--overview {
+    justify-content: flex-start;
+
+    padding: 0 0 14px;
+}
+
+
+.report-overview {
+    display: flex;
+    flex-direction: column;
+
+    gap: 16px;
+
+    &__grid {
+        display: grid;
+
+        grid-template-columns:
+            repeat(auto-fit, minmax(320px, 1fr));
+
+        gap: 16px;
+    }
+
+    &__table {
+        overflow-x: auto;
+
+        table {
+            width: 100%;
+
+            border-collapse: collapse;
+
+            font-size: 12px;
+            white-space: nowrap;
+        }
+
+        th {
+            padding: 9px 10px;
+
+            border-bottom:
+                1px solid rgba(15, 23, 42, 0.1);
+
+            color: rgba(15, 23, 42, 0.55);
+
+            font-size: 11px;
+            font-weight: 700;
+            text-align: left;
+            text-transform: none;
+        }
+
+        td {
+            padding: 10px;
+
+            border-bottom:
+                1px solid rgba(15, 23, 42, 0.05);
+
+            color: rgba(15, 23, 42, 0.8);
+        }
+
+        tbody tr:nth-child(even) {
+            background: rgba(15, 23, 42, 0.02);
+        }
+    }
+
+    &__blank {
+        padding: 22px 0;
+
+        color: rgba(15, 23, 42, 0.45);
+
+        text-align: center;
+    }
+}

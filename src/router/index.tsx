@@ -63,7 +63,7 @@ function AppRouter() {
 
           <Route path="/operations/sectors" element={<Navigate to="/operations/schools?tab=sectors" replace />} />
 
-          <Route path="/operations/students" element={<Navigate to="/operations/schools?tab=students" replace />} />
+          <Route path="/operations/students" element={<Navigate to="/operations/schools?tab=classes" replace />} />
 
           <Route path="/operations/students/:studentId" element={<StudentDetail />} />
 

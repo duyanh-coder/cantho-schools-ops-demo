@@ -149,10 +149,10 @@ export const canThoAlerts: AlertItem[] = [
 
         campusId: "campus-chu-van-an",
 
-        title: "C?n c?p nh?t danh s�ch h?c sinh ph�n hi?u Chu Van An",
+        title: "Cần cập nhật danh sách học sinh phân hiệu Chu Van An",
 
         description:
-            "Danh s�ch h?c sinh m?i nh?p h?c chua du?c d?ng b? v�o s? theo doi c?a ph�n hi?u.",
+            "Danh sách học sinh mới nhập học chưa được đồng bộ vào sổ theo dõi của phân hiệu.",
 
         level: "danger",
 

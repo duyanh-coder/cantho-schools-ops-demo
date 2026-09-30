@@ -20,6 +20,49 @@
 
 
 /* ========================================
+   OVERVIEW TAB (Tổng quan tuần + lưới)
+   ======================================== */
+
+.tt-overview {
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 20px;
+}
+
+.tt-overview__summary {
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 12px;
+
+    padding: 18px;
+
+    border: 1px solid rgba(100, 116, 139, 0.16);
+
+    border-radius: 18px;
+
+    background: #fff;
+}
+
+.tt-overview__summary-title {
+    margin: 0;
+
+    color: #1e293b;
+
+    font-size: 16px;
+
+    font-weight: 600;
+}
+
+.tt-overview .page-kpi {
+    margin-bottom: 0;
+}
+
+
+/* ========================================
    CELL DRAWER
    ======================================== */
 

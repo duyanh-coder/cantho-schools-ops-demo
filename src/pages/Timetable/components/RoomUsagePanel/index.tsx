@@ -32,7 +32,12 @@ import type {
 
 import {
     DAY_LABELS,
+    PERIOD_TIME,
 } from "@/mock/common/types";
+
+import {
+    CALENDAR_DAYS,
+} from "@/components/TimetableCalendar/helpers";
 
 import type {
     TimetableLookups,
@@ -42,16 +47,14 @@ import {
     slotLabel,
 } from "../../helpers";
 
-const DAYS: WeekDay[] = [
-    "monday",
-    "tuesday",
-    "wednesday",
-    "thursday",
-    "friday",
-    "saturday",
-];
+/**
+ * Ngày học và khung tiết lấy từ nguồn chuẩn để bảng công suất phòng
+ * khớp với lưới thời khóa biểu: sáu ngày Thứ Hai - Thứ Bảy và cả hai
+ * buổi (tiết 1-10).
+ */
+const DAYS: WeekDay[] = CALENDAR_DAYS;
 
-const PERIODS = [1, 2, 3, 4, 5];
+const PERIODS: number[] = PERIOD_TIME.map((item) => item.period);
 
 const ROOM_CATEGORY_LABELS: Record<string, string> = {
     classroom: "Phòng học",

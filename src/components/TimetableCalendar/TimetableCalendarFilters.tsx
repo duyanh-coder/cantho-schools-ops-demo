@@ -4,12 +4,18 @@ import {
 } from "antd";
 
 import type {
+    AcademicYear,
     SchoolClass,
     Semester,
 } from "@/mock/common/types";
 
 import type {
     CalendarFilterScope,
+} from "./helpers";
+
+import {
+    CALENDAR_DAYS,
+    dayLabel,
 } from "./helpers";
 
 import type {
@@ -75,6 +81,18 @@ export interface TimetableCalendarFiltersProps {
     showGrade?: boolean;
 
     showSubject?: boolean;
+
+    /**
+     * Bật bộ chọn năm học. Cần `academicYears` thì mới có danh sách chọn.
+     */
+    showAcademicYear?: boolean;
+
+    academicYears?: AcademicYear[];
+
+    /**
+     * Bật bộ chọn thứ trong tuần.
+     */
+    showDay?: boolean;
 }
 
 const gradeLabel = (grade: number): string => `Khối ${grade}`;
@@ -154,6 +172,9 @@ const TimetableCalendarFilters = ({
     showCampus: showCampusProp,
     showGrade: showGradeProp,
     showSubject = false,
+    showAcademicYear = false,
+    academicYears = [],
+    showDay = true,
 }: TimetableCalendarFiltersProps) => {
     const campusId = filters.campusId ?? "";
 
@@ -167,7 +188,9 @@ const TimetableCalendarFilters = ({
             mode !== "grade" &&
             mode !== "teacher" &&
             mode !== "room");
-    const showClass = showScope;
+    const showClass = showScope &&
+        mode !== "class" &&
+        mode !== "student";
     const showTeacher = showScope && mode !== "teacher";
     const showRoom = showScope && mode !== "room";
 
@@ -219,6 +242,22 @@ const TimetableCalendarFilters = ({
             wrap
             className="tt-cal-filters"
         >
+            {showAcademicYear && academicYears.length > 0 && (
+                <Select
+                    allowClear
+                    placeholder="Tất cả năm học"
+                    value={filters.academicYearId || undefined}
+                    style={{ minWidth: 170 }}
+                    options={academicYears.map((year) => ({
+                        value: year.id,
+                        label: year.name,
+                    }))}
+                    onChange={(value) => update({
+                        academicYearId: value ?? undefined,
+                    })}
+                />
+            )}
+
             {showSemester && (
                 <Select
                     allowClear
@@ -240,6 +279,23 @@ const TimetableCalendarFilters = ({
                 options={weekOptions}
                 onChange={(value) => update({ week: value })}
             />
+
+            {showDay && (
+                <Select
+                    allowClear
+                    placeholder="Cả tuần"
+                    value={filters.dayOfWeek ?? undefined}
+                    style={{ minWidth: 140 }}
+                    options={CALENDAR_DAYS.map((day) => ({
+                        value: day,
+                        label: dayLabel(day),
+                    }))}
+                    onChange={(value) => update({
+                        dayOfWeek: (value ?? undefined) as
+                            | CalendarFilters["dayOfWeek"],
+                    })}
+                />
+            )}
 
             {showCampus && (
                 <Select

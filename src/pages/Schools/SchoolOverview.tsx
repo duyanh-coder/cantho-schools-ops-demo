@@ -40,7 +40,9 @@ import {
 } from "@/mock/canTho";
 
 import {
+    groupPersonnel,
     subjects,
+    summarizePersonnel,
 } from "@/mock/common";
 
 import type {
@@ -52,10 +54,21 @@ import {
 } from "@/store/useAcademicYears";
 
 import {
+    usePersonnel,
+} from "@/store/usePersonnel";
+
+import {
     buildCampusScale,
 } from "@/utils/campusScale";
 
 import "./overview.scss";
+
+
+/**
+ * Tab Tổng quan chỉ hiện sẵn 10 nhân sự, phần còn lại mở sang tab Nhân sự để
+ * tránh bảng dài chiếm hết trang.
+ */
+const PERSONNEL_PREVIEW = 10;
 
 
 const educationLevelLabelMap: Record<string, string> = {
@@ -183,6 +196,11 @@ const SchoolOverview = ({
     const yearsApi =
         useAcademicYears(schoolId);
 
+    const personnelApi =
+        usePersonnel();
+
+    const personnelItems = personnelApi.items;
+
     const activeYear = yearsApi.activeYear;
 
     const stats =
@@ -192,7 +210,7 @@ const SchoolOverview = ({
         if (!schoolId) {
             return {
                 campuses: [] as typeof canThoMockData.campuses,
-                personnel: [] as typeof canThoMockData.personnel,
+                personnel: [] as typeof personnelItems,
                 classes: [] as typeof canThoMockData.classes,
                 students: [] as typeof canThoMockData.students,
             };
@@ -202,7 +220,11 @@ const SchoolOverview = ({
             campuses: canThoMockData.campuses.filter(
                 (campus) => campus.schoolId === schoolId,
             ),
-            personnel: canThoMockData.personnel.filter(
+            /**
+             * Nhân sự lấy từ store để nhận đúng các thay đổi đã lưu, giống hệt
+             * nguồn dữ liệu của tab Nhân sự.
+             */
+            personnel: personnelItems.filter(
                 (item) => item.schoolId === schoolId,
             ),
             classes: canThoMockData.classes.filter(
@@ -212,22 +234,31 @@ const SchoolOverview = ({
                 (item) => item.schoolId === schoolId,
             ),
         };
-    }, [schoolId]);
+    }, [schoolId, personnelItems]);
 
     if (!school) {
         return null;
     }
 
-    const personnelTotal =
-        stats?.personnel.total ?? scope.personnel.length;
+    /**
+     * Số nhân sự hiển thị ở tab Tổng quan lấy từ cùng nguồn và cùng quy tắc
+     * phân nhóm với tab Nhân sự, nên tổng, số giáo viên và số cán bộ luôn khớp
+     * với danh sách chi tiết.
+     */
+    const personnelSummary =
+        summarizePersonnel(scope.personnel);
 
-    const personnelByRole = stats
-        ? [
-            { label: "Giáo viên", value: String(stats.personnel.teachers) },
-            { label: "Cán bộ quản lý", value: String(stats.personnel.managers).padStart(2, "0") },
-            { label: "Nhân viên", value: String(stats.personnel.staff).padStart(2, "0") },
-        ]
-        : [];
+    const personnelTotal =
+        personnelSummary.total;
+
+    const personnelByRole = groupPersonnel(scope.personnel).map(
+        (group) => ({
+            label: group.label,
+            value: group.count >= 10
+                ? String(group.count)
+                : String(group.count).padStart(2, "0"),
+        }),
+    );
 
     const studentsTotal =
         stats?.students.total ?? scope.students.filter(
@@ -423,10 +454,10 @@ const SchoolOverview = ({
                                         icon={<ReadOutlined />}
                                         onClick={() =>
                                             navigate(
-                                                `/operations/schools?tab=students&campusId=${row.id}`,
+                                                `/operations/schools?tab=classes&campusId=${row.id}`,
                                             )}
                                     >
-                                        Xem học sinh
+                                        Xem lớp học
                                     </Button>
 
                                     <Button
@@ -648,17 +679,42 @@ const SchoolOverview = ({
                 <header>
                     <span>NHÂN SỰ</span>
 
-                    <strong>Cán bộ, giáo viên, nhân viên</strong>
+                    <strong>
+                        Cán bộ, giáo viên, nhân viên
+                        {" ("}
+                        {formatVnNumber(personnelTotal)}
+                        {")"}
+                    </strong>
                 </header>
 
                 <Table
                     rowKey="id"
                     columns={personnelColumns}
-                    dataSource={scope.personnel}
+                    dataSource={scope.personnel.slice(0, PERSONNEL_PREVIEW)}
                     pagination={false}
                     size="small"
                     scroll={{ x: true }}
+                    locale={{
+                        emptyText: "Chưa có dữ liệu nhân sự.",
+                    }}
                 />
+
+                {personnelTotal > PERSONNEL_PREVIEW && (
+                    <div className="school-overview__more">
+                        <Button
+                            type="link"
+                            icon={<TeamOutlined />}
+                            onClick={() =>
+                                navigate(
+                                    `/operations/schools?tab=personnel&school=${schoolId}`,
+                                )}
+                        >
+                            Xem thêm{" "}
+                            {formatVnNumber(personnelTotal - PERSONNEL_PREVIEW)}{" "}
+                            nhân sự
+                        </Button>
+                    </div>
+                )}
             </section>
         </div>
     );

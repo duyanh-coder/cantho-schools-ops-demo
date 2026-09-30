@@ -1,7 +1,7 @@
 import type { SchoolFacility } from "../common/types";
 
 export const canThoFacilities: SchoolFacility[] = [
-    { id: "can-tho-facility-001", schoolId: "can-tho-school-001", campusId: "campus-main", category: "classroom", name: "Phòng học lý thuyết", quantity: 18, unit: "phòng", condition: "good" },
+    { id: "can-tho-facility-001", schoolId: "can-tho-school-001", campusId: "campus-main", category: "classroom", name: "Phòng học lý thuyết", quantity: 40, unit: "phòng", condition: "good" },
 
     { id: "can-tho-facility-002", schoolId: "can-tho-school-001", campusId: "campus-main", category: "function_room", name: "Phòng thực hành Lý – Hóa", quantity: 3, unit: "phòng", condition: "good" },
 
@@ -13,19 +13,19 @@ export const canThoFacilities: SchoolFacility[] = [
 
     { id: "can-tho-facility-006", schoolId: "can-tho-school-001", campusId: "campus-main", category: "equipment", name: "Bộ máy tính học sinh", quantity: 60, unit: "bộ", condition: "normal" },
 
-    { id: "can-tho-facility-007", schoolId: "can-tho-school-001", campusId: "campus-chu-van-an", category: "classroom", name: "Phòng học lý thuyết", quantity: 12, unit: "phòng", condition: "good" },
+    { id: "can-tho-facility-007", schoolId: "can-tho-school-001", campusId: "campus-chu-van-an", category: "classroom", name: "Phòng học lý thuyết", quantity: 25, unit: "phòng", condition: "good" },
 
     { id: "can-tho-facility-008", schoolId: "can-tho-school-001", campusId: "campus-chu-van-an", category: "library", name: "Thư viện phân hiệu", quantity: 1, unit: "phòng", condition: "normal" },
 
     { id: "can-tho-facility-009", schoolId: "can-tho-school-001", campusId: "campus-chu-van-an", category: "kitchen", name: "Bếp ăn bán trú", quantity: 1, unit: "bếp", condition: "good" },
 
-    { id: "can-tho-facility-010", schoolId: "can-tho-school-001", campusId: "campus-thoi-binh", category: "classroom", name: "Phòng học lý thuyết", quantity: 10, unit: "phòng", condition: "normal" },
+    { id: "can-tho-facility-010", schoolId: "can-tho-school-001", campusId: "campus-thoi-binh", category: "classroom", name: "Phòng học lý thuyết", quantity: 18, unit: "phòng", condition: "normal" },
 
-    { id: "can-tho-facility-011", schoolId: "can-tho-school-001", campusId: "campus-an-lac", category: "classroom", name: "Phòng học lý thuyết", quantity: 14, unit: "phòng", condition: "good" },
+    { id: "can-tho-facility-011", schoolId: "can-tho-school-001", campusId: "campus-an-lac", category: "classroom", name: "Phòng học lý thuyết", quantity: 27, unit: "phòng", condition: "good" },
 
-    { id: "can-tho-facility-012", schoolId: "can-tho-school-001", campusId: "campus-tran-hung-dao", category: "classroom", name: "Phòng học lý thuyết", quantity: 9, unit: "phòng", condition: "repair" },
+    { id: "can-tho-facility-012", schoolId: "can-tho-school-001", campusId: "campus-tran-hung-dao", category: "classroom", name: "Phòng học lý thuyết", quantity: 16, unit: "phòng", condition: "repair" },
 
-    { id: "can-tho-facility-013", schoolId: "can-tho-school-001", campusId: "campus-huynh-thuc-khang", category: "classroom", name: "Phòng học lý thuyết", quantity: 11, unit: "phòng", condition: "normal" },
+    { id: "can-tho-facility-013", schoolId: "can-tho-school-001", campusId: "campus-huynh-thuc-khang", category: "classroom", name: "Phòng học lý thuyết", quantity: 21, unit: "phòng", condition: "normal" },
 
     { id: "can-tho-facility-014", schoolId: "can-tho-school-002", campusId: "can-tho-campus-007", category: "classroom", name: "Phòng học lý thuyết", quantity: 16, unit: "phòng", condition: "good" },
 

@@ -1,5 +1,4 @@
 import {
-    AlertOutlined,
     ApartmentOutlined,
     AppstoreOutlined,
     BarChartOutlined,
@@ -104,18 +103,11 @@ const moduleSummaryDefs:
             catalog: "sector-type",
         },
         {
-            title: "Lớp học",
+            title: "Lớp học & Học sinh",
             path: "/operations/schools?tab=classes",
             tone: "purple",
             icon: <ReadOutlined />,
             catalog: "class-status",
-        },
-        {
-            title: "Học sinh",
-            path: "/operations/schools?tab=students",
-            tone: "orange",
-            icon: <SolutionOutlined />,
-            catalog: "student-status",
         },
     ];
 
@@ -148,12 +140,6 @@ const OperationsDashboard = () => {
 
     const regionMock =
         getCurrentRegionMockData();
-
-    const {
-        alerts,
-        campuses,
-    } =
-        regionMock;
 
     const tasks =
         readCrudItems(
@@ -192,33 +178,6 @@ const OperationsDashboard = () => {
                 activeRole,
         ) ?? ROLE_GUIDES[0];
 
-    const pendingAlerts =
-        alerts
-            .filter(
-                (alert) =>
-                    alert.status !==
-                        "resolved",
-            )
-            .sort(
-                (a, b) => {
-                    const rank:
-                        Record<string, number> = {
-                            danger: 0,
-                            warning: 1,
-                            info: 2,
-                        };
-
-                    return (
-                        rank[a.level] -
-                        rank[b.level]
-                    );
-                },
-            )
-            .slice(
-                0,
-                5,
-            );
-
     const pendingTasks =
         tasks
             .filter(
@@ -243,11 +202,6 @@ const OperationsDashboard = () => {
                 readCrudItems(
                     "can-tho-classes",
                     regionMock.classes,
-                ).length,
-            "/operations/schools?tab=students":
-                readCrudItems(
-                    "can-tho-students",
-                    regionMock.students,
                 ).length,
         };
 
@@ -328,20 +282,6 @@ const getTaskModuleHint = (
 
             {/* ============ KPI ============ */}
             <div className="page-kpi">
-                <StatsCard
-                    tone="blue"
-                    title="Cảnh báo chưa xử lý"
-                    value={
-                        alerts.filter(
-                            (alert) =>
-                                alert.status !==
-                                "resolved",
-                        ).length
-                    }
-                    icon={<WarningOutlined />}
-                    note={`${pendingAlerts.length} việc ưu tiên`}
-                />
-
                 <StatsCard
                     tone="orange"
                     title="Việc cần làm"
@@ -639,79 +579,6 @@ const getTaskModuleHint = (
                 </Card>
             </div>
 
-            {/* ============ THÔNG BÁO ============ */}
-            <Card
-                className="op-dashboard__alerts"
-                title="Thông báo cần thiết"
-                extra={
-                    <Button
-                        type="link"
-                        size="small"
-                        onClick={() =>
-                            navigate(
-                                "/operations/alerts",
-                            )
-                        }
-                    >
-                        Tất cả cảnh báo
-                    </Button>
-                }
-            >
-                {pendingAlerts.length === 0 ? (
-                    <Empty description="Không có thông báo nào" />
-                ) : (
-                    <div className="op-dashboard__alertlist">
-                        {pendingAlerts.map(
-                            (alert) => {
-                                const campus =
-                                    campuses.find(
-                                        (item) =>
-                                            item.id ===
-                                            alert.campusId,
-                                    );
-
-                                return (
-                                    <div
-                                        key={alert.id}
-                                        className={
-                                            `op-dashboard__alert op-dashboard__alert--${alert.level}`
-                                        }
-                                        onClick={() =>
-                                            navigate(
-                                                "/operations/alerts",
-                                            )
-                                        }
-                                    >
-                                        <span className="op-dashboard__alert-icon">
-                                            {alert.level ===
-                                            "danger" ? (
-                                                <AlertOutlined />
-                                            ) : alert.level ===
-                                              "warning" ? (
-                                                <WarningOutlined />
-                                            ) : (
-                                                <AlertOutlined />
-                                            )}
-                                        </span>
-
-                                        <div>
-                                            <strong>
-                                                {alert.title}
-                                            </strong>
-
-                                            <span>
-                                                {campus?.name ??
-                                                    ""}{" "}
-                                                · {alert.createdAt}
-                                            </span>
-                                        </div>
-                                    </div>
-                                );
-                            },
-                        )}
-                    </div>
-                )}
-            </Card>
 
             {/* ============ DANH MỤC ============ */}
             <Card
@@ -787,13 +654,6 @@ const getTaskModuleHint = (
                             path: "/operations/reports",
                             icon: (
                                 <BarChartOutlined />
-                            ),
-                        },
-                        {
-                            title: "Cảnh báo",
-                            path: "/operations/alerts",
-                            icon: (
-                                <WarningOutlined />
                             ),
                         },
                         {

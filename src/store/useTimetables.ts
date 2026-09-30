@@ -29,8 +29,12 @@ import type {
 /**
  * Đổi khóa lưu trữ ở phase 05 vì seed thời khóa biểu được dựng lại:
  * dữ liệu cache của bản cũ không còn khớp với cấu trúc `version`.
+ *
+ * Đổi tiếp ở phase 08 vì khung tiết mở rộng thêm buổi chiều (tiết
+ * 6-10) và bổ sung tiết cho các ngày trống trong tuần. Cache bản cũ
+ * chỉ có tiết buổi sáng nên không dùng lại được.
  */
-export const TIMETABLES_STORAGE_KEY = "can-tho-timetables-v2";
+export const TIMETABLES_STORAGE_KEY = "can-tho-timetables-v3";
 
 export interface TimetableSlotKey {
     dayOfWeek: WeekDay;

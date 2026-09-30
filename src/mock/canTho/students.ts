@@ -62,8 +62,6 @@ const DOB_YEAR_BY_GRADE: Record<number, number> = {
     9: 2011,
 };
 
-const TARGET_STUDENTS_PER_CLASS = 12;
-
 const existingSeed: Student[] = [
     { id: "can-tho-student-001", schoolId: "can-tho-school-001", campusId: "campus-main", classId: "can-tho-class-001", code: "CT-HS-001", fullName: "Lê Minh An", gender: "male", dob: "2014-03-12", address: "Phường An Hòa, quận Ninh Kiều", guardianPhone: "0901234567", status: "studying" },
 
@@ -131,22 +129,37 @@ const toPhone = (offset: number): string => {
     return `0${base}`;
 };
 
+/**
+ * Sĩ số dao động 30–48 em để có cả lớp dưới tải lẫn lớp vượt sức chứa,
+ * phục vụ demo cảnh báo sĩ số. Hai rổ thấp nhất được dồn vào rổ trung tâm
+ * để trung bình rơi vào khoảng 40 em một lớp, khớp tổng sĩ số toàn khối.
+ */
+const MIN_STUDENTS_PER_CLASS = 30;
+const MAX_STUDENTS_PER_CLASS = 48;
+
+const classSizeOf = (ordinal: number): number => {
+    const span = MAX_STUDENTS_PER_CLASS - MIN_STUDENTS_PER_CLASS + 1;
+
+    const residue = (ordinal * 7) % span;
+
+    return MIN_STUDENTS_PER_CLASS + (residue < 2 ? span >> 1 : residue);
+};
+
+let studentSequence = existingSeed.length;
+
 const generatedStudents: Student[] = canThoClasses
     .filter((classItem) => classItem.schoolId === SCHOOL_001)
-    .flatMap((classItem) => {
+    .flatMap((classItem, ordinal) => {
         const existingInClass = existingSeed.filter(
             (student) => student.classId === classItem.id,
         ).length;
 
-        const roomLimit = TARGET_STUDENTS_PER_CLASS - existingInClass;
+        const size = Math.max(0, classSizeOf(ordinal) - existingInClass);
 
-        const classIndex = Number.parseInt(
-            classItem.id.slice("can-tho-class-".length),
-            10,
-        );
+        return Array.from({ length: size }, (_, index) => {
+            studentSequence += 1;
 
-        return Array.from({ length: roomLimit }, (_, index) => {
-            const studentIndex = classIndex * TARGET_STUDENTS_PER_CLASS + index + 1;
+            const studentIndex = ordinal * MAX_STUDENTS_PER_CLASS + index + 1;
 
             const surname = SURNAMES[(studentIndex * 3 + 1) % SURNAMES.length];
 
@@ -157,11 +170,11 @@ const generatedStudents: Student[] = canThoClasses
                 : FEMALE_GIVEN_NAMES[(studentIndex * 7 + 5) % FEMALE_GIVEN_NAMES.length];
 
             return {
-                id: `can-tho-student-${padIndex(existingSeed.length + studentIndex)}`,
+                id: `can-tho-student-${padIndex(studentSequence)}`,
                 schoolId: SCHOOL_001,
                 campusId: classItem.campusId,
                 classId: classItem.id,
-                code: `CT-HS-${padIndex(existingSeed.length + studentIndex)}`,
+                code: `CT-HS-${padIndex(studentSequence)}`,
                 fullName: `${surname} ${givenName}`,
                 gender: isMale ? "male" as const : "female" as const,
                 dob: toDob(classItem.grade, studentIndex),

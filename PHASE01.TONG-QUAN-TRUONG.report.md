@@ -81,14 +81,60 @@ Khối/Lớp học, Học sinh, Thời khóa biểu, Chuyên môn, Phòng & CSVC
 tiết Nhân sự; không CRUD mới, không phân quyền, không thiết kế lại toàn app.
 
 ## 9. Ghi chú
-- Số Nhân sự/Học sinh là **mock aggregate demo** theo ví dụ đề bài; 2 bảng chi tiết
+- ~~Số Nhân sự/Học sinh là **mock aggregate demo** theo ví dụ đề bài; 2 bảng chi tiết
   vẫn đọc dữ liệu thật hiện hữu (08 nhân sự / 06 cơ sở) nên số KPI có thể khác số
-  dòng hiển thị – đúng tinh thần "mock phục vụ demo, tổng phải khớp nhau".
+  dòng hiển thị~~ → **đã xử lý**, xem mục 11.
 - Tên hiển thị: trụ sở chính = "Trường THCS Ninh Kiều"; phân hiệu = "Phân hiệu ...";
   "THCS Đoàn Thị Điểm" chỉ tồn tại ở `historicalName`.
 - `Docs/PROGRESS.md` không cập nhật (file này chỉ ghi các GĐ đã commit/tag).
 
 ## 10. Đề xuất PHASE 02 (chỉ liệt kê, chưa thực hiện)
-1. Dựng `SchoolOverview KPI` đọc từ store/selector có sẵn thay vì đọc mock trực tiếp.
+1. ~~Dựng `SchoolOverview KPI` đọc từ store/selector có sẵn thay vì đọc mock trực tiếp.~~
+   → **đã làm**, xem mục 11.
 2. Thêm người dùng xem được danh sách Nhân sự phân trang / tìm kiếm ngay trong tab.
 3. Có thể bổ sung mini-chart (sĩ số theo khối, phân bổ GV theo môn) từ dữ liệu thật.
+
+## 11. Đồng bộ số liệu nhân sự giữa Tổng quan và tab Nhân sự
+
+### Vấn đề
+Sau khi thêm bảng xem trước 10 nhân sự + nút **Xem thêm**, số liệu hai bên lệch nhau:
+- Tổng quan: giáo viên **210** (loại trừ cán bộ quản lý).
+- Tab Nhân sự: giáo viên **215** (đếm cả cán bộ đang được giao môn).
+Có 5 người thuộc chức danh quản lý nhưng vẫn có `subjectIds`, nên bị đếm ở cả hai nhóm.
+
+Nguyên nhân gốc: hai bên dùng hai nguồn và hai quy tắc khác nhau
+(`getSchoolOverviewStats()` tĩnh ở Tổng quan vs `usePersonnel()` + `MANAGER_KEYWORDS`
+ở tab Nhân sự).
+
+### Cách sửa
+- Thêm `src/mock/common/personnelRole.ts` làm **nguồn duy nhất** cho quy tắc phân nhóm:
+  - `MANAGER_ROLE_TITLES`, `isManagerRole`
+  - `personnelGroupOf` / `isTeachingRole` → mỗi người chỉ thuộc **một** nhóm,
+    cán bộ quản lý được xếp trước dù còn có môn giảng dạy.
+  - `summarizePersonnel` (total/managers/teachers/staff/male/female/active/inactive),
+    `groupPersonnel`, `personnelOfSchool`.
+- `SchoolOverview.tsx`: đọc nhân sự từ `usePersonnel()` (thay cho `canThoMockData.personnel`),
+  tính `personnelSummary`/`personnelByRole` bằng helper chung, bỏ phụ thuộc KPI tĩnh.
+- `PersonnelList.tsx`: KPI và tab "Cơ cấu" dùng cùng helper; xóa `MANAGER_KEYWORDS` cục bộ.
+- `schoolStats.ts`: `personnelStatsOfSchool` dùng `summarizePersonnel`, và
+  `canThoSchoolOverviewStats` sinh cho **cả 4 trường** thay vì riêng trường 001.
+- Tiêu đề bảng hiện tổng (`Cán bộ, giáo viên, nhân viên (240)`) và số trên nút dùng
+  `formatVnNumber`.
+
+### Kết quả (trường `can-tho-school-001`)
+| Chỉ số | Trước | Sau |
+| --- | --- | --- |
+| Tổng CB-GV | 240 | 240 |
+| Cán bộ quản lý | 8 | 8 |
+| Giáo viên | 210 / **215** | **210** (khớp cả hai nơi) |
+| Nhân viên | 22 | 22 |
+
+Tiền đề = hậu tố đảm bảo tổng khớp: `240 = 10 (preview) + 230 (Xem thêm)`.
+
+### Validation
+- `npm run typecheck` ✅
+- `npx vitest run` ✅ **158/158** (14 files), thêm `src/personnelRole.integrity.test.ts`
+  (5 test: nhóm loại trừ nhau, cán bộ có môn vẫn là cán bộ, thống kê mọi trường khớp,
+  cộng preview + phần còn lại = tổng).
+- `npm run lint` ✅ 0 error, 1 cảnh báo sẵn có ở `CrudManager/index.tsx:544`.
+- `npm run build` ✅

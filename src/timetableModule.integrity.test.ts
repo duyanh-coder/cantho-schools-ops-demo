@@ -15,6 +15,7 @@ import {
 
 import {
     TIMETABLE_SCENARIOS as canThoTimetableScenarios,
+    plannedGeneratedEntries,
     plannedPeriods,
 } from "@/mock/canTho/timetablePlan";
 
@@ -78,6 +79,21 @@ const effectiveEntries = (() => {
 
     return [...winners.values()];
 })();
+
+const rowsByTeacher = <T extends { teacherId: string }>(
+    rows: T[],
+): Map<string, T[]> => {
+    const map = new Map<string, T[]>();
+
+    for (const row of rows) {
+        const group = map.get(row.teacherId) ?? [];
+
+        group.push(row);
+        map.set(row.teacherId, group);
+    }
+
+    return map;
+};
 
 const countByType = (
     conflicts: ReturnType<typeof detectConflicts>,
@@ -263,8 +279,93 @@ describe("PHASE 05 timetable module integrity", () => {
             canThoClasses,
         );
 
-        expect(missing.length).toBe(13);
-        expect(crossCampus.length).toBe(8);
+        const teacherOf = (cause: string) =>
+            cause.match(/can-tho-personnel-\d+/)?.[0] ?? "";
+
+        // 13 phân công học kỳ 1 của năm 2026-2027 được cố ý chờ xếp tiết,
+        // cộng thêm kịch bản E (thiếu tiết) khai báo trong TIMETABLE_SCENARIOS.
+        expect(missing.length).toBe(14);
+        expect(
+            missing.filter((item) =>
+                teacherOf(item.cause) ===
+                    canThoTimetableScenarios.missingPeriod.teacherId &&
+                item.cause.includes(
+                    canThoTimetableScenarios.missingPeriod.classId)),
+        ).toHaveLength(1);
+
+        // Phần sinh thêm của thời khóa biểu luôn bám một cơ sở: mỗi giáo viên
+        // trong kho giáo viên chỉ được xếp dạy ở đúng một cơ sở duy nhất.
+        const campusByClass = new Map(
+            canThoClasses.map((item) => [item.id, item.campusId]),
+        );
+
+        expect(
+            [...rowsByTeacher(plannedGeneratedEntries)]
+                .filter(([, rows]) =>
+                    new Set(
+                        rows.map((row) => campusByClass.get(row.classId)),
+                    ).size > 1)
+                .map(([teacherId]) => teacherId),
+        ).toStrictEqual([]);
+
+        // Cảnh báo đa cơ sở chỉ đến từ nhóm giáo viên được khối dữ liệu cố ý
+        // giao dạy liên cơ sở, trong đó có giáo viên khai báo tại kịch bản.
+        expect(crossCampus.length).toBe(6);
+        expect(
+            crossCampus
+                .map((item) => teacherOf(item.cause))
+                .includes(canThoTimetableScenarios.crossCampus),
+        ).toBe(true);
+
+        /**
+         * Mỗi cảnh báo đa cơ sở đến từ nhóm giáo viên đã có phân công ở nhiều
+         * cơ sở ngay trong khối dữ liệu. Phần sinh thêm chỉ bám vào cơ sở đã có
+         * của giáo viên nên không tự tạo ra tình trạng dạy liên cơ sở.
+         */
+        const generatedIds = new Set(
+            plannedGeneratedEntries.map((entry) => entry.id),
+        );
+
+        for (const item of crossCampus) {
+            const seededCampuses = new Set(
+                item.rows
+                    .filter((row) => !generatedIds.has(row.id))
+                    .map((row) => campusByClass.get(row.classId)),
+            );
+
+            expect(seededCampuses.size).toBeGreaterThan(1);
+        }
+    });
+
+    it("covers every generated class and keeps one campus per generated teacher", () => {
+        const generatedClassIds = new Set(
+            plannedGeneratedEntries.map((entry) => entry.classId),
+        );
+
+        expect(generatedClassIds.size).toBe(64);
+
+        const effectiveClassIds = new Set(
+            effectiveEntries.map((entry) => entry.classId),
+        );
+
+        for (const classId of generatedClassIds) {
+            expect(effectiveClassIds.has(classId)).toBe(true);
+        }
+
+        const campusByClass = new Map(
+            canThoClasses.map((item) => [item.id, item.campusId]),
+        );
+
+        for (const [
+            teacherId,
+            rows,
+        ] of rowsByTeacher(plannedGeneratedEntries)) {
+            expect(
+                new Set(rows.map((row) =>
+                    campusByClass.get(row.classId))).size,
+                `GV ${teacherId} bị xếp ở nhiều cơ sở`,
+            ).toBe(1);
+        }
     });
 
     it("timetable history references existing timetables and snapshots", () => {

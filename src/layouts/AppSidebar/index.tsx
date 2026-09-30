@@ -1,22 +1,6 @@
 import {
-    AppstoreOutlined,
-    CalendarOutlined,
-    DashboardOutlined,
-    EnvironmentOutlined,
-    FileTextOutlined,
-    RobotOutlined,
-    SettingOutlined,
-    SolutionOutlined,
-    WarningOutlined,
-} from "@ant-design/icons";
-
-import {
     Layout,
     Menu,
-} from "antd";
-
-import type {
-    MenuProps,
 } from "antd";
 
 import {
@@ -26,58 +10,9 @@ import {
 
 import { APP_CONFIG } from "@/config/app";
 
+import { APP_MENU_ITEMS } from "@/layouts/AppSidebar/menuItems";
+
 import "./style.scss";
-
-type MenuItem =
-    Required<MenuProps>["items"][number];
-
-const menuItems: MenuItem[] = [
-    {
-        key: "/",
-        icon: <AppstoreOutlined />,
-        label: "Tổng quan",
-    },
-    {
-        key: "/dashboard",
-        icon: <DashboardOutlined />,
-        label: "Dashboard",
-    },
-    {
-        key: "/gis",
-        icon: <EnvironmentOutlined />,
-        label: "Bản đồ GIS",
-    },
-    {
-        key: "/schools",
-        icon: <SolutionOutlined />,
-        label: "Trường & Phân hiệu",
-    },
-    {
-        key: "/timetable",
-        icon: <CalendarOutlined />,
-        label: "Thời khóa biểu",
-    },
-    {
-        key: "/documents",
-        icon: <FileTextOutlined />,
-        label: "Văn bản điện tử",
-    },
-    {
-        key: "/alerts",
-        icon: <WarningOutlined />,
-        label: "Cảnh báo",
-    },
-    {
-        key: "/chatbot",
-        icon: <RobotOutlined />,
-        label: "Trợ lý AI",
-    },
-    {
-        key: "/admin",
-        icon: <SettingOutlined />,
-        label: "Quản trị",
-    },
-];
 
 const {
     Sider,
@@ -116,7 +51,7 @@ function AppSidebar() {
                 selectedKeys={[
                     location.pathname,
                 ]}
-                items={menuItems}
+                items={APP_MENU_ITEMS}
                 onClick={(item) =>
                     navigate(item.key)
                 }

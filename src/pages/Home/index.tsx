@@ -2,25 +2,18 @@ import {
   useEffect,
   useRef,
   type CSSProperties,
-  type ReactNode,
 } from "react";
 
 import {
   ArrowRightOutlined,
-  BarChartOutlined,
-  CalendarOutlined,
   EnvironmentOutlined,
-  FileTextOutlined,
   LinkOutlined,
   PartitionOutlined,
   ReadOutlined,
   RiseOutlined,
-  RobotOutlined,
   SafetyCertificateOutlined,
-  SolutionOutlined,
   TeamOutlined,
   TrophyOutlined,
-  WarningOutlined,
 } from "@ant-design/icons";
 
 import {
@@ -42,75 +35,10 @@ import heroImage from "@/assets/images/cantho/hero.jpg";
 
 import "./style.scss";
 
+import { OPERATION_FEATURES } from "@/pages/Home/operationFeatures";
+
 const { Title, Paragraph, Text } = Typography;
 
-interface OperationFeature {
-  key: string;
-  title: string;
-  description: string;
-  path: string;
-  colorClass: string;
-  icon: ReactNode;
-}
-
-const operationFeatures: OperationFeature[] = [
-  {
-    key: "documents",
-    title: "Văn bản điện tử",
-    description: "Quản lý văn bản, hồ sơ và các thông tin điều hành.",
-    path: "/operations/documents",
-    colorClass: "feature-card--documents",
-    icon: <FileTextOutlined />,
-  },
-  {
-    key: "timetable",
-    title: "Thời khóa biểu",
-    description: "Theo dõi và quản lý thời khóa biểu tại các cơ sở giáo dục.",
-    path: "/operations/timetable",
-    colorClass: "feature-card--timetable",
-    icon: <CalendarOutlined />,
-  },
-  {
-    key: "schools",
-    title: "Trường & Phân hiệu",
-    description: "Quản lý thông tin trường học và các cơ sở trực thuộc.",
-    path: "/operations/schools",
-    colorClass: "feature-card--school",
-    icon: <SolutionOutlined />,
-  },
-  {
-    key: "gis",
-    title: "Bản đồ GIS",
-    description: "Quản lý địa bàn, trường học và các cơ sở trên nền bản đồ số.",
-    path: "/operations/gis",
-    colorClass: "feature-card--gis",
-    icon: <EnvironmentOutlined />,
-  },
-  {
-    key: "reports",
-    title: "Báo cáo điều hành",
-    description: "Tổng hợp số liệu và hỗ trợ theo dõi tình hình hoạt động.",
-    path: "/operations/reports",
-    colorClass: "feature-card--reports",
-    icon: <BarChartOutlined />,
-  },
-  {
-    key: "alerts",
-    title: "Cảnh báo",
-    description: "Theo dõi các vấn đề cần xử lý và thông báo quan trọng.",
-    path: "/operations/alerts",
-    colorClass: "feature-card--alerts",
-    icon: <WarningOutlined />,
-  },
-  {
-    key: "chatbot",
-    title: "Trợ lý AI",
-    description: "Hỗ trợ tra cứu thông tin và giải đáp nghiệp vụ nhanh chóng.",
-    path: "/operations/chatbot",
-    colorClass: "feature-card--chatbot",
-    icon: <RobotOutlined />,
-  },
-];
 
 /* ============================================================
    EDUCATION STATS — số liệu sưu tầm & tham khảo từ nguồn web
@@ -814,7 +742,7 @@ function HomePage() {
           </div>
 
           <Row gutter={[24, 24]}>
-            {operationFeatures.map((feature) => (
+            {OPERATION_FEATURES.map((feature) => (
               <Col key={feature.key} xs={24} sm={12} xl={6}>
                 <Card
                   hoverable

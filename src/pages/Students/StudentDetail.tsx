@@ -11,6 +11,7 @@ import {
 
 import {
     Alert,
+    Breadcrumb,
     Button,
     Descriptions,
     Form,
@@ -47,6 +48,13 @@ import {
 
 import StatsCard from "@/components/dashboard/StatCard";
 
+import TimetableCalendar from "@/components/TimetableCalendar";
+
+import {
+    buildTimetableLookups,
+    subjectTone,
+} from "@/components/TimetableCalendar/lookups";
+
 import {
     subjects,
 } from "@/mock/common";
@@ -61,13 +69,7 @@ import type {
     StudentHistoryEntry,
     StudentMovement,
     StudentMovementType,
-    TimetableEntry,
 } from "@/mock/common/types";
-
-import {
-    periodTimes,
-    STATUS_LABELS,
-} from "@/mock/common";
 
 import {
     useAcademicYears,
@@ -95,8 +97,16 @@ import {
 } from "@/store/usePersonnel";
 
 import {
+    usePersonnelAssignments,
+} from "@/store/usePersonnelAssignments";
+
+import {
     useRooms,
 } from "@/store/useRooms";
+
+import {
+    useSemesters,
+} from "@/store/useSemesters";
 
 import {
     useStudentAchievements,
@@ -122,7 +132,14 @@ import {
     useTimetables,
 } from "@/store/useTimetables";
 
-import { MOVEMENT_TYPE_LABEL } from "@/pages/Students/labels";
+import {
+    HISTORY_EVENT,
+    MOVEMENT_TYPE_LABEL,
+    MOVEMENT_TYPE_TONE,
+    STATUS_TONE,
+} from "@/pages/Students/labels";
+
+import StudentCv from "@/pages/Students/StudentCv";
 
 import "./style.scss";
 
@@ -147,49 +164,9 @@ const PAGE_SIZE = {
         `${range[0]}–${range[1]} / ${total}`,
 };
 
-const STATUS_TONE: Record<string, string> = {
-    studying: "green",
-    transferred: "orange",
-    dropped_out: "red",
-    graduated: "blue",
-    suspended: "orange",
-};
-
-const DAY_LABEL: Record<string, string> = {
-    monday: "Thứ Hai",
-    tuesday: "Thứ Ba",
-    wednesday: "Thứ Tư",
-    thursday: "Thứ Năm",
-    friday: "Thứ Sáu",
-    saturday: "Thứ Bảy",
-    sunday: "Chủ nhật",
-};
-
 const SUBJECT_NAME = new Map<string, string>(
     subjects.map((subject) => [subject.id, subject.name] as [string, string]),
 );
-
-const MOVEMENT_TYPE_TONE: Record<string, string> = {
-    admitted: "green",
-    class_transfer: "cyan",
-    campus_transfer: "geekblue",
-    school_transfer: "orange",
-    drop_out: "red",
-    withdraw: "volcano",
-    graduate: "purple",
-};
-
-const HISTORY_EVENT: Record<string, { label: string; tone: string }> = {
-    created: { label: "Tạo hồ sơ", tone: "green" },
-    updated: { label: "Cập nhật", tone: "blue" },
-    profile_changed: { label: "Hồ sơ", tone: "cyan" },
-    status_changed: { label: "Trạng thái", tone: "orange" },
-    class_changed: { label: "Chuyển lớp", tone: "geekblue" },
-    campus_changed: { label: "Chuyển cơ sở", tone: "purple" },
-    admitted: { label: "Nhập học", tone: "green" },
-    transferred: { label: "Chuyển trường", tone: "orange" },
-    graduated: { label: "Tốt nghiệp", tone: "purple" },
-};
 
 const campusName = (
     campusesById: Map<string, Campus>,
@@ -219,6 +196,8 @@ const StudentDetail = () => {
     const classesApi = useClasses();
 
     const personnelApi = usePersonnel();
+
+    const assignmentsApi = usePersonnelAssignments();
 
     const transcriptsApi = useTranscripts(studentId);
 
@@ -271,7 +250,7 @@ const StudentDetail = () => {
 
     useEffect(() => {
         if (!student && studentsApi.items.length > 0) {
-            navigate("/operations/schools?tab=students", { replace: true });
+            navigate("/operations/schools?tab=classes", { replace: true });
         }
     }, [student, studentsApi.items.length, navigate]);
 
@@ -294,13 +273,14 @@ const StudentDetail = () => {
             return classesApi.bySchool
                 .filter((classItem) =>
                     classItem.academicYear === student?.academicYear &&
+                    classItem.schoolId === student?.schoolId &&
                     (campusFilter ? classItem.campusId === campusFilter : true))
                 .map((classItem) => ({
                     value: classItem.id,
                     label: `${classItem.name} – ${campusName(campusesById, classItem.campusId)}`,
                 }));
         },
-        [classesApi.bySchool, student?.academicYear, campusesById],
+        [classesApi.bySchool, student?.academicYear, student?.schoolId, campusesById],
     );
 
     const timelineItems = useMemo(() => {
@@ -364,6 +344,78 @@ const StudentDetail = () => {
     const ward = student?.wardId
         ? canThoWards.find((item) => item.id === student.wardId)
         : undefined;
+
+    /**
+     * Môn học của học sinh là môn được phân công dạy cho lớp của học sinh, nên
+     * đọc từ phân công giảng dạy chứ không cần lọc thời khóa biểu.
+     */
+    const classSubjects = useMemo(() => {
+        if (!classItem) {
+            return [];
+        }
+
+        return assignmentsApi.byClass
+            .filter((assignment) =>
+                assignment.classId === classItem.id &&
+                assignment.academicYear === classItem.academicYear &&
+                assignment.status === "active")
+            .map((assignment) => ({
+                key: assignment.id,
+                subjectId: assignment.subjectId,
+                subjectName: SUBJECT_NAME.get(assignment.subjectId)
+                    ?? assignment.subjectId,
+                teacherId: assignment.personnelId,
+                teacherName: personnelApi.byId.get(
+                    assignment.personnelId,
+                )?.fullName
+                    ?? assignment.personnelId,
+                periodsPerWeek: assignment.periodsPerWeek,
+            }))
+            .sort((a, b) => a.subjectName.localeCompare(b.subjectName, "vi"));
+    }, [assignmentsApi.byClass, classItem, personnelApi.byId]);
+
+    const timetableLookups = useMemo(
+        () => buildTimetableLookups(
+            subjects,
+            classesApi.items,
+            personnelApi.items,
+            campusesApi.items,
+            roomsApi.items,
+        ),
+        [
+            classesApi.items,
+            personnelApi.items,
+            campusesApi.items,
+            roomsApi.items,
+        ],
+    );
+
+    const semestersApi = useSemesters(classItem?.academicYear);
+
+    const calendarSemesters = useMemo(
+        () => [...new Set(timetables.map((entry) => entry.semesterId))]
+            .sort(),
+        [timetables],
+    );
+
+    const calendarSemester = useMemo(
+        () => calendarSemesters
+            .map((semesterId) =>
+                semestersApi.items.find(
+                    (semester) => semester.id === semesterId,
+                ))
+            .find((semester) => semester?.status === "ACTIVE") ??
+            semestersApi.items.find(
+                (semester) => semester.status === "ACTIVE",
+            ),
+        [calendarSemesters, semestersApi.items],
+    );
+
+    const calendarSemesterOptions = useMemo(
+        () => semestersApi.items.filter((semester) =>
+            calendarSemesters.includes(semester.id)),
+        [calendarSemesters, semestersApi.items],
+    );
 
     if (!student) {
         return null;
@@ -441,6 +493,38 @@ const StudentDetail = () => {
             tone: "green" as const,
             note: homeroomTeacher?.fullName ?? "lớp hiện tại",
             tab: "overview" as TabKey,
+        },
+    ];
+
+    const classSubjectColumns: ColumnsType<(typeof classSubjects)[number]> = [
+        {
+            title: "Môn học",
+            dataIndex: "subjectName",
+            render: (value: string, row) => (
+                <Tag color={subjectTone(row.subjectId)}>{value}</Tag>
+            ),
+        },
+        {
+            title: "Giáo viên",
+            dataIndex: "teacherName",
+            render: (value: string, row) => (
+                <a
+                    href={`/operations/personnel/${row.teacherId}`}
+                    onClick={(event) => {
+                        event.preventDefault();
+
+                        navigate(`/operations/personnel/${row.teacherId}`);
+                    }}
+                >
+                    {value}
+                </a>
+            ),
+        },
+        {
+            title: "Tiết/tuần",
+            dataIndex: "periodsPerWeek",
+            width: 120,
+            align: "right",
         },
     ];
 
@@ -717,6 +801,38 @@ const StudentDetail = () => {
                 return;
             }
 
+            if (toClass.schoolId !== student.schoolId) {
+                message.error("Chỉ chuyển trong cùng trường");
+
+                return;
+            }
+
+            if (toClass.academicYear !== student.academicYear) {
+                message.error(
+                    `Lớp đích không thuộc năm học ${student.academicYear ?? "hiện tại"}`,
+                );
+
+                return;
+            }
+
+            if (toClass.id === student.classId) {
+                message.error("Học sinh đang ở lớp này");
+
+                return;
+            }
+
+            if (movementType === "campus_transfer" && toClass.campusId === student.campusId) {
+                message.error("Chuyển cơ sở cần chọn lớp thuộc cơ sở khác");
+
+                return;
+            }
+
+            if (movementType === "class_transfer" && toClass.campusId !== student.campusId) {
+                message.error("Chuyển lớp chỉ dùng cho lớp cùng cơ sở");
+
+                return;
+            }
+
             const movement: StudentMovement = {
                 ...baseMovement,
                 fromCampusId: student.campusId,
@@ -843,64 +959,6 @@ const StudentDetail = () => {
         movementForm.resetFields();
     };
 
-    const timetableColumns: ColumnsType<TimetableEntry> = [
-        {
-            title: "Ngày",
-            dataIndex: "dayOfWeek",
-            width: 110,
-            render: (value: string) => DAY_LABEL[value] ?? value,
-        },
-        {
-            title: "Tiết",
-            dataIndex: "period",
-            width: 70,
-        },
-        {
-            title: "Môn",
-            dataIndex: "subjectId",
-            width: 140,
-            render: (value: string) => (
-                <Tag color="blue">{SUBJECT_NAME.get(value) ?? value}</Tag>
-            ),
-        },
-        {
-            title: "Giáo viên",
-            dataIndex: "teacherId",
-            width: 200,
-            render: (value: string) => {
-                const teacher = personnelApi.byId.get(value);
-
-                return teacher?.fullName ?? value;
-            },
-        },
-        {
-            title: "Phòng",
-            dataIndex: "roomId",
-            width: 90,
-            render: (value: string) =>
-                roomsApi.byId.get(value)?.code ?? value,
-        },
-        {
-            title: "Thời gian",
-            width: 150,
-            render: (_: unknown, row: TimetableEntry) => {
-                const time = periodTimes(row.period);
-
-                return <span>{time.startTime} – {time.endTime}</span>;
-            },
-        },
-        {
-            title: "Trạng thái",
-            dataIndex: "status",
-            width: 130,
-            render: (value: string) => (
-                <Tag color={value === "PUBLISHED" ? "green" : value === "APPROVED" ? "blue" : value === "CONFLICT" ? "red" : "default"}>
-                    {STATUS_LABELS[value as keyof typeof STATUS_LABELS] ?? value}
-                </Tag>
-            ),
-        },
-    ];
-
     const tabItems = [
         {
             key: "overview",
@@ -1013,48 +1071,29 @@ const StudentDetail = () => {
                 </div>
             ),
         },
-        {
+            {
             key: "profile",
             label: "Hồ sơ",
             children: (
-                <div className="students-detail__tab">
-                    <Descriptions
-                        column={2}
-                        size="small"
-                        bordered
-                        className="personnel-detail-tabs__descriptions"
-                    >
-                        <Descriptions.Item label="Dân tộc">
-                            {student.ethnicity ?? "—"}
-                        </Descriptions.Item>
-
-                        <Descriptions.Item label="Nơi sinh">
-                            {student.birthPlace ?? "—"}
-                        </Descriptions.Item>
-
-                        <Descriptions.Item label="Địa chỉ" span={2}>
-                            {student.address ?? "—"}
-                        </Descriptions.Item>
-
-                        <Descriptions.Item label="Người giám hộ">
-                            {student.guardianName ?? "—"}
-                        </Descriptions.Item>
-
-                        <Descriptions.Item label="SĐT giám hộ">
-                            {student.guardianPhone ?? "—"}
-                        </Descriptions.Item>
-
-                        <Descriptions.Item label="Email">
-                            {student.email ?? "—"}
-                        </Descriptions.Item>
-                    </Descriptions>
-
-                    <Alert
-                        type="info"
-                        showIcon
-                        message="Hồ sơ được cập nhật qua mục Chỉnh sửa trong danh sách học sinh."
-                    />
-                </div>
+                <StudentCv
+                    student={student}
+                    classItem={classItem}
+                    homeroomTeacher={homeroomTeacher}
+                    campusName={campusName(
+                        campusesById,
+                        student.campusId,
+                    )}
+                    academicYearLabel={academicYear?.name ?? ""}
+                    wardName={ward?.name}
+                    statusLabel={statusLabel}
+                    averageScore={averageScore}
+                    activeBoarding={activeBoarding}
+                    movements={movements}
+                    achievements={achievements}
+                    historyEntries={historyEntries}
+                    onOpenTab={(tab) => setActiveTab(tab)}
+                    onNavigate={(to) => navigate(to)}
+                />
             ),
         },
         {
@@ -1107,35 +1146,71 @@ const StudentDetail = () => {
                 />
             ),
         },
-        {
+            {
             key: "timetable",
             label: "Lịch học",
-            children: timetables.length > 0 ? (
+            children: (
                 <div className="students-detail__tab">
                     <Alert
                         type="info"
                         showIcon
-                        message={`Lịch học theo lớp ${classItem?.name ?? "hiện tại"} – ${timetables.length} tiết trong tuần.`}
+                        message={classItem
+                            ? `Lịch học theo lớp ${classItem.name} – ${timetables.length} tiết trong tuần.`
+                            : "Học sinh chưa thuộc lớp nào nên chưa có lịch học."}
                     />
 
-                    <Table
-                        rowKey="id"
-                        columns={timetableColumns}
-                        dataSource={timetables}
-                        pagination={{
-                            ...PAGE_SIZE,
-                            pageSize: 12,
-                        }}
-                        size="small"
-                        scroll={{ x: true }}
-                    />
+                    <section className="students-detail__cv-card">
+                        <h5>Môn học</h5>
+
+                        {classSubjects.length > 0 ? (
+                            <Table
+                                rowKey="key"
+                                size="small"
+                                columns={classSubjectColumns}
+                                dataSource={classSubjects}
+                                pagination={false}
+                                scroll={{ x: true }}
+                            />
+                        ) : (
+                            <Alert
+                                type="info"
+                                showIcon
+                                message="Chưa có phân công giảng dạy cho lớp của học sinh."
+                            />
+                        )}
+                    </section>
+
+                    {timetables.length > 0 && classItem && calendarSemester
+                        ? (
+                            <TimetableCalendar
+                                key={`${studentId}-${classItem.id}`}
+                                entries={timetables}
+                                lookups={timetableLookups}
+                                semester={calendarSemester}
+                                semesterOptions={calendarSemesterOptions}
+                                mode="student"
+                                entityId={classItem.id}
+                                showFilters
+                                showSemesterFilter
+                                showCampusFilter={false}
+                                showSubjectFilter
+                                scopeOptionsToEntries
+                                showClass={false}
+                                showRoom
+                                onNavigate={(to) => navigate(to)}
+                                emptyText="Lớp chưa có tiết học nào trong tuần và bộ lọc đang chọn."
+                            />
+                        )
+                        : (
+                            <Alert
+                                type="info"
+                                showIcon
+                                message={classItem
+                                    ? "Lớp chưa có thời khóa biểu."
+                                    : "Học sinh chưa thuộc lớp nào nên chưa có thời khóa biểu."}
+                            />
+                        )}
                 </div>
-            ) : (
-                <Alert
-                    type="info"
-                    showIcon
-                    message="Chưa có thời khóa biểu cho lớp của học sinh."
-                />
             ),
         },
         {
@@ -1303,10 +1378,56 @@ const StudentDetail = () => {
 
     const backPath = classItem?.id
         ? `/operations/classes/${classItem.id}?tab=students`
-        : "/operations/schools?tab=students";
+        : "/operations/schools?tab=classes";
+
+    const breadcrumbItems = [
+        {
+            title: (
+                <a
+                    href="/operations/schools?tab=classes"
+                    onClick={(event) => {
+                        event.preventDefault();
+
+                        navigate("/operations/schools?tab=classes");
+                    }}
+                >
+                    Khối &amp; Lớp học
+                </a>
+            ),
+        },
+        ...(classItem
+            ? [
+                {
+                    title: (
+                        <a
+                            href={`/operations/classes/${classItem.id}?tab=students`}
+                            onClick={(event) => {
+                                event.preventDefault();
+
+                                navigate(
+                                    `/operations/classes/${classItem.id}?tab=students`,
+                                );
+                            }}
+                        >
+                            Khối {classItem.grade} / Lớp{" "}
+                            {classItem.name}
+                        </a>
+                    ),
+                },
+            ]
+            : []),
+        {
+            title: student.fullName,
+        },
+    ];
 
     return (
         <div className="students-detail-page">
+            <Breadcrumb
+                className="students-detail__breadcrumb"
+                items={breadcrumbItems}
+            />
+
             <div className="page-sticky">
                 <header className="page-head">
                     <div className="page-head__title">
@@ -1327,18 +1448,18 @@ const StudentDetail = () => {
                                 : "Danh sách lớp học"}
                         </span>
 
-                        <div className="personnel-detail__identity">
+                        <div className="students-detail__identity">
                             <div>
-                                <div className="personnel-detail__identity-name">
+                                <div className="students-detail__identity-name">
                                     {student.fullName}
                                 </div>
 
-                                <span className="personnel-detail__identity-meta">
+                                <span className="students-detail__identity-meta">
                                     {student.code} · Khối {student.grade ?? "—"}{" "}
                                     {classItem ? `· Lớp ${classItem.name}` : ""}
                                 </span>
 
-                                <div className="personnel-detail__identity-tags">
+                                <div className="students-detail__identity-tags">
                                     <Space size={4} wrap>
                                         <Tag color={STATUS_TONE[student.status] ?? "default"}>
                                             {statusLabel}
@@ -1439,7 +1560,7 @@ const StudentDetail = () => {
 
                     {movementType === "school_transfer" && (
                         <Form.Item name="toSchoolName" label="Tên trường chuyển đến">
-                            <Input placeholder="VD: Trường THCS Đoàn Thị Điểm" />
+                            <Input placeholder="VD: Trường THCS Ninh Kiều" />
                         </Form.Item>
                     )}
 

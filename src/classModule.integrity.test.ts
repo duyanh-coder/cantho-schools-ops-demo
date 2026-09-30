@@ -55,6 +55,41 @@ describe("PHASE 04 feature integrity", () => {
         }
     });
 
+    it("room ids and codes are unique across every campus", () => {
+        const ids = canThoRooms.map((room) => room.id);
+        const codes = canThoRooms.map((room) => room.code);
+
+        expect(new Set(ids).size).toBe(ids.length);
+        expect(new Set(codes).size).toBe(codes.length);
+    });
+
+    it("rooms cover every campus that runs a class", () => {
+        const campusesWithClasses = new Set(
+            canThoClasses.map((classItem) => classItem.campusId),
+        );
+
+        const campusesWithRooms = new Set(
+            canThoRooms.map((room) => room.campusId),
+        );
+
+        for (const campusId of campusesWithClasses) {
+            expect(campusesWithRooms.has(campusId), campusId).toBe(true);
+        }
+    });
+
+    it("every class sits in a classroom of the same school and campus", () => {
+        const roomById = new Map(canThoRooms.map((room) => [room.id, room]));
+
+        for (const classItem of canThoClasses) {
+            const room = roomById.get(classItem.roomId ?? "");
+
+            expect(room, classItem.id).toBeDefined();
+            expect(room!.category).toBe("classroom");
+            expect(room!.campusId).toBe(classItem.campusId);
+            expect(room!.schoolId).toBe(classItem.schoolId);
+        }
+    });
+
     it("classes reference valid campus, year, teacher, room", () => {
         for (const cls of canThoClasses) {
             expect(campusIds.has(cls.campusId)).toBe(true);

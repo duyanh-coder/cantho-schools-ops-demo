@@ -608,10 +608,10 @@ const CampusesPage = ({
                                             icon={<ReadOutlined />}
                                             onClick={() =>
                                                 navigate(
-                                                    `/operations/schools?tab=students&campusId=${campus.id}`,
+                                                    `/operations/schools?tab=classes&campusId=${campus.id}`,
                                                 )}
                                         >
-                                            Xem học sinh
+                                            Xem lớp học
                                         </Button>
 
                                         <Button

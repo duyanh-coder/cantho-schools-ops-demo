@@ -11,6 +11,7 @@ import {
 } from "vitest";
 
 import {
+    CRUD_SEED_VERSION_PREFIX,
     CRUD_STORAGE_PREFIX,
     useCrud,
 } from "@/store/useCrud";
@@ -160,5 +161,61 @@ describe("useCrud", () => {
         expect(result.current.items).toEqual(seed);
 
         expect(readPersisted("can-tho-reset")).toEqual(seed);
+    });
+});
+
+describe("useCrud seed versioning", () => {
+    beforeEach(() => {
+        localStorage.clear();
+    });
+
+    it("drops a cache written by an older seed version", () => {
+        const first = renderHook(() =>
+            useCrud<Todo>("can-tho-version", seed, 1));
+
+        act(() => {
+            first.result.current.create({
+                id: "tStale",
+                label: "Ghi từ seed cũ",
+                done: false,
+            });
+        });
+
+        expect(readPersisted("can-tho-version")).toHaveLength(3);
+
+        first.unmount();
+
+        const { result } = renderHook(() =>
+            useCrud<Todo>("can-tho-version", seed, 2));
+
+        expect(result.current.items).toEqual(seed);
+
+        expect(
+            localStorage.getItem(
+                `${CRUD_SEED_VERSION_PREFIX}can-tho-version`,
+            ),
+        ).toBe("2");
+    });
+
+    it("keeps the cache while the seed version is unchanged", () => {
+        const first = renderHook(() =>
+            useCrud<Todo>("can-tho-same-version", seed, 4));
+
+        act(() => {
+            first.result.current.create({
+                id: "tKeep",
+                label: "Ghi nhớ xuyên phiên bản",
+                done: true,
+            });
+        });
+
+        first.unmount();
+
+        const { result } = renderHook(() =>
+            useCrud<Todo>("can-tho-same-version", seed, 4));
+
+        expect(result.current.items).toHaveLength(3);
+
+        expect(result.current.items[0].id).toBe("tKeep");
     });
 });

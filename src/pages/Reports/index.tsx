@@ -1,6 +1,7 @@
 import {
     BarChartOutlined,
     CalendarOutlined,
+    DashboardOutlined,
     FileTextOutlined,
     FilterOutlined,
     SearchOutlined,
@@ -12,6 +13,7 @@ import {
     Input,
     Select,
     Table,
+    Tabs,
     Tag,
 } from "antd";
 
@@ -27,11 +29,24 @@ import {
     getCurrentRegionMockData,
 } from "@/mock";
 
+import {
+    canThoAcademicYears,
+    canThoBoardingProfiles,
+    canThoEnrolmentChanges,
+    canThoRooms,
+} from "@/mock/canTho";
+
 import type {
     ReportItem,
 } from "@/mock/common/types";
 
 import StatsCard from "@/components/dashboard/StatCard";
+
+import ReportOverview from "@/pages/Reports/ReportOverview";
+
+import {
+    buildReportOverview,
+} from "@/pages/Reports/reportStats";
 
 import "./style.scss";
 
@@ -40,6 +55,9 @@ function ReportsPage() {
     const {
         reports,
         campuses,
+        classes,
+        students,
+        personnel,
     } = getCurrentRegionMockData();
 
 
@@ -61,9 +79,21 @@ function ReportsPage() {
     ] = useState("all");
 
 
+    /**
+     * Báo cáo chỉ có bộ lọc năm học.
+     *
+     * Học kỳ không tác động tới bất kỳ chỉ số nào của báo cáo quản trị nên
+     * không đưa vào để tránh lọc không có tác dụng.
+     */
+    const [
+        academicYearId,
+        setAcademicYearId,
+    ] = useState("");
+
+
     /* ========================================
        REPORT TYPES
-    ======================================== */
+     ======================================== */
 
     const reportTypes = [
         ...new Set(
@@ -76,8 +106,46 @@ function ReportsPage() {
 
 
     /* ========================================
+       REPORT OVERVIEW
+     ======================================== */
+
+    /*
+     * Bộ dữ liệu vùng đến từ store nên không giữ tham chiếu bất biến, vì
+     * vậy không `useMemo` hoá: React Compiler không bảo toàn được phép ghi
+     * nhớ khi phụ thuộc là object có thể bị sửa. Quy mô dữ liệu ở đây nhỏ
+     * nên tính trực tiếp mỗi lần render.
+     */
+    const reportSources = {
+        campuses,
+        classes,
+        students,
+        personnel,
+        rooms: canThoRooms,
+        boardingProfiles: canThoBoardingProfiles,
+        enrolmentChanges: canThoEnrolmentChanges,
+        grades: [],
+    };
+
+
+    const overview = buildReportOverview(
+        reportSources,
+        academicYearId,
+    );
+
+
+    const academicYearOptions = [
+        { value: "", label: "Tất cả năm học" },
+
+        ...canThoAcademicYears.map((year) => ({
+            value: year.id,
+            label: year.name,
+        })),
+    ];
+
+
+    /* ========================================
        FILTERED REPORTS
-    ======================================== */
+     ======================================== */
 
     const normalizedKeyword =
         keyword
@@ -269,152 +337,154 @@ function ReportsPage() {
                 </header>
             </div>
 
-            <div className="page-kpi">
-                <StatsCard
-                    tone="blue"
-                    title="Tổng số báo cáo"
-                    value={reports.length}
-                    icon={<FileTextOutlined />}
-                />
+            <div className="reports-tabs">
+                <Tabs
+                    defaultActiveKey="overview"
+                    items={[
+                        {
+                            key: "overview",
+                            label: (
+                                <span className="reports-tabs__label">
+                                    <DashboardOutlined />
 
-                <StatsCard
-                    tone="green"
-                    title="Loại báo cáo"
-                    value={reportTypes.length}
-                    icon={<FilterOutlined />}
-                />
+                                    Tổng quan BGH
+                                </span>
+                            ),
 
-                <StatsCard
-                    tone="orange"
-                    title="Cơ sở có báo cáo"
-                    value={campusReportCount}
-                    note="Cơ sở phát sinh báo cáo"
-                    icon={<BarChartOutlined />}
+                            children: (
+                                <>
+                                    <div className="reports-toolbar reports-toolbar--overview">
+                                        <Select
+                                            value={academicYearId}
+                                            onChange={setAcademicYearId}
+                                            className="reports-toolbar__select"
+                                            options={academicYearOptions}
+                                        />
+                                    </div>
+
+                                    <ReportOverview
+                                        overview={overview}
+                                    />
+                                </>
+                            ),
+                        },
+
+                        {
+                            key: "catalog",
+                            label: (
+                                <span className="reports-tabs__label">
+                                    <FileTextOutlined />
+
+                                    Danh mục báo cáo
+                                </span>
+                            ),
+
+                            children: (
+                                <>
+                                    <div className="page-kpi">
+                                        <StatsCard
+                                            tone="blue"
+                                            title="Tổng số báo cáo"
+                                            value={reports.length}
+                                            icon={<FileTextOutlined />}
+                                        />
+
+                                        <StatsCard
+                                            tone="green"
+                                            title="Loại báo cáo"
+                                            value={reportTypes.length}
+                                            icon={<FilterOutlined />}
+                                        />
+
+                                        <StatsCard
+                                            tone="orange"
+                                            title="Cơ sở có báo cáo"
+                                            value={campusReportCount}
+                                            note="Cơ sở phát sinh báo cáo"
+                                            icon={<BarChartOutlined />}
+                                        />
+                                    </div>
+
+                                    <Card className="reports-card">
+                                        <div className="reports-toolbar">
+                                            <Input
+                                                allowClear
+                                                value={keyword}
+                                                onChange={(event) =>
+                                                    setKeyword(event.target.value)
+                                                }
+                                                placeholder="Tìm kiếm báo cáo"
+                                                prefix={<SearchOutlined />}
+                                                className="reports-toolbar__search"
+                                            />
+
+                                            <Select
+                                                value={typeFilter}
+                                                onChange={setTypeFilter}
+                                                className="reports-toolbar__select"
+                                                options={[
+                                                    {
+                                                        value: "all",
+
+                                                        label: "Tất cả loại báo cáo",
+                                                    },
+
+                                                    ...reportTypes.map((type) => ({
+                                                        value: type,
+
+                                                        label: type,
+                                                    })),
+                                                ]}
+                                            />
+
+                                            <Select
+                                                value={campusFilter}
+                                                onChange={setCampusFilter}
+                                                className="reports-toolbar__select"
+                                                options={[
+                                                    {
+                                                        value: "all",
+
+                                                        label: "Tất cả cơ sở",
+                                                    },
+
+                                                    ...campuses.map((campus) => ({
+                                                        value: campus.id,
+
+                                                        label: campus.name,
+                                                    })),
+                                                ]}
+                                            />
+                                        </div>
+
+                                        <Table<ReportItem>
+                                            rowKey="id"
+                                            columns={columns}
+                                            dataSource={filteredReports}
+                                            pagination={{
+                                                pageSize: 10,
+
+                                                showSizeChanger: false,
+                                            }}
+                                            locale={{
+                                                emptyText: (
+                                                    <Empty
+                                                        description="Không tìm thấy báo cáo"
+                                                    />
+                                                ),
+                                            }}
+                                            className="reports-table"
+                                        />
+                                    </Card>
+                                </>
+                            ),
+                        },
+                    ]}
                 />
             </div>
-
-
-            {/* ========================================
-               CONTENT
-            ======================================== */}
-
-            <Card className="reports-card">
-
-
-                {/* FILTER */}
-
-                <div className="reports-toolbar">
-
-                    <Input
-                        allowClear
-                        value={
-                            keyword
-                        }
-                        onChange={
-                            (event) => {
-                                setKeyword(
-                                    event.target.value,
-                                );
-                            }
-                        }
-                        placeholder="Tìm kiếm báo cáo"
-                        prefix={
-                            <SearchOutlined />
-                        }
-                        className="reports-toolbar__search"
-                    />
-
-
-                    <Select
-                        value={
-                            typeFilter
-                        }
-                        onChange={
-                            setTypeFilter
-                        }
-                        className="reports-toolbar__select"
-                        options={[
-                            {
-                                value: "all",
-
-                                label:
-                                    "Tất cả loại báo cáo",
-                            },
-
-                            ...reportTypes.map(
-                                (type) => ({
-                                    value:
-                                        type,
-
-                                    label:
-                                        type,
-                                }),
-                            ),
-                        ]}
-                    />
-
-
-                    <Select
-                        value={
-                            campusFilter
-                        }
-                        onChange={
-                            setCampusFilter
-                        }
-                        className="reports-toolbar__select"
-                        options={[
-                            {
-                                value: "all",
-
-                                label:
-                                    "Tất cả cơ sở",
-                            },
-
-                            ...campuses.map(
-                                (campus) => ({
-                                    value:
-                                        campus.id,
-
-                                    label:
-                                        campus.name,
-                                }),
-                            ),
-                        ]}
-                    />
-
-                </div>
-
-
-                {/* TABLE */}
-
-                <Table<ReportItem>
-                    rowKey="id"
-                    columns={
-                        columns
-                    }
-                    dataSource={
-                        filteredReports
-                    }
-                    pagination={{
-                        pageSize: 10,
-
-                        showSizeChanger: false,
-                    }}
-                    locale={{
-                        emptyText: (
-                            <Empty
-                                description="Không tìm thấy báo cáo"
-                            />
-                        ),
-                    }}
-                    className="reports-table"
-                />
-
-            </Card>
 
         </div>
     );
 }
-
 
 export default ReportsPage;

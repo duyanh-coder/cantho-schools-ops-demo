@@ -12,6 +12,41 @@
     gap: 16px;
 }
 
+.tt-cal__legend {
+    display: flex;
+
+    align-items: center;
+
+    flex-wrap: wrap;
+
+    gap: 8px 14px;
+
+    padding: 12px 14px;
+
+    border-radius: 14px;
+
+    background: var(--tt-cal-soft);
+}
+
+.tt-cal__legend-title {
+    color: #475569;
+
+    font-size: 12px;
+
+    font-weight: 600;
+
+    text-transform: uppercase;
+
+    letter-spacing: 0.04em;
+}
+
+.tt-cal__legend-item {
+    display: inline-flex;
+
+    align-items: center;
+
+    gap: 6px;
+}
 /* ========================================
    HEADER
    ======================================== */

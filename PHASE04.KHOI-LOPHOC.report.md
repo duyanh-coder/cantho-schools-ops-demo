@@ -70,6 +70,9 @@ list + 9-tab detail, deep-linking, drill-downs from/near Cuối module, no hard 
   (base data includes THPT Cái Khế), 3 academic years, 4 semesters, rooms derived
   from facilities, 5 class-history entries.
 
+> Số liệu ở mục này là của bản Phase 04. Phase 05 đã nâng lên 151 lớp, 229
+> phòng, 13 khối và 12 bản ghi biến động – xem `PHASE05.KHOI-LOPHOC-DEEP.report.md`.
+
 ## CRUD / validation
 - Create / update / status-change only – no delete (status CLOSED).
 - Duplicate code check within (academicYear, campusId).
@@ -90,3 +93,30 @@ list + 9-tab detail, deep-linking, drill-downs from/near Cuối module, no hard 
   if they hardcode active/inactive (CampusDetail already updated, Grep suggested no
   other status consumers rely on the old 2-value set; SchoolOverview uses catalog).
 - Legacy `campus-main` ids normalized via `CAMPUS_LEGACY_ID_MAP` for display.
+
+---
+
+# Cập nhật Phase 05 (mở rộng sâu khối/lớp học)
+
+Báo cáe chi tiết nằm ở `PHASE05.KHOI-LOPHOC-DEEP.report.md`. Tóm tắt thay đổi
+so với bản Phase 04 ở trên:
+
+- Lớp học tăng từ 57 lên **151 lớp**: Ninh Kiều 142 (main 40, An Lạc 26,
+  Chu Văn An 24, Huỳnh Thúc Kháng 20, Thới Bình 17, Trần Hưng Đạo 15) và
+  9 lớp của 3 trường khác.
+- Phòng học: **229 phòng** (214 classroom + 15 phòng chức năng) cho cả 10 cơ sở
+  trong hệ, sinh từ `canThoFacilities`; đủ phòng cho 151 lớp.
+- GVCN: **151/151 lớp** có chủ nhiệm (trước đây 9 lớp của 3 trường khác bị "Chưa
+  phân công" do chỉ duyệt 6 cơ sở Ninh Kiều).
+- Thêm khối học `Grade` (13 khối, id `${schoolId}-g{grade}`) và `gradeId` trên
+  `SchoolClass`.
+- Detail gộp từ 9 tab còn **7 tab**: Tổng quan, Học sinh, Giáo viên, Thời khóa
+  biểu, Tiếp nhận, Nhu cầu, Hồ sơ. GVCN nằm trong tab Giáo viên; Phòng học và
+  Sĩ số nằm ở Tổng quan; Lịch sử gộp vào Hồ sơ.
+- Bổ sung `useGrades`, `useEnrolmentChanges`, `classRoster.ts` (derive sĩ số,
+  nhu cầu, tiếp nhận, cảnh báo), `GradeManagerModal`.
+- CRUD lớp nay dùng chung quy tắc với store: `classDraftBlockers` (tên, mã,
+  khối, cơ sở, năm học, mã duy nhất, GVCN phải đang hoạt động và thuộc đúng
+  trường/cơ sở) và `classBlockers` cho xóa. Xóa lớp chỉ được phép khi lớp không
+  còn học sinh, thời khóa biểu, phân công hay biến động.
+- Sửa liên kết sai `?tab=history` (tab đã gỡ) thành `?tab=records`.
