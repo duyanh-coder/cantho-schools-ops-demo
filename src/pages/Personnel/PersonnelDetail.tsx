@@ -4,8 +4,6 @@ import {
     PlusOutlined,
     ReadOutlined,
     TeamOutlined,
-    TrophyOutlined,
-    UndoOutlined,
 } from "@ant-design/icons";
 
 import {
@@ -44,12 +42,17 @@ import {
 
 import StatsCard from "@/components/dashboard/StatCard";
 
+import TimetableCalendar from "@/components/TimetableCalendar";
+
+import {
+    buildTimetableLookups,
+} from "@/components/TimetableCalendar/lookups";
+
 import {
     canThoMockData,
 } from "@/mock";
 
 import {
-    periodTimes,
     subjects,
 } from "@/mock/common";
 
@@ -61,7 +64,6 @@ import type {
     PersonnelHistoryEntry,
     PersonnelReward,
     PersonnelWorkHistory,
-    TimetableEntry,
 } from "@/mock/common/types";
 
 import {
@@ -72,6 +74,10 @@ import {
     useCampuses,
     CAMPUS_LEGACY_ID_MAP,
 } from "@/store/useCampuses";
+
+import {
+    useClasses,
+} from "@/store/useClasses";
 
 import {
     usePersonnel,
@@ -102,25 +108,34 @@ import {
 } from "@/store/useRooms";
 
 import {
+    useSemesters,
+} from "@/store/useSemesters";
+
+import {
     useTimetables,
 } from "@/store/useTimetables";
 
 import "./style.scss";
 
 
-const TAB_KEYS = [
-    "overview",
-    "personal",
-    "professional",
-    "work",
-    "assignment",
-    "timetable",
-    "competition",
-    "reward",
-    "history",
-] as const;
+type TabKey = "personal" | "timetable" | "history";
 
-type TabKey = (typeof TAB_KEYS)[number];
+/**
+ * Ánh xạ các tab/đường link legacy sang tab mới (phase 04):
+ * Tổng quan, Chuyên môn, Công tác, Phân công giảng dạy, Dạy giỏi,
+ * Thi đua & Khen thưởng đều được gộp vào "Thông tin cá nhân".
+ */
+const LEGACY_TAB_MAP: Record<string, TabKey> = {
+    overview: "personal",
+    personal: "personal",
+    professional: "personal",
+    work: "personal",
+    assignment: "personal",
+    competition: "personal",
+    reward: "personal",
+    timetable: "timetable",
+    history: "history",
+};
 
 const SUBJECT_NAME = new Map<string, string>(
     subjects.map((subject) => [subject.id, subject.name] as [string, string]),
@@ -220,7 +235,11 @@ const PersonnelDetail = () => {
 
     const campusesApi = useCampuses();
 
+    const classesApi = useClasses();
+
     const roomsApi = useRooms();
+
+    const semestersApi = useSemesters();
 
     const assignmentApi = usePersonnelAssignments(personnelId);
 
@@ -232,9 +251,66 @@ const PersonnelDetail = () => {
 
     const historyApi = usePersonnelHistory(personnelId);
 
-    const timetablesApi = useTimetables({
-        teacherId: personnelId,
-    });
+    /**
+     * Thời khóa biểu lấy toàn bộ dữ liệu rồi lọc theo giáo viên ở tầng
+     * hiển thị, nhờ vậy bộ phát hiện xung đột nhìn được cả các tiết của
+     * giáo viên khác và bắt được xung đột lớp học khi một lớp có hai
+     * giáo viên cùng khung giờ. Một instance duy nhất nên sửa tiết ngay
+     * trên màn hình vẫn cập nhật lưới và các cảnh báo.
+     */
+    const timetablesApi = useTimetables();
+
+    const calendarEntries = useMemo(
+        () => timetablesApi.effective.filter((entry) =>
+            entry.teacherId === personnelId),
+        [timetablesApi.effective, personnelId],
+    );
+
+    const calendarSemesters = useMemo(
+        () => [...new Set(
+            calendarEntries.map((entry) => entry.semesterId),
+        )].sort(),
+        [calendarEntries],
+    );
+
+    const calendarLookups = useMemo(
+        () => buildTimetableLookups(
+            subjects,
+            classesApi.items,
+            personnelApi.items,
+            campusesApi.items,
+            roomsApi.items,
+        ),
+        [
+            classesApi.items,
+            personnelApi.items,
+            campusesApi.items,
+            roomsApi.items,
+        ],
+    );
+
+    const calendarSemester = useMemo(
+        () => calendarSemesters
+            .map((semesterId) =>
+                semestersApi.items.find(
+                    (semester) => semester.id === semesterId,
+                ))
+            .find((semester) => semester?.status === "ACTIVE") ??
+            semestersApi.items.find(
+                (semester) => semester.status === "ACTIVE",
+            ),
+        [calendarSemesters, semestersApi.items],
+    );
+
+    /**
+     * Bộ chọn học kỳ chỉ nên có những học kỳ mà giáo viên thực sự có
+     * tiết, tránh chọn xong ra một lưới trống.
+     */
+    const calendarSemesterOptions = useMemo(
+        () => semestersApi.items.filter((semester) =>
+            calendarSemesters.includes(semester.id)),
+        [calendarSemesters, semestersApi.items],
+    );
 
     const genderOptions = useCatalogOptions("gender");
 
@@ -249,9 +325,7 @@ const PersonnelDetail = () => {
     const initialTab = useMemo<TabKey>(() => {
         const raw = searchParams.get("tab");
 
-        return (TAB_KEYS as readonly string[]).includes(raw ?? "")
-            ? raw as TabKey
-            : "overview";
+        return LEGACY_TAB_MAP[raw ?? ""] ?? "personal";
     }, [searchParams]);
 
     const [activeTab, setActiveTab] = useState<TabKey>(initialTab);
@@ -296,6 +370,14 @@ const PersonnelDetail = () => {
             navigate("/operations/schools?tab=personnel", { replace: true });
         }
     }, [personnel, personnelApi.items.length, navigate]);
+
+    const goBackToList = () => {
+        if (window.history.state?.idx > 0) {
+            navigate(-1);
+        } else {
+            navigate("/operations/schools?tab=personnel");
+        }
+    };
 
     if (!personnel) {
         return null;
@@ -342,10 +424,6 @@ const PersonnelDetail = () => {
         return map[value] ?? value;
     };
 
-    const workCount = workHistoryApi.byPersonnel.length;
-
-    const assignmentCount = assignmentApi.byPersonnel.length;
-
     const currentSemester = assignmentApi.byPersonnel.find(
         (item) => item.status === "active",
     );
@@ -361,7 +439,7 @@ const PersonnelDetail = () => {
             icon: <TeamOutlined />,
             tone: "blue" as const,
             note: "sinh hoạt chuyên môn",
-            tab: "professional" as TabKey,
+            anchor: "chuyen-mon",
         },
         {
             title: "Môn giảng dạy",
@@ -369,7 +447,7 @@ const PersonnelDetail = () => {
             icon: <BookOutlined />,
             tone: "green" as const,
             note: "bộ môn chính",
-            tab: "professional" as TabKey,
+            anchor: "chuyen-mon",
         },
         {
             title: "Tiết/tuần",
@@ -377,41 +455,20 @@ const PersonnelDetail = () => {
             icon: <ReadOutlined />,
             tone: "purple" as const,
             note: "khối lượng đang đảm nhiệm",
-            tab: "assignment" as TabKey,
-        },
-        {
-            title: "Phân công giảng dạy",
-            value: assignmentCount,
-            icon: <BookOutlined />,
-            tone: "orange" as const,
-            note: "lịch sử phân công",
-            tab: "assignment" as TabKey,
-        },
-        {
-            title: "Giáo viên dạy giỏi",
-            value: competitionApi.byPersonnel.length,
-            icon: <TrophyOutlined />,
-            tone: "orange" as const,
-            note: "kết quả hội thi",
-            tab: "competition" as TabKey,
-        },
-        {
-            title: "Khen thưởng",
-            value: rewardApi.byPersonnel.length,
-            icon: <TrophyOutlined />,
-            tone: "purple" as const,
-            note: "danh hiệu, bằng khen",
-            tab: "reward" as TabKey,
-        },
-        {
-            title: "Quá trình công tác",
-            value: workCount,
-            icon: <UndoOutlined />,
-            tone: "blue" as const,
-            note: "luân chuyển, bổ nhiệm",
-            tab: "work" as TabKey,
+            anchor: "cong-tac",
         },
     ];
+
+    const scrollToCard = (
+        anchor: string,
+    ) => {
+        document.getElementById(`personnel-cv-${anchor}`)?.scrollIntoView({
+            behavior: "smooth",
+            block: "start",
+        });
+    };
+
+    const calendarReady = calendarEntries.length > 0;
 
     const assignmentColumns: ColumnsType<PersonnelAssignment> = [
         {
@@ -468,91 +525,6 @@ const PersonnelDetail = () => {
                     {value === "active" ? "Đang hiệu lực" : "Hết hiệu lực"}
                 </Tag>
             ),
-        },
-    ];
-
-    const timetableColumns: ColumnsType<TimetableEntry> = [
-        {
-            title: "Ngày",
-            dataIndex: "dayOfWeek",
-            width: 110,
-            render: (value: string) => {
-                const map: Record<string, string> = {
-                    monday: "Thứ Hai",
-                    tuesday: "Thứ Ba",
-                    wednesday: "Thứ Tư",
-                    thursday: "Thứ Năm",
-                    friday: "Thứ Sáu",
-                    saturday: "Thứ Bảy",
-                    sunday: "Chủ nhật",
-                };
-
-                return map[value] ?? value;
-            },
-        },
-        {
-            title: "Tiết",
-            dataIndex: "period",
-            width: 70,
-        },
-        {
-            title: "Lớp",
-            dataIndex: "classId",
-            width: 170,
-            render: (value: string) => (
-                <Button
-                    type="link"
-                    size="small"
-                    style={{ padding: 0 }}
-                    onClick={() =>
-                        navigate(`/operations/classes/${value}`)}
-                >
-                    {className(value)}
-                </Button>
-            ),
-        },
-        {
-            title: "Môn",
-            dataIndex: "subjectId",
-            width: 140,
-            render: (value: string) => <Tag color="blue">{subjectName(value)}</Tag>,
-        },
-        {
-            title: "Phòng",
-            dataIndex: "roomId",
-            width: 100,
-            render: (value: string) =>
-                roomsApi.byId.get(value)?.code
-                ?? value,
-        },
-        {
-            title: "Thời gian",
-            width: 150,
-            render: (_: unknown, row: TimetableEntry) => {
-                const time = periodTimes(row.period);
-
-                return <span>{time.startTime} – {time.endTime}</span>;
-            },
-        },
-        {
-            title: "Trạng thái",
-            dataIndex: "status",
-            width: 130,
-            render: (value: string) => {
-                const toneMap: Record<string, string> = {
-                    PUBLISHED: "green",
-                    APPROVED: "blue",
-                    CONFLICT: "red",
-                    ADJUSTING: "orange",
-                    DRAFT: "default",
-                };
-
-                return (
-                    <Tag color={toneMap[value] ?? "default"}>
-                        {value}
-                    </Tag>
-                );
-            },
         },
     ];
 
@@ -737,7 +709,7 @@ const PersonnelDetail = () => {
         },
     ];
 
-    const overviewFields: Array<{
+    const cvLyLichFields: Array<{
         label: string;
 
         value: string;
@@ -759,12 +731,12 @@ const PersonnelDetail = () => {
             value: formatDate(personnel.dob),
         },
         {
-            label: "Chức danh",
-            value: personnel.roleTitle,
+            label: "Địa chỉ thường trú",
+            value: personnel.address || "—",
         },
         {
-            label: "Trình độ",
-            value: personnel.degree || "—",
+            label: "Phường/Xã",
+            value: wardName(personnel.wardId),
         },
         {
             label: "Điện thoại",
@@ -775,12 +747,16 @@ const PersonnelDetail = () => {
             value: personnel.email || "—",
         },
         {
-            label: "Cơ sở công tác",
-            value: personnel.campusIds.map((campusId) => campusName(campusesById, campusId)).join(", "),
+            label: "Chức danh",
+            value: personnel.roleTitle,
         },
         {
-            label: "Phường/Xã",
-            value: wardName(personnel.wardId),
+            label: "Trình độ",
+            value: personnel.degree || "—",
+        },
+        {
+            label: "Cơ sở công tác",
+            value: personnel.campusIds.map((campusId) => campusName(campusesById, campusId)).join(", "),
         },
         {
             label: "Ngày vào ngành",
@@ -790,15 +766,6 @@ const PersonnelDetail = () => {
             label: "Ngày vào trường",
             value: formatDate(personnel.schoolStartDate),
         },
-    ];
-
-    const personalFields = [
-        { label: "Địa chỉ thường trú", value: personnel.address || "—" },
-        { label: "Phường/Xã", value: wardName(personnel.wardId) },
-        { label: "Số điện thoại", value: personnel.phone || "—" },
-        { label: "Email", value: personnel.email || "—" },
-        { label: "Ngày sinh", value: formatDate(personnel.dob) },
-        { label: "Giới tính", value: genderLabel },
     ];
 
     const professionalFields = [
@@ -862,258 +829,301 @@ const PersonnelDetail = () => {
 
     const tabItems = [
         {
-            key: "overview",
-            label: "Tổng quan",
+            key: "personal",
+            label: "Thông tin cá nhân",
             children: (
-                <div className="personnel-detail-tab">
+                <div className="personnel-detail-tab personnel-detail-tab--cv">
                     <div className="page-kpi">
                         {kpis.map((kpi) => (
                             <StatsCard
-                                key={`${kpi.tab}-${kpi.title}`}
+                                key={`${kpi.anchor}-${kpi.title}`}
                                 tone={kpi.tone}
                                 title={kpi.title}
                                 value={kpi.value}
                                 icon={kpi.icon}
                                 note={kpi.note}
-                                onClick={() => setActiveTab(kpi.tab)}
+                                onClick={() => scrollToCard(kpi.anchor)}
                             />
                         ))}
                     </div>
 
-                    <Descriptions
-                        column={2}
-                        size="small"
-                        bordered
-                        className="personnel-detail-tabs__descriptions"
-                    >
-                        {overviewFields.map((field, index) => (
-                            <Descriptions.Item
-                                key={field.label}
-                                label={field.label}
-                                span={field.label === "Cơ sở công tác" ? 2 : 1}
+                    <div className="personnel-detail__cv">
+                        <aside className="personnel-detail__cv-side">
+                            <Avatar
+                                size={120}
+                                style={{
+                                    backgroundColor: avatarColor(personnel.gender),
+                                }}
                             >
-                                <span className={
-                                    index === 1
-                                        ? "personnel-detail-tabs__strong"
-                                        : undefined
-                                }>
-                                    {field.value}
-                                </span>
-                            </Descriptions.Item>
-                        ))}
-                    </Descriptions>
+                                {toName(personnel.fullName)}
+                            </Avatar>
 
-                    {personnel.achievements && (
-                        <>
-                            <Divider titlePlacement="left" plain>
-                                Thành tích nổi bật
-                            </Divider>
+                            <h4>{personnel.fullName}</h4>
 
-                            <Alert
-                                type="success"
-                                showIcon
-                                message={personnel.achievements}
-                            />
-                        </>
-                    )}
-                </div>
-            ),
-        },
-        {
-            key: "personal",
-            label: "Thông tin cá nhân",
-            children: (
-                <Descriptions
-                    column={2}
-                    size="small"
-                    bordered
-                    className="personnel-detail-tabs__descriptions"
-                >
-                    {personalFields.map((field) => (
-                        <Descriptions.Item key={field.label} label={field.label}>
-                            {field.value}
-                        </Descriptions.Item>
-                    ))}
-                </Descriptions>
-            ),
-        },
-        {
-            key: "professional",
-            label: "Chuyên môn",
-            children: (
-                <div className="operations-tab-panel">
-                    <div className="operations-tab-panel__header">
-                        <div className="operations-tab-panel__title">
-                            <h4>Trình độ và vị trí chuyên môn</h4>
+                            <span className="personnel-detail__cv-side-role">
+                                {personnel.roleTitle}
+                            </span>
 
-                            <p>Thông tin chức danh, trình độ, tổ bộ môn và môn giảng dạy.</p>
-                        </div>
-                    </div>
-
-                    <Descriptions
-                        column={2}
-                        size="small"
-                        bordered
-                        className="personnel-detail-tabs__descriptions"
-                    >
-                        {professionalFields.map((field) => (
-                            <Descriptions.Item key={field.label} label={field.label}>
-                                {field.value}
-                            </Descriptions.Item>
-                        ))}
-
-                        <Descriptions.Item label="Môn giảng dạy" span={2}>
-                            <Space size={4} wrap>
-                                {personnel.subjectIds.map((subjectId) => (
-                                    <Tag key={subjectId} color="blue">
-                                        {subjectName(subjectId)}
+                            <div className="personnel-detail__cv-side-tags">
+                                <Space size={4} wrap>
+                                    <Tag color={
+                                        personnel.status === "active"
+                                            ? "green"
+                                            : "red"
+                                    }>
+                                        {statusLabel}
                                     </Tag>
-                                ))}
-                            </Space>
-                        </Descriptions.Item>
-                    </Descriptions>
-                </div>
-            ),
-        },
-        {
-            key: "work",
-            label: "Công tác",
-            children: workHistoryApi.byPersonnel.length > 0 ? (
-                <Table
-                    rowKey="id"
-                    columns={workColumns}
-                    dataSource={workHistoryApi.byPersonnel}
-                    pagination={paging(6)}
-                    size="small"
-                    scroll={{ x: true }}
-                />
-            ) : (
-                <Alert
-                    type="info"
-                    showIcon
-                    message="Chưa có dữ liệu quá trình công tác."
-                />
-            ),
-        },
-        {
-            key: "assignment",
-            label: "Phân công giảng dạy",
-            children: (
-                <div className="operations-tab-panel">
-                    <div className="operations-tab-panel__header">
-                        <div className="operations-tab-panel__title">
-                            <h4>Lịch sử phân công</h4>
 
-                            <p>
-                                Chỉ ghi nhận thêm phân công mới; không xóa, không sửa
-                                các phân công đã có để bảo toàn lịch sử.
-                            </p>
-                        </div>
+                                    {personnel.isExcellentTeacher && (
+                                        <Tag color="orange">
+                                            GV giỏi / CSTĐ
+                                        </Tag>
+                                    )}
 
-                        <div className="operations-tab-panel__actions">
-                            <Button
-                                type="primary"
-                                icon={<PlusOutlined />}
-                                onClick={openAddAssignment}
+                                    {personnel.campusIds.map((campusId) => (
+                                        <Tag key={campusId} color="purple">
+                                            {campusName(campusesById, campusId)}
+                                        </Tag>
+                                    ))}
+                                </Space>
+                            </div>
+
+                            <dl className="personnel-detail__cv-side-facts">
+                                <div>
+                                    <dt>Mã nhân sự</dt>
+                                    <dd>{personnel.code}</dd>
+                                </div>
+
+                                <div>
+                                    <dt>Điện thoại</dt>
+                                    <dd>{personnel.phone || "—"}</dd>
+                                </div>
+
+                                <div>
+                                    <dt>Email</dt>
+                                    <dd>{personnel.email || "—"}</dd>
+                                </div>
+                            </dl>
+                        </aside>
+
+                        <main className="personnel-detail__cv-main">
+                            <section
+                                id="personnel-cv-lylich"
+                                className="personnel-detail__cv-card"
                             >
-                                Thêm phân công
-                            </Button>
-                        </div>
-                    </div>
+                                <h5>Lý lịch</h5>
 
-                    {assignmentApi.byPersonnel.length > 0 ? (
-                        <Table
-                            rowKey="id"
-                            columns={assignmentColumns}
-                            dataSource={assignmentApi.byPersonnel}
-                            pagination={paging(6)}
-                            size="small"
-                            scroll={{ x: true }}
-                        />
-                    ) : (
-                        <Alert
-                            type="info"
-                            showIcon
-                            message="Chưa có phân công giảng dạy."
-                        />
-                    )}
+                                <Descriptions
+                                    column={2}
+                                    size="small"
+                                    bordered
+                                    className="personnel-detail-tabs__descriptions"
+                                >
+                                    {cvLyLichFields.map((field, index) => (
+                                        <Descriptions.Item
+                                            key={field.label}
+                                            label={field.label}
+                                            span={
+                                                field.label === "Cơ sở công tác" ? 2 : 1
+                                            }
+                                        >
+                                            <span className={
+                                                index === 1
+                                                    ? "personnel-detail-tabs__strong"
+                                                    : undefined
+                                            }>
+                                                {field.value}
+                                            </span>
+                                        </Descriptions.Item>
+                                    ))}
+                                </Descriptions>
+                            </section>
+
+                            <section
+                                id="personnel-cv-chuyen-mon"
+                                className="personnel-detail__cv-card"
+                            >
+                                <h5>Chuyên môn</h5>
+
+                                <Descriptions
+                                    column={2}
+                                    size="small"
+                                    bordered
+                                    className="personnel-detail-tabs__descriptions"
+                                >
+                                    {professionalFields.map((field) => (
+                                        <Descriptions.Item
+                                            key={field.label}
+                                            label={field.label}
+                                        >
+                                            {field.value}
+                                        </Descriptions.Item>
+                                    ))}
+
+                                    <Descriptions.Item
+                                        label="Môn giảng dạy"
+                                        span={2}
+                                    >
+                                        <Space size={4} wrap>
+                                            {personnel.subjectIds.map((subjectId) => (
+                                                <Tag key={subjectId} color="blue">
+                                                    {subjectName(subjectId)}
+                                                </Tag>
+                                            ))}
+                                        </Space>
+                                    </Descriptions.Item>
+                                </Descriptions>
+                            </section>
+
+                            <section
+                                id="personnel-cv-cong-tac"
+                                className="personnel-detail__cv-card"
+                            >
+                                <h5>Công tác</h5>
+
+                                <div className="personnel-detail__cv-block-head">
+                                    <h6>Phân công giảng dạy</h6>
+
+                                    <Button
+                                        type="primary"
+                                        icon={<PlusOutlined />}
+                                        onClick={openAddAssignment}
+                                    >
+                                        Thêm phân công
+                                    </Button>
+                                </div>
+
+                                {assignmentApi.byPersonnel.length > 0 ? (
+                                    <Table
+                                        rowKey="id"
+                                        columns={assignmentColumns}
+                                        dataSource={assignmentApi.byPersonnel}
+                                        pagination={paging(5)}
+                                        size="small"
+                                        scroll={{ x: true }}
+                                    />
+                                ) : (
+                                    <Alert
+                                        type="info"
+                                        showIcon
+                                        message="Chưa có phân công giảng dạy."
+                                    />
+                                )}
+
+                                <div className="personnel-detail__cv-block-head">
+                                    <h6>Quá trình công tác</h6>
+                                </div>
+
+                                {workHistoryApi.byPersonnel.length > 0 ? (
+                                    <Table
+                                        rowKey="id"
+                                        columns={workColumns}
+                                        dataSource={workHistoryApi.byPersonnel}
+                                        pagination={paging(5)}
+                                        size="small"
+                                        scroll={{ x: true }}
+                                    />
+                                ) : (
+                                    <Alert
+                                        type="info"
+                                        showIcon
+                                        message="Chưa có dữ liệu quá trình công tác."
+                                    />
+                                )}
+                            </section>
+
+                            <section
+                                id="personnel-cv-day-gioi"
+                                className="personnel-detail__cv-card"
+                            >
+                                <h5>Giáo viên dạy giỏi</h5>
+
+                                {competitionApi.byPersonnel.length > 0 ? (
+                                    <Table
+                                        rowKey="id"
+                                        columns={competitionColumns}
+                                        dataSource={competitionApi.byPersonnel}
+                                        pagination={paging(5)}
+                                        size="small"
+                                        scroll={{ x: true }}
+                                    />
+                                ) : (
+                                    <Alert
+                                        type="info"
+                                        showIcon
+                                        message="Chưa có kết quả hội thi giáo viên dạy giỏi."
+                                    />
+                                )}
+                            </section>
+
+                            <section
+                                id="personnel-cv-khen-thuong"
+                                className="personnel-detail__cv-card"
+                            >
+                                <h5>Thi đua & Khen thưởng</h5>
+
+                                {rewardApi.byPersonnel.length > 0 ? (
+                                    <Table
+                                        rowKey="id"
+                                        columns={rewardColumns}
+                                        dataSource={rewardApi.byPersonnel}
+                                        pagination={paging(5)}
+                                        size="small"
+                                        scroll={{ x: true }}
+                                    />
+                                ) : (
+                                    <Alert
+                                        type="info"
+                                        showIcon
+                                        message="Chưa có danh hiệu thi đua, khen thưởng."
+                                    />
+                                )}
+
+                                {personnel.achievements && (
+                                    <>
+                                        <Divider titlePlacement="left" plain>
+                                            Thành tích nổi bật
+                                        </Divider>
+
+                                        <Alert
+                                            type="success"
+                                            showIcon
+                                            message={personnel.achievements}
+                                        />
+                                    </>
+                                )}
+                            </section>
+                        </main>
+                    </div>
                 </div>
             ),
         },
         {
             key: "timetable",
             label: "Thời khóa biểu",
-            children: timetablesApi.effective.length > 0 ? (
-                <div className="operations-tab-panel">
-                    <div className="operations-tab-panel__header">
-                        <div className="operations-tab-panel__title">
-                            <h4>Lịch giảng dạy trong lưới</h4>
-
-                            <p>
-                                Các tiết đang có hiệu lực của giáo viên trong
-                                học kỳ hiện tại.
-                            </p>
-                        </div>
-                    </div>
-
-                    <Table
-                        rowKey="id"
-                        columns={timetableColumns}
-                        dataSource={timetablesApi.effective.slice().sort(
-                            (a, b) =>
-                                a.dayOfWeek.localeCompare(b.dayOfWeek) ||
-                                a.period - b.period,
-                        )}
-                        pagination={paging(8)}
-                        size="small"
-                        scroll={{ x: true }}
-                    />
-                </div>
+            children: calendarReady ? (
+                <TimetableCalendar
+                    key={personnelId}
+                    entries={calendarEntries}
+                    lookups={calendarLookups}
+                    semester={calendarSemester}
+                    semesterOptions={calendarSemesterOptions}
+                    mode="teacher"
+                    entityId={personnelId}
+                    showRoom
+                    showFilters
+                    showSemesterFilter
+                    showCampusFilter={false}
+                    showGradeFilter
+                    showSubjectFilter
+                    scopeOptionsToEntries
+                    emptyText="Giáo viên không có tiết nào trong tuần và bộ lọc đang chọn."
+                />
             ) : (
                 <Alert
                     type="info"
                     showIcon
                     message="Giáo viên chưa có tiết nào trong thời khóa biểu."
-                />
-            ),
-        },
-        {
-            key: "competition",
-            label: "Dạy giỏi",
-            children: competitionApi.byPersonnel.length > 0 ? (
-                <Table
-                    rowKey="id"
-                    columns={competitionColumns}
-                    dataSource={competitionApi.byPersonnel}
-                    pagination={paging(6)}
-                    size="small"
-                    scroll={{ x: true }}
-                />
-            ) : (
-                <Alert
-                    type="info"
-                    showIcon
-                    message="Chưa có kết quả hội thi giáo viên dạy giỏi."
-                />
-            ),
-        },
-        {
-            key: "reward",
-            label: "Thi đua & Khen thưởng",
-            children: rewardApi.byPersonnel.length > 0 ? (
-                <Table
-                    rowKey="id"
-                    columns={rewardColumns}
-                    dataSource={rewardApi.byPersonnel}
-                    pagination={paging(6)}
-                    size="small"
-                    scroll={{ x: true }}
-                />
-            ) : (
-                <Alert
-                    type="info"
-                    showIcon
-                    message="Chưa có danh hiệu thi đua, khen thưởng."
                 />
             ),
         },
@@ -1145,13 +1155,13 @@ const PersonnelDetail = () => {
                 <header className="page-head">
                     <div className="page-head__title">
                         <span
-                            className="personnel-detail__breadcrumb"
-                            onClick={() => navigate("/operations/schools?tab=personnel")}
+                            className="page-head__back"
+                            onClick={goBackToList}
                             role="button"
                             tabIndex={0}
                             onKeyDown={(event) => {
                                 if (event.key === "Enter") {
-                                    navigate("/operations/schools?tab=personnel");
+                                    goBackToList();
                                 }
                             }}
                         >
@@ -1222,7 +1232,7 @@ const PersonnelDetail = () => {
                 activeKey={activeTab}
                 onChange={(key) => setActiveTab(key as TabKey)}
                 items={tabItems}
-                tabBarStyle={{ margin: 0 }}
+                tabBarStyle={{ margin: "0 0 24px" }}
             />
 
             <Modal

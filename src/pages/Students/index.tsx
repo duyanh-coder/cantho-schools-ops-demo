@@ -574,7 +574,8 @@ const StudentsPage = ({
             <Tabs
                 defaultActiveKey="students"
                 items={items}
-                tabBarStyle={{ margin: 0 }}
+                className="page-tabs"
+                tabBarStyle={{ margin: "0 0 24px" }}
             />
         </div>
     );

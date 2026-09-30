@@ -1311,7 +1311,7 @@ const StudentDetail = () => {
                 <header className="page-head">
                     <div className="page-head__title">
                         <span
-                            className="personnel-detail__breadcrumb"
+                            className="page-head__back"
                             onClick={() => navigate(backPath)}
                             role="button"
                             tabIndex={0}
@@ -1373,11 +1373,11 @@ const StudentDetail = () => {
 
             <Tabs
                 key={student.id}
-                className="classes-detail__tabs"
+                className="classes-detail__tabs page-tabs"
                 activeKey={activeTab}
                 onChange={(key) => setActiveTab(key as TabKey)}
                 items={tabItems}
-                tabBarStyle={{ margin: 0 }}
+                tabBarStyle={{ margin: "0 0 24px" }}
             />
 
             <Modal

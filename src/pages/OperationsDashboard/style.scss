@@ -3,7 +3,7 @@
 
     flex-direction: column;
 
-    gap: 24px;
+    gap: 28px;
 
     &__rolebar {
         display: flex;
@@ -18,7 +18,7 @@
             #f0fdf4 100%
         );
 
-        border: 1px solid #e6f0ff;
+        border: 2px solid #bcd6fb;
 
         border-radius: 14px;
 
@@ -58,7 +58,7 @@
 
         gap: 16px;
 
-        margin-bottom: 18px;
+        margin-bottom: 24px;
     }
 
     &__role-badge {
@@ -101,7 +101,7 @@
             minmax(220px, 1fr)
         );
 
-        gap: 16px;
+        gap: 20px;
     }
 
     &__feature {
@@ -117,11 +117,11 @@
 
         background: #ffffff;
 
-        border: 1px solid #eef1f5;
+        border: 2px solid #cbd5e1;
 
         border-radius: 14px;
 
-        padding: 16px;
+        padding: 20px;
 
         cursor: pointer;
 
@@ -175,7 +175,7 @@
 
         grid-template-columns: 1fr;
 
-        gap: 24px;
+        gap: 28px;
     }
 
     &__card {
@@ -187,7 +187,7 @@
 
         flex-direction: column;
 
-        gap: 12px;
+        gap: 16px;
     }
 
     &__task {
@@ -199,11 +199,11 @@
 
         background: #f9fafb;
 
-        border: 1px solid #eef1f5;
+        border: 2px solid #cbd5e1;
 
         border-radius: 12px;
 
-        padding: 14px 16px;
+        padding: 16px 20px;
     }
 
     &__task-icon {
@@ -302,7 +302,7 @@
             minmax(240px, 1fr)
         );
 
-        gap: 16px;
+        gap: 20px;
     }
 
     &__mod {
@@ -318,11 +318,11 @@
 
         background: #ffffff;
 
-        border: 1px solid #eef1f5;
+        border: 2px solid #cbd5e1;
 
         border-radius: 14px;
 
-        padding: 16px;
+        padding: 20px;
 
         cursor: pointer;
 
@@ -408,7 +408,7 @@
 
         background: #f9fafb;
 
-        border: 1px solid #eef1f5;
+        border: 2px solid #cbd5e1;
 
         border-radius: 999px;
 
@@ -420,7 +420,7 @@
 
         flex-direction: column;
 
-        gap: 12px;
+        gap: 16px;
     }
 
     &__alert {
@@ -432,13 +432,13 @@
 
         background: #f9fafb;
 
-        border: 1px solid #eef1f5;
+        border: 2px solid #cbd5e1;
 
         border-left-width: 4px;
 
         border-radius: 10px;
 
-        padding: 12px 16px;
+        padding: 14px 20px;
 
         cursor: pointer;
 
@@ -508,7 +508,7 @@
 
         background: #f9fafb;
 
-        border: 1px solid #eef1f5;
+        border: 2px solid #cbd5e1;
 
         border-radius: 999px;
 
@@ -554,7 +554,7 @@
 
         background: #f9fafb;
 
-        border: 1px solid #eef1f5;
+        border: 2px solid #cbd5e1;
 
         border-radius: 10px;
 

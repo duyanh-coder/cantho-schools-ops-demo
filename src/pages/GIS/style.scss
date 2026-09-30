@@ -9,7 +9,7 @@
 
 .gis-map-card {
     border:
-        1px solid rgba(100, 116, 139, 0.45);
+        2px solid rgba(100, 116, 139, 0.6);
 
     border-radius: 18px;
 
@@ -671,7 +671,7 @@
 .gis-sidebar {
     display: flex;
     flex-direction: column;
-    gap: 16px;
+    gap: 20px;
 }
 
 
@@ -679,7 +679,7 @@
 .gis-location-card,
 .gis-result-card {
     border:
-        1px solid rgba(100, 116, 139, 0.42);
+        2px solid rgba(100, 116, 139, 0.6);
 
     border-radius: 18px;
 
@@ -687,7 +687,7 @@
         0 8px 22px rgba(15, 23, 42, 0.06);
 
     .ant-card-body {
-        padding: 18px;
+        padding: 22px;
     }
 }
 
@@ -697,7 +697,7 @@
     align-items: center;
     gap: 8px;
 
-    margin-bottom: 16px;
+    margin-bottom: 20px;
 
     color:
         rgba(15, 23, 42, 0.82);
@@ -790,11 +790,11 @@
     grid-template-columns:
         repeat(2, 1fr);
 
-    gap: 8px;
+    gap: 10px;
 
-    margin-top: 16px;
+    margin-top: 20px;
 
-    padding-top: 14px;
+    padding-top: 18px;
 
     border-top:
         1px solid rgba(15, 23, 42, 0.06);

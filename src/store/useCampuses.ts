@@ -19,7 +19,7 @@ import type {
 } from "@/store/useCrud";
 
 
-export const CAMPUSES_STORAGE_KEY = "can-tho-campuses";
+export const CAMPUSES_STORAGE_KEY = "can-tho-campuses-v2";
 
 export const CAMPUS_LEGACY_ID_MAP: Record<string, string> = {
     "can-tho-campus-001": "campus-main",

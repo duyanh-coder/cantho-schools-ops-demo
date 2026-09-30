@@ -1348,6 +1348,7 @@ const StudentList = ({
                 </div>
 
                 <Tabs
+                    className="page-tabs"
                     activeKey={activeTab}
                     onChange={(key) => {
                         setActiveTab(key as TabKey);

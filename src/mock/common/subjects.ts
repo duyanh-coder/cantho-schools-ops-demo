@@ -35,4 +35,39 @@ export const subjects: Subject[] = [
         code: "SINH",
         name: "Sinh học",
     },
+    {
+        id: "history",
+        code: "SU",
+        name: "Lịch sử",
+    },
+    {
+        id: "geography",
+        code: "DIA",
+        name: "Địa lý",
+    },
+    {
+        id: "civics",
+        code: "GDCD",
+        name: "Giáo dục công dân",
+    },
+    {
+        id: "informatics",
+        code: "TIN",
+        name: "Tin học",
+    },
+    {
+        id: "physical-education",
+        code: "TD",
+        name: "Thể dục",
+    },
+    {
+        id: "music",
+        code: "AN",
+        name: "Âm nhạc",
+    },
+    {
+        id: "fine-arts",
+        code: "MT",
+        name: "Mỹ thuật",
+    },
 ];

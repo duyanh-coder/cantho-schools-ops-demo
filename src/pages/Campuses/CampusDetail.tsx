@@ -4,6 +4,7 @@ import {
     EnvironmentOutlined,
     GlobalOutlined,
     HomeOutlined,
+    IdcardOutlined,
     PhoneOutlined,
     ReadOutlined,
     SafetyCertificateOutlined,
@@ -52,6 +53,12 @@ import {
 
 import StatsCard from "@/components/dashboard/StatCard";
 
+import TimetableCalendar from "@/components/TimetableCalendar";
+
+import {
+    buildTimetableLookups,
+} from "@/components/TimetableCalendar/lookups";
+
 import {
     canThoMockData,
 } from "@/mock";
@@ -88,12 +95,16 @@ import {
 } from "@/store/useRooms";
 
 import {
+    useSemesters,
+} from "@/store/useSemesters";
+
+import {
     useTimetables,
 } from "@/store/useTimetables";
 
 import {
-    summarizeCampus,
-} from "@/utils/campusSummary";
+    buildCampusKpis,
+} from "@/utils/campusScale";
 
 import "./style.scss";
 
@@ -209,6 +220,8 @@ const CampusDetail = () => {
 
     const roomsApi = useRooms(campusId);
 
+    const semestersApi = useSemesters();
+
     const timetablesApi = useTimetables({
         campusId,
     });
@@ -257,9 +270,9 @@ const CampusDetail = () => {
 
     const stats = useMemo(
         () => campus
-            ? summarizeCampus(campus.id, personnelApi.items)
+            ? buildCampusKpis(campus.id)
             : null,
-        [campus, personnelApi.items],
+        [campus],
     );
 
     const sectorNameById = useMemo(
@@ -344,6 +357,30 @@ const CampusDetail = () => {
     }, [campusClasses, studentCountByClass]);
 
     const timetableEntries = timetablesApi.effective;
+
+    const timetableLookups = useMemo(
+        () => buildTimetableLookups(
+            subjects,
+            campusClasses,
+            personnelApi.items,
+            campusesApi.items,
+            roomsApi.items,
+        ),
+        [campusClasses, personnelApi.items, campusesApi.items, roomsApi.items],
+    );
+
+    const timetableSemester = useMemo(() => {
+        const referenced = new Set(
+            timetableEntries.map((entry) => entry.semesterId),
+        );
+
+        return semestersApi.items.find(
+            (semester) => semester.status === "ACTIVE" &&
+                referenced.has(semester.id),
+        ) ?? semestersApi.items.find(
+            (semester) => semester.status === "ACTIVE",
+        );
+    }, [timetableEntries, semestersApi.items]);
 
     const timetableRows = useMemo(() => {
         const counts = new Map<string, number>();
@@ -438,6 +475,14 @@ const CampusDetail = () => {
             icon: <SafetyCertificateOutlined />,
             tone: "purple",
             note: "ban giám hiệu / tổ trưởng",
+            tab: "staff",
+        },
+        {
+            title: "Nhân viên",
+            value: stats.staff,
+            icon: <IdcardOutlined />,
+            tone: "blue",
+            note: "phục vụ, hỗ trợ cơ sở",
             tab: "staff",
         },
         {
@@ -877,6 +922,18 @@ const CampusDetail = () => {
                         </Button>
                     </div>
 
+                    <TimetableCalendar
+                        entries={timetableEntries}
+                        lookups={timetableLookups}
+                        semester={timetableSemester}
+                        mode="campus"
+                        entityId={campusId}
+                        showFilters
+                        showCampusFilter={false}
+                        showRoom={tkbView === "room"}
+                        emptyText="Cơ sở chưa có tiết dạy trong tuần đang xem."
+                    />
+
                     <Table
                         rowKey="key"
                         columns={tkbSummaryColumns}
@@ -941,7 +998,7 @@ const CampusDetail = () => {
                 <header className="page-head">
                     <div className="page-head__title">
                         <span className="page-head__eyebrow">
-                            CAMPUS DETAIL
+                            CHI TIẾT CƠ SỞ
                         </span>
 
                         <h2>{campus.name}</h2>
@@ -986,11 +1043,11 @@ const CampusDetail = () => {
 
             <Tabs
                 key={campus.id}
-                className="campus-detail__tabs"
+                className="campus-detail__tabs page-tabs"
                 activeKey={activeTab}
                 onChange={(key) => setActiveTab(key as TabKey)}
                 items={tabItems}
-                tabBarStyle={{ margin: 0 }}
+                tabBarStyle={{ margin: "0 0 24px" }}
             />
 
             <Modal

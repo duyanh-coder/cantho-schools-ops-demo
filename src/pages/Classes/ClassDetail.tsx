@@ -38,12 +38,17 @@ import {
 
 import StatsCard from "@/components/dashboard/StatCard";
 
+import TimetableCalendar from "@/components/TimetableCalendar";
+
+import {
+    buildTimetableLookups,
+} from "@/components/TimetableCalendar/lookups";
+
 import {
     canThoMockData,
 } from "@/mock";
 
 import {
-    periodTimes,
     subjects,
 } from "@/mock/common";
 
@@ -51,7 +56,6 @@ import type {
     Campus,
     ClassHistoryEntry,
     TeachingAttendance,
-    TimetableEntry,
 } from "@/mock/common/types";
 
 import {
@@ -86,6 +90,10 @@ import {
 import {
     useRooms,
 } from "@/store/useRooms";
+
+import {
+    useSemesters,
+} from "@/store/useSemesters";
 
 import {
     useStudents,
@@ -125,16 +133,6 @@ const STATUS_TONE: Record<string, string> = {
     inactive: "orange",
     suspended: "orange",
     closed: "red",
-};
-
-const DAY_LABEL: Record<string, string> = {
-    monday: "Thứ Hai",
-    tuesday: "Thứ Ba",
-    wednesday: "Thứ Tư",
-    thursday: "Thứ Năm",
-    friday: "Thứ Sáu",
-    saturday: "Thứ Bảy",
-    sunday: "Chủ nhật",
 };
 
 const SUBJECT_NAME = new Map<string, string>(
@@ -205,6 +203,24 @@ const ClassDetail = () => {
     );
 
     const campusesById = campusesApi.byId;
+
+    const semestersApi = useSemesters(classItem?.academicYear);
+
+    const timetableLookups = useMemo(
+        () => buildTimetableLookups(
+            subjects,
+            classesApi.items,
+            personnelApi.items,
+            campusesApi.items,
+            roomsApi.items,
+        ),
+        [
+            classesApi.items,
+            personnelApi.items,
+            campusesApi.items,
+            roomsApi.items,
+        ],
+    );
 
     const initialTab = useMemo<TabKey>(() => {
         const raw = searchParams.get("tab");
@@ -285,6 +301,14 @@ const ClassDetail = () => {
         ?? "Lớp đại trà";
 
     const academicYear = yearsApi.byId.get(classItem.academicYear);
+
+    const classSemester =
+        semestersApi.items.find(
+            (semester) => semester.id === timetables[0]?.semesterId,
+        ) ??
+        semestersApi.byAcademicYear.find(
+            (semester) => semester.status === "ACTIVE",
+        );
 
     const homeroomTeacher = classItem.homeroomTeacherId
         ? personnelApi.byId.get(classItem.homeroomTeacherId)
@@ -396,54 +420,6 @@ const ClassDetail = () => {
                     {value === "active" ? "Đang hiệu lực" : "Hết hiệu lực"}
                 </Tag>
             ),
-        },
-    ];
-
-    const timetableColumns: ColumnsType<TimetableEntry> = [
-        {
-            title: "Ngày",
-            dataIndex: "dayOfWeek",
-            width: 110,
-            render: (value: string) => DAY_LABEL[value] ?? value,
-        },
-        {
-            title: "Tiết",
-            dataIndex: "period",
-            width: 70,
-        },
-        {
-            title: "Môn",
-            dataIndex: "subjectId",
-            width: 140,
-            render: (value: string) => (
-                <Tag color="blue">{SUBJECT_NAME.get(value) ?? value}</Tag>
-            ),
-        },
-        {
-            title: "Giáo viên",
-            dataIndex: "teacherId",
-            width: 200,
-            render: (value: string) => {
-                const teacher = personnelApi.byId.get(value);
-
-                return teacher?.fullName ?? value;
-            },
-        },
-        {
-            title: "Phòng",
-            dataIndex: "roomId",
-            width: 90,
-            render: (value: string) =>
-                roomsApi.byId.get(value)?.code ?? value,
-        },
-        {
-            title: "Thời gian",
-            width: 150,
-            render: (_: unknown, row: TimetableEntry) => {
-                const time = periodTimes(row.period);
-
-                return <span>{time.startTime} – {time.endTime}</span>;
-            },
         },
     ];
 
@@ -769,7 +745,7 @@ const ClassDetail = () => {
                             icon={<EditOutlined />}
                             onClick={() =>
                                 navigate(
-                                    `/operations/personnel/${homeroomTeacher.id}?tab=assignment`,
+                                    `/operations/personnel/${homeroomTeacher.id}?tab=personal`,
                                 )}
                         >
                             Xem phân công giảng dạy
@@ -801,7 +777,7 @@ const ClassDetail = () => {
                     onRow={(assignment) => ({
                         onDoubleClick: () =>
                             navigate(
-                                `/operations/personnel/${assignment.personnelId}?tab=assignment`,
+                                `/operations/personnel/${assignment.personnelId}?tab=personal`,
                             ),
                     })}
                 />
@@ -817,16 +793,15 @@ const ClassDetail = () => {
             key: "timetable",
             label: "Thời khóa biểu",
             children: timetables.length > 0 ? (
-                <Table
-                    rowKey="id"
-                    columns={timetableColumns}
-                    dataSource={timetables}
-                    pagination={{
-                        ...PAGINATION,
-                        pageSize: 12,
-                    }}
-                    size="small"
-                    scroll={{ x: true }}
+                <TimetableCalendar
+                    entries={timetables}
+                    lookups={timetableLookups}
+                    semester={classSemester}
+                    mode="class"
+                    entityId={classId}
+                    showFilters={false}
+                    showClass={false}
+                    showRoom
                 />
             ) : (
                 <Alert
@@ -977,7 +952,7 @@ const ClassDetail = () => {
                 <header className="page-head">
                     <div className="page-head__title">
                         <span
-                            className="personnel-detail__breadcrumb"
+                            className="page-head__back"
                             onClick={() => navigate("/operations/schools?tab=classes")}
                             role="button"
                             tabIndex={0}
@@ -1034,11 +1009,11 @@ const ClassDetail = () => {
 
             <Tabs
                 key={classItem.id}
-                className="classes-detail__tabs"
+                className="classes-detail__tabs page-tabs"
                 activeKey={activeTab}
                 onChange={(key) => setActiveTab(key as TabKey)}
                 items={tabItems}
-                tabBarStyle={{ margin: 0 }}
+                tabBarStyle={{ margin: "0 0 24px" }}
             />
         </div>
     );

@@ -2,7 +2,7 @@
     display: flex;
     flex-direction: column;
 
-    gap: 20px;
+    gap: 24px;
 
     padding-bottom: 32px;
 }
@@ -11,8 +11,8 @@
 .reports-card {
     border-radius: 18px;
 
-    border: 1px solid
-        rgba(100, 116, 139, 0.45);
+    border: 2px solid
+        rgba(100, 116, 139, 0.6);
 
     box-shadow:
         0 12px 32px
@@ -26,7 +26,7 @@
 
     gap: 12px;
 
-    margin-bottom: 20px;
+    margin-bottom: 24px;
 }
 
 

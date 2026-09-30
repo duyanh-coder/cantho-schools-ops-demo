@@ -1,6 +1,7 @@
 import {
     ApartmentOutlined,
     BookOutlined,
+    DeleteOutlined,
     EditOutlined,
     EyeOutlined,
     HistoryOutlined,
@@ -27,6 +28,7 @@ import {
     Select,
     Space,
     Table,
+    Tabs,
     Tag,
     message,
 } from "antd";
@@ -77,6 +79,18 @@ import {
 } from "@/store/usePersonnel";
 
 import {
+    usePersonnelAssignments,
+} from "@/store/usePersonnelAssignments";
+
+import {
+    usePersonnelCompetitions,
+} from "@/store/usePersonnelCompetitions";
+
+import {
+    usePersonnelRewards,
+} from "@/store/usePersonnelRewards";
+
+import {
     usePersonnelHistory,
 } from "@/store/usePersonnelHistory";
 
@@ -84,6 +98,37 @@ import "./style.scss";
 
 
 const SCHOOL_ID = "can-tho-school-001";
+
+
+const MANAGER_KEYWORDS = [
+    "Hiệu trưởng",
+    "Phó hiệu trưởng",
+    "Tổ trưởng chuyên môn",
+    "Trưởng khối",
+];
+
+
+type TabKey =
+    | "list"
+    | "structure"
+    | "team"
+    | "subject"
+    | "excellent"
+    | "reward";
+
+
+const levelLabel = (
+    value: string,
+): string => {
+    const map: Record<string, string> = {
+        truong: "Cấp trường",
+        quan: "Cấp quận",
+        thanh_pho: "Cấp thành phố",
+        bo_gddt: "Bộ GD&ĐT",
+    };
+
+    return map[value] ?? value;
+};
 
 
 const SUBJECT_NAME = new Map<string, string>(
@@ -159,7 +204,15 @@ const PersonnelList = ({
 
     const historyApi = usePersonnelHistory();
 
+    const assignmentApi = usePersonnelAssignments();
+
+    const competitionApi = usePersonnelCompetitions();
+
+    const rewardApi = usePersonnelRewards();
+
     const campusesApi = useCampuses(schoolId);
+
+    const [activeTab, setActiveTab] = useState<TabKey>("list");
 
     const genderOptions =
         useCatalogOptions("gender");
@@ -169,6 +222,9 @@ const PersonnelList = ({
 
     const statusOptions =
         useCatalogOptions("personnel-status");
+
+    const awardOptions =
+        useCatalogOptions("award");
 
     const items = useMemo(
         () => personnelApi.items.filter((item) => item.schoolId === schoolId),
@@ -225,6 +281,89 @@ const PersonnelList = ({
             label: subject.name,
         })),
         [],
+    );
+
+    const structureGroups = useMemo(() => {
+        const isManager = (item: Personnel) =>
+            MANAGER_KEYWORDS.some((title) => item.roleTitle.includes(title));
+
+        const isTeacher = (item: Personnel) =>
+            !isManager(item) &&
+            item.subjectIds.length > 0;
+
+        const managerPool = items.filter(isManager);
+
+        const teacherPool = items.filter(isTeacher);
+
+        const staffPool = items.filter(
+            (item) => !isManager(item) && !isTeacher(item),
+        );
+
+        return [
+            {
+                key: "manager",
+                label: "Cán bộ quản lý",
+                pool: managerPool,
+            },
+            {
+                key: "teacher",
+                label: "Giáo viên",
+                pool: teacherPool,
+            },
+            {
+                key: "staff",
+                label: "Nhân viên",
+                pool: staffPool,
+            },
+        ];
+    }, [items]);
+
+    const assignmentCounts = useMemo(
+        () => {
+            const counts = new Map<string, number>();
+
+            for (const assignment of assignmentApi.items) {
+                counts.set(
+                    assignment.personnelId,
+                    (counts.get(assignment.personnelId) ?? 0) + 1,
+                );
+            }
+
+            return counts;
+        },
+        [assignmentApi.items],
+    );
+
+    const committeeCounts = useMemo(
+        () => {
+            const counts = new Map<string, number>();
+
+            for (const committee of competitionApi.items) {
+                counts.set(
+                    committee.personnelId,
+                    (counts.get(committee.personnelId) ?? 0) + 1,
+                );
+            }
+
+            return counts;
+        },
+        [competitionApi.items],
+    );
+
+    const rewardCounts = useMemo(
+        () => {
+            const counts = new Map<string, number>();
+
+            for (const reward of rewardApi.items) {
+                counts.set(
+                    reward.personnelId,
+                    (counts.get(reward.personnelId) ?? 0) + 1,
+                );
+            }
+
+            return counts;
+        },
+        [rewardApi.items],
     );
 
     const roleTitleOptions = useMemo(() => {
@@ -549,11 +688,61 @@ const PersonnelList = ({
         form.resetFields();
     };
 
-    const statusLabel = (status: string): string => {
-        return statusOptions.find(
-            (option) => String(option.value) === status,
-        )?.label
-            ?? status;
+    const removePersonnel = (
+        personnel: Personnel,
+    ) => {
+        const assignmentCount = assignmentCounts.get(personnel.id) ?? 0;
+
+        if (assignmentCount > 0) {
+            Modal.warning({
+                title: "Không thể xóa",
+                content:
+                    `Nhân sự “${personnel.fullName}” đang có ${assignmentCount} phân công ` +
+                    "giảng dạy. Vui lòng gỡ phân công trước khi xóa hồ sơ.",
+                okText: "Đã hiểu",
+            });
+
+            return;
+        }
+
+        Modal.confirm({
+            title: "Xóa hồ sơ nhân sự?",
+            content:
+                `Bạn có chắc muốn xóa “${personnel.fullName}” khỏi danh sách? ` +
+                "Thao tác này không thể hoàn tác.",
+            okText: "Xóa",
+            okType: "danger",
+            cancelText: "Hủy",
+            onOk: () => {
+                personnelApi.remove(personnel.id);
+
+                for (const entry of assignmentApi.items.filter(
+                    (item) => item.personnelId === personnel.id,
+                )) {
+                    assignmentApi.remove(entry.id);
+                }
+
+                for (const entry of competitionApi.items.filter(
+                    (item) => item.personnelId === personnel.id,
+                )) {
+                    competitionApi.remove(entry.id);
+                }
+
+                for (const entry of rewardApi.items.filter(
+                    (item) => item.personnelId === personnel.id,
+                )) {
+                    rewardApi.remove(entry.id);
+                }
+
+                for (const entry of historyApi.items.filter(
+                    (item) => item.personnelId === personnel.id,
+                )) {
+                    historyApi.remove(entry.id);
+                }
+
+                message.success("Đã xóa hồ sơ nhân sự");
+            },
+        });
     };
 
     const columns: ColumnsType<Personnel> = [
@@ -609,13 +798,19 @@ const PersonnelList = ({
             ),
         },
         {
-            title: "Trạng thái",
-            dataIndex: "status",
-            width: 110,
-            render: (value: string) => (
-                <Tag color={value === "active" ? "green" : "red"}>
-                    {statusLabel(value)}
-                </Tag>
+            title: "Chi tiết",
+            key: "__detail",
+            width: 74,
+            render: (_: unknown, personnel: Personnel) => (
+                <Button
+                    type="link"
+                    size="small"
+                    icon={<EyeOutlined />}
+                    onClick={() =>
+                        navigate(`/operations/personnel/${personnel.id}`)}
+                >
+                    Chi tiết
+                </Button>
             ),
         },
         {
@@ -629,13 +824,6 @@ const PersonnelList = ({
                     menu={{
                         items: [
                             {
-                                key: "view",
-                                icon: <EyeOutlined />,
-                                label: "Xem hồ sơ",
-                                onClick: () =>
-                                    navigate(`/operations/personnel/${personnel.id}`),
-                            },
-                            {
                                 key: "edit",
                                 icon: <EditOutlined />,
                                 label: "Chỉnh sửa",
@@ -647,7 +835,7 @@ const PersonnelList = ({
                                 label: "Phân công giảng dạy",
                                 onClick: () =>
                                     navigate(
-                                        `/operations/personnel/${personnel.id}?tab=assignment`,
+                                        `/operations/personnel/${personnel.id}?tab=personal`,
                                     ),
                             },
                             {
@@ -668,6 +856,16 @@ const PersonnelList = ({
                                 label: "Đổi trạng thái hoạt động",
                                 onClick: () => openStatusChange(personnel),
                             },
+                            {
+                                type: "divider",
+                            },
+                            {
+                                key: "remove",
+                                icon: <DeleteOutlined />,
+                                label: "Xóa",
+                                danger: true,
+                                onClick: () => removePersonnel(personnel),
+                            },
                         ],
                     }}
                 >
@@ -679,6 +877,226 @@ const PersonnelList = ({
                     />
                 </Dropdown>
             ),
+        },
+    ];
+
+    const awardLabel = (value: string): string =>
+        awardOptions.find(
+            (option) => String(option.value) === value,
+        )?.label
+            ?? value;
+
+    const structureRows = useMemo(
+        () => structureGroups.map((group) => ({
+            key: group.key,
+            label: group.label,
+            count: group.pool.length,
+            male: group.pool.filter((item) => item.gender === "male").length,
+            female: group.pool.filter((item) => item.gender === "female").length,
+            active: group.pool.filter((item) => item.status === "active").length,
+        })),
+        [structureGroups],
+    );
+
+    const structureColumns: ColumnsType<(typeof structureRows)[number]> = [
+        { title: "Loại nhân sự", dataIndex: "label", width: 220 },
+        { title: "Tổng số", dataIndex: "count", width: 120, align: "right" },
+        { title: "Nam", dataIndex: "male", width: 90, align: "right" },
+        { title: "Nữ", dataIndex: "female", width: 90, align: "right" },
+        { title: "Đang công tác", dataIndex: "active", width: 130, align: "right" },
+    ];
+
+    const teamRows = useMemo(
+        () => sectors.map((sector) => ({
+            sector,
+            members: items.filter((item) => item.teamId === sector.id),
+        })),
+        [sectors, items],
+    );
+
+    const teamColumns: ColumnsType<(typeof teamRows)[number]> = [
+        {
+            title: "Tổ chuyên môn",
+            key: "team",
+            render: (_: unknown, row) => (
+                <span className="personnel-cell__name">{row.sector.name}</span>
+            ),
+        },
+        {
+            title: "Mã",
+            key: "code",
+            width: 160,
+            render: (_: unknown, row) => row.sector.code,
+        },
+        {
+            title: "Số thành viên",
+            key: "count",
+            width: 130,
+            align: "right",
+            render: (_: unknown, row) => row.members.length,
+        },
+        {
+            title: "Thành viên",
+            key: "members",
+            render: (_: unknown, row) => (
+                <Space size={4} wrap>
+                    {row.members.map((item) => (
+                        <Tag key={item.id}>{item.fullName}</Tag>
+                    ))}
+                </Space>
+            ),
+        },
+    ];
+
+    const subjectRows = useMemo(
+        () => subjects
+            .map((subject) => ({
+                subject,
+                members: items.filter((item) => item.subjectIds.includes(subject.id)),
+            }))
+            .filter((row) => row.members.length > 0),
+        [items],
+    );
+
+    const subjectColumns: ColumnsType<(typeof subjectRows)[number]> = [
+        {
+            title: "Môn học",
+            key: "subject",
+            render: (_: unknown, row) => (
+                <span className="personnel-cell__name">{row.subject.name}</span>
+            ),
+        },
+        {
+            title: "Số giáo viên",
+            key: "count",
+            width: 140,
+            align: "right",
+            render: (_: unknown, row) => row.members.length,
+        },
+        {
+            title: "Giáo viên",
+            key: "members",
+            render: (_: unknown, row) => (
+                <Space size={4} wrap>
+                    {row.members.map((item) => <Tag key={item.id}>{item.fullName}</Tag>)}
+                </Space>
+            ),
+        },
+    ];
+
+    const excellentRows = useMemo(
+        () => items.filter((item) => item.isExcellentTeacher),
+        [items],
+    );
+
+    const excellentColumns: ColumnsType<Personnel> = [
+        {
+            title: "STT",
+            key: "__index",
+            width: 48,
+            render: (_: unknown, __: Personnel, index: number) => index + 1,
+        },
+        {
+            title: "Họ tên",
+            dataIndex: "fullName",
+            width: 200,
+            render: (value: string, personnel: Personnel) => (
+                <Space size={8}>
+                    {avatarFor(personnel)}
+
+                    <span className="personnel-cell__name">{value}</span>
+                </Space>
+            ),
+        },
+        {
+            title: "Chức danh",
+            dataIndex: "roleTitle",
+            width: 170,
+        },
+        {
+            title: "Tổ / Bộ môn",
+            key: "__team_subject",
+            render: (_: unknown, personnel: Personnel) => (
+                <Space size={4} wrap>
+                    {sectorName(personnel.teamId)
+                        ? <Tag>{sectorName(personnel.teamId)}</Tag>
+                        : null}
+
+                    {personnel.subjectIds.map((subjectId) => (
+                        <Tag key={subjectId} color="blue">{toSubjectName(subjectId)}</Tag>
+                    ))}
+                </Space>
+            ),
+        },
+        {
+            title: "Hội thi",
+            key: "__committee",
+            width: 90,
+            align: "right",
+            render: (_: unknown, personnel: Personnel) =>
+                committeeCounts.get(personnel.id) ?? 0,
+        },
+        {
+            title: "Khen thưởng",
+            key: "__reward",
+            width: 100,
+            align: "right",
+            render: (_: unknown, personnel: Personnel) =>
+                rewardCounts.get(personnel.id) ?? 0,
+        },
+    ];
+
+    const rewardRows = useMemo(
+        () => rewardApi.items
+            .map((reward) => ({
+                reward,
+                personnel: personnelApi.byId.get(reward.personnelId),
+            }))
+            .filter((row) => row.personnel?.schoolId === schoolId)
+            .sort(
+                (a, b) => b.reward.academicYear.localeCompare(a.reward.academicYear),
+            ),
+        [rewardApi.items, personnelApi.byId, schoolId],
+    );
+
+    const rewardColumns: ColumnsType<(typeof rewardRows)[number]> = [
+        {
+            title: "Nhân sự",
+            key: "personnel",
+            width: 220,
+            render: (_: unknown, row) => (
+                <Space size={8}>
+                    {row.personnel ? avatarFor(row.personnel) : null}
+
+                    <span className="personnel-cell__name">
+                        {row.personnel?.fullName ?? "—"}
+                    </span>
+                </Space>
+            ),
+        },
+        {
+            title: "Danh hiệu",
+            key: "title",
+            width: 220,
+            render: (_: unknown, row) => row.reward.title,
+        },
+        {
+            title: "Loại",
+            key: "type",
+            width: 140,
+            render: (_: unknown, row) => awardLabel(row.reward.awardType),
+        },
+        {
+            title: "Cấp",
+            key: "level",
+            width: 120,
+            render: (_: unknown, row) => levelLabel(row.reward.level),
+        },
+        {
+            title: "Năm học",
+            key: "year",
+            width: 110,
+            render: (_: unknown, row) => row.reward.academicYear,
         },
     ];
 
@@ -716,8 +1134,17 @@ const PersonnelList = ({
                 </div>
             )}
 
-            <section className="crud-panel__card">
-                <div className="crud-panel__header">
+            <Tabs
+                className="page-tabs"
+                activeKey={activeTab}
+                onChange={(key) => setActiveTab(key as TabKey)}
+                items={[
+                    {
+                        key: "list",
+                        label: "Danh sách",
+                        children: (
+                            <section className="crud-panel__card">
+                                <div className="crud-panel__header">
                     <div className="crud-panel__title">
                         <span className="crud-panel__eyebrow">
                             DANH SÁCH NHÂN SỰ
@@ -827,6 +1254,152 @@ const PersonnelList = ({
                     />
                 </div>
             </section>
+            ),
+        },
+        {
+            key: "structure",
+            label: "Theo cơ cấu",
+            children: (
+                <section className="crud-panel__card">
+                    <div className="crud-panel__header">
+                        <div className="crud-panel__title">
+                            <span className="crud-panel__eyebrow">
+                                CƠ CẤU NHÂN SỰ
+                            </span>
+
+                            <h3>Cán bộ quản lý – giáo viên – nhân viên</h3>
+                        </div>
+                    </div>
+
+                    <div className="crud-panel__body">
+                        <Table
+                            rowKey="key"
+                            columns={structureColumns}
+                            dataSource={structureRows}
+                            pagination={false}
+                        />
+                    </div>
+                </section>
+            ),
+        },
+        {
+            key: "team",
+            label: "Theo tổ chuyên môn",
+            children: (
+                <section className="crud-panel__card">
+                    <div className="crud-panel__header">
+                        <div className="crud-panel__title">
+                            <span className="crud-panel__eyebrow">
+                                TỔ CHUYÊN MÔN
+                            </span>
+
+                            <h3>Thành viên theo từng tổ (theo teamId)</h3>
+                        </div>
+                    </div>
+
+                    <div className="crud-panel__body">
+                        <Table
+                            rowKey={(row) => row.sector.id}
+                            columns={teamColumns}
+                            dataSource={teamRows}
+                            scroll={{ x: "max-content" }}
+                            pagination={false}
+                        />
+                    </div>
+                </section>
+            ),
+        },
+        {
+            key: "subject",
+            label: "Chuyên môn",
+            children: (
+                <section className="crud-panel__card">
+                    <div className="crud-panel__header">
+                        <div className="crud-panel__title">
+                            <span className="crud-panel__eyebrow">
+                                BỘ MÔN
+                            </span>
+
+                            <h3>Giáo viên theo môn giảng dạy</h3>
+                        </div>
+                    </div>
+
+                    <div className="crud-panel__body">
+                        <Table
+                            rowKey={(row) => row.subject.id}
+                            columns={subjectColumns}
+                            dataSource={subjectRows}
+                            scroll={{ x: "max-content" }}
+                            pagination={false}
+                        />
+                    </div>
+                </section>
+            ),
+        },
+        {
+            key: "excellent",
+            label: "Dạy giỏi",
+            children: (
+                <section className="crud-panel__card">
+                    <div className="crud-panel__header">
+                        <div className="crud-panel__title">
+                            <span className="crud-panel__eyebrow">
+                                GIÁO VIÊN DẠY GIỎI
+                            </span>
+
+                            <h3>Cán bộ – giáo viên đạt danh hiệu dạy giỏi</h3>
+                        </div>
+                    </div>
+
+                    <div className="crud-panel__body">
+                        <Table<Personnel>
+                            rowKey="id"
+                            columns={excellentColumns}
+                            dataSource={excellentRows}
+                            scroll={{ x: "max-content" }}
+                            pagination={{
+                                pageSize: 8,
+                                showSizeChanger: true,
+                                showTotal: (total) => `Tổng ${total} người đạt danh hiệu`,
+                            }}
+                        />
+                    </div>
+                </section>
+            ),
+        },
+        {
+            key: "reward",
+            label: "Thi đua – khen thưởng",
+            children: (
+                <section className="crud-panel__card">
+                    <div className="crud-panel__header">
+                        <div className="crud-panel__title">
+                            <span className="crud-panel__eyebrow">
+                                KHEN THƯỞNG
+                            </span>
+
+                            <h3>Danh hiệu, bằng khen theo nhân sự</h3>
+                        </div>
+                    </div>
+
+                    <div className="crud-panel__body">
+                        <Table
+                            rowKey={(row) => row.reward.id}
+                            columns={rewardColumns}
+                            dataSource={rewardRows}
+                            scroll={{ x: "max-content" }}
+                            pagination={{
+                                pageSize: 8,
+                                showSizeChanger: true,
+                                showTotal: (total) => `Tổng ${total} minh chứng khen thưởng`,
+                            }}
+                        />
+                    </div>
+                </section>
+            ),
+        },
+    ]}
+/>
 
             <Modal
                 open={open}
@@ -857,7 +1430,26 @@ const PersonnelList = ({
                             name="code"
                             label="Mã nhân sự"
                             required
-                            rules={[{ required: true, message: "Vui lòng nhập mã nhân sự" }]}
+                            rules={[
+                                { required: true, message: "Vui lòng nhập mã nhân sự" },
+                                {
+                                    validator: (_, value: string) => {
+                                        if (!value) {
+                                            return Promise.resolve();
+                                        }
+
+                                        const duplicate = items.some(
+                                            (item) =>
+                                                item.code.trim() === value.trim() &&
+                                                item.id !== editing?.id,
+                                        );
+
+                                        return duplicate
+                                            ? Promise.reject(new Error("Mã nhân sự đã tồn tại"))
+                                            : Promise.resolve();
+                                    },
+                                },
+                            ]}
                         >
                             <Input placeholder="VD: CT-CBCS-018" />
                         </Form.Item>
@@ -958,7 +1550,30 @@ const PersonnelList = ({
                             <Input placeholder="VD: 0901xxxxxx" />
                         </Form.Item>
 
-                        <Form.Item name="email" label="Email">
+                        <Form.Item
+                            name="email"
+                            label="Email"
+                            rules={[
+                                {
+                                    validator: (_, value: string) => {
+                                        if (!value) {
+                                            return Promise.resolve();
+                                        }
+
+                                        const duplicate = items.some(
+                                            (item) =>
+                                                item.email.trim().toLowerCase() ===
+                                                    value.trim().toLowerCase() &&
+                                                item.id !== editing?.id,
+                                        );
+
+                                        return duplicate
+                                            ? Promise.reject(new Error("Email đã được sử dụng"))
+                                            : Promise.resolve();
+                                    },
+                                },
+                            ]}
+                        >
                             <Input placeholder="VD: an.nguyen@ninhkieu.edu.vn" />
                         </Form.Item>
                     </div>

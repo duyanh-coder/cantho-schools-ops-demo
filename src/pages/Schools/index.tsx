@@ -261,8 +261,8 @@ function SchoolsHub() {
                 activeKey={activeTab}
                 onChange={handleTabChange}
                 items={items}
-                className="schools-hub"
-                tabBarStyle={{ margin: 0 }}
+                className="schools-hub page-tabs"
+                tabBarStyle={{ margin: "0 0 24px" }}
             />
         </div>
     );

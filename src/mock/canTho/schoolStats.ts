@@ -6,6 +6,10 @@ import {
     canThoClasses,
 } from "./classes";
 
+import {
+    canThoPersonnel,
+} from "./personnel";
+
 
 export interface SchoolGradeCount {
     grade: number;
@@ -79,6 +83,48 @@ const campusCountsOfSchool = (
     };
 };
 
+const MANAGER_TITLES = [
+    "Hiệu trưởng",
+    "Phó hiệu trưởng",
+    "Tổ trưởng chuyên môn",
+    "Trưởng khối",
+];
+
+const isManagerRole = (roleTitle: string): boolean => {
+    return MANAGER_TITLES.some((title) => roleTitle.includes(title));
+};
+
+const personnelStatsOfSchool = (
+    schoolId: string,
+): SchoolPersonnelStats => {
+    const personnel = canThoPersonnel.filter(
+        (item) => item.schoolId === schoolId,
+    );
+
+    const managers = personnel.filter(
+        (item) => isManagerRole(item.roleTitle),
+    ).length;
+
+    const teachers = personnel.filter(
+        (item) =>
+            !isManagerRole(item.roleTitle) &&
+            item.subjectIds.length > 0,
+    ).length;
+
+    const male = personnel.filter(
+        (item) => item.gender === "male",
+    ).length;
+
+    return {
+        total: personnel.length,
+        teachers,
+        managers,
+        staff: Math.max(0, personnel.length - teachers - managers),
+        male,
+        female: personnel.length - male,
+    };
+};
+
 const classCountsOfSchool = (
     schoolId: string,
 ): { total: number; grades: SchoolGradeCount[] } => {
@@ -109,14 +155,7 @@ export const canThoSchoolOverviewStats: SchoolOverviewStats[] = [
     {
         schoolId: SCHOOL_001,
         academicYear: ACADEMIC_YEAR,
-        personnel: {
-            total: 240,
-            teachers: 210,
-            managers: 8,
-            staff: 22,
-            male: 92,
-            female: 148,
-        },
+        personnel: personnelStatsOfSchool(SCHOOL_001),
         students: {
             total: 4280,
             grades: [
