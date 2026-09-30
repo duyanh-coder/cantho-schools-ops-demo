@@ -15,6 +15,10 @@ import {
 } from "@/mock/canTho";
 
 import {
+    TIMETABLE_SCENARIOS as canThoTimetableScenarios,
+} from "@/mock/canTho/timetablePlan";
+
+import {
     WEEKDAY_ORDER,
 } from "@/mock/common/types";
 
@@ -108,6 +112,15 @@ describe("PHASE 04 feature integrity", () => {
     });
 
     it("no class is scheduled twice in the same day/period/week", () => {
+        /**
+         * Phase 05 bổ sung các kịch bản minh hoạ xung đột có chủ đích.
+         * Chỉ những tiết nằm trong danh sách này được phép trùng lớp;
+         * mọi xung đột ngoài dự kiến vẫn phải bắt được ở đây.
+         */
+        const deliberateClassConflicts = new Set<string>([
+            ...canThoTimetableScenarios.classConflict,
+        ]);
+
         const keyed = new Map<
             string,
             typeof canThoTimetables[number][]
@@ -132,6 +145,26 @@ describe("PHASE 04 feature integrity", () => {
                 for (let j = i + 1; j < bucket.length; j += 1) {
                     const [a, b] = [bucket[i], bucket[j]];
 
+                    if (
+                        deliberateClassConflicts.has(a.id) &&
+                        deliberateClassConflicts.has(b.id)
+                    ) {
+                        continue;
+                    }
+
+                    /**
+                     * Các phiên bản cùng một chuỗi (bản PUBLISHED và bản
+                     * ADJUSTING thay thế nó) trùng lớp là hợp lệ, vì chỉ
+                     * bản có số version cao nhất mới được tính trên lưới.
+                     */
+                    if (
+                        a.id === b.id ||
+                        a.supersedesId === b.id ||
+                        b.supersedesId === a.id
+                    ) {
+                        continue;
+                    }
+
                     const overlaps = a.week === 0 || b.week === 0 || a.week === b.week;
 
                     expect(overlaps).toBe(false);
@@ -139,6 +172,7 @@ describe("PHASE 04 feature integrity", () => {
             }
         }
     });
+
 
     it("teaching attendance references valid class, personnel, timetable", () => {
         for (const record of canThoTeachingAttendance) {

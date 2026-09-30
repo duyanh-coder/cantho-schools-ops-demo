@@ -1,5 +1,6 @@
 import {
   AimOutlined,
+  ArrowLeftOutlined,
   BankOutlined,
   EnvironmentOutlined,
   EyeOutlined,
@@ -11,11 +12,24 @@ import {
   WarningOutlined,
 } from "@ant-design/icons";
 
-import { Button, Card, Col, Empty, Row, Select, Tag } from "antd";
+import {
+  Button,
+  Card,
+  Col,
+  Empty,
+  Row,
+  Select,
+  Tag,
+} from "antd";
 
-import { useEffect, useMemo, useState } from "react";
+import {
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 
-import { useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 
 import type { LatLngBoundsExpression } from "leaflet";
 
@@ -38,9 +52,18 @@ import "leaflet/dist/leaflet.css";
 
 import StatsCard from "@/components/dashboard/StatCard";
 
-import { getCurrentRegionMockData } from "@/mock";
+import {
+  canThoMockData,
+  getCurrentRegionMockData,
+} from "@/mock";
 
-import type { GisWard } from "@/mock";
+import type {
+    Campus,
+} from "@/mock/common/types";
+
+import type {
+    GisWard,
+} from "@/mock";
 
 import "./style.scss";
 
@@ -73,7 +96,11 @@ function FocusMap({ bounds }: FocusMapProps) {
    CAMPUS MARKER ICON
 ======================================== */
 
-function createCampusIcon(isMainCampus: boolean, hasActiveAlert: boolean) {
+function createCampusIcon(
+  isMainCampus: boolean,
+  hasActiveAlert: boolean,
+  isSelected = false,
+) {
   const glyph = renderToStaticMarkup(<BankOutlined />);
 
   const className = [
@@ -82,6 +109,8 @@ function createCampusIcon(isMainCampus: boolean, hasActiveAlert: boolean) {
     isMainCampus ? "gis-campus-marker--main" : "gis-campus-marker--sub",
 
     hasActiveAlert && !isMainCampus ? "gis-campus-marker--alert" : "",
+
+    isSelected ? "gis-campus-marker--selected" : "",
   ]
     .filter(Boolean)
     .join(" ");
@@ -101,10 +130,40 @@ function createCampusIcon(isMainCampus: boolean, hasActiveAlert: boolean) {
 }
 
 /* ========================================
+   CAMPUS ENTITY LOOKUP (single source)
+======================================== */
+
+const campusEntityById = new Map<string, Campus>(
+  canThoMockData.campuses.map(
+    (campus) => [campus.id, campus] as [string, Campus],
+  ),
+);
+
+const CAMPUS_TYPE_LABEL: Record<Campus["type"], string> = {
+  HEADQUARTERS: "Trụ sở chính",
+  BRANCH: "Phân hiệu",
+};
+
+const hasValidCoordinates = (
+  campus: Campus | GisWard,
+): boolean => {
+  if ("latitude" in campus && "longitude" in campus) {
+    return (
+      Number.isFinite(campus.latitude) &&
+      Number.isFinite(campus.longitude)
+    );
+  }
+
+  return false;
+};
+
+/* ========================================
    PAGE
 ======================================== */
 
 function GisPage() {
+  const navigation = useNavigate();
+
   const { gis, alerts } = getCurrentRegionMockData();
 
   const { province, wards, campuses } = gis;
@@ -117,6 +176,13 @@ function GisPage() {
     () => campuses.find((campus) => campus.id === presetCampusId) ?? null,
     [campuses, presetCampusId],
   );
+
+  const presetCampusMissing = useMemo(
+    () => presetCampusId !== null && presetCampus === null,
+    [presetCampus, presetCampusId],
+  );
+
+  const markerRefs = useRef<Record<string, L.Marker | null>>({});
 
   const DEFAULT_WARD_ID = "can-tho-31135";
 
@@ -184,6 +250,22 @@ function GisPage() {
 
     return campuses.find((campus) => campus.id === selectedCampusId) ?? null;
   }, [campuses, selectedCampusId]);
+
+  /* ========================================
+       AUTO OPEN POPUP FOR PRESET CAMPUS
+  ======================================== */
+
+  useEffect(() => {
+    if (!presetCampusId) {
+      return;
+    }
+
+    const marker = markerRefs.current[presetCampusId];
+
+    if (marker) {
+      marker.openPopup();
+    }
+  }, [presetCampusId, filteredCampuses]);
 
   const activeAlertCountByCampusId = useMemo(() => {
     const counter = new Map<string, number>();
@@ -288,6 +370,16 @@ function GisPage() {
           <h2>Bản đồ GIS</h2>
 
           <p>Trực quan hóa địa bàn, trường học và các cơ sở giáo dục.</p>
+        </div>
+
+        <div className="page-head__meta">
+          <Button
+            icon={<ArrowLeftOutlined />}
+            onClick={() =>
+              navigation("/operations/schools?tab=campuses")}
+          >
+            Quay lại danh sách
+          </Button>
         </div>
       </header>
 
@@ -482,28 +574,51 @@ function GisPage() {
                 ======================================== */}
 
                 {filteredCampuses.map((campus) => {
+                  const campusEntity = campusEntityById.get(campus.id);
+
+                  if (!campusEntity || !hasValidCoordinates(campusEntity)) {
+                    return null;
+                  }
+
                   const activeAlertCount =
                     activeAlertCountByCampusId.get(campus.id) ?? 0;
 
                   const hasActiveAlert =
                     activeAlertCount > 0 && !campus.isMainCampus;
 
+                  const isSelected = campus.id === selectedCampusId;
+
                   return (
                     <Marker
                       key={campus.id}
                       position={campus.position}
-                      icon={createCampusIcon(campus.isMainCampus, hasActiveAlert)}
+                      icon={createCampusIcon(
+                        campus.isMainCampus,
+                        hasActiveAlert,
+                        isSelected,
+                      )}
+                      ref={(marker) => {
+                        markerRefs.current[campus.id] = marker;
+                      }}
                       eventHandlers={{
                         click: () => handleCampusSelect(campus.id),
                       }}
                     >
                       <Popup>
                         <div className="gis-popup">
-                          <strong>{campus.schoolName}</strong>
+                          <strong>{campus.name}</strong>
 
-                          <span>{campus.name}</span>
+                          <span className="gis-popup__tag">
+                            {CAMPUS_TYPE_LABEL[campusEntity.type]}
+                          </span>
 
                           <p>{campus.address}</p>
+
+                          {campusEntity.phone && (
+                            <p className="gis-popup__phone">
+                              ☎ {campusEntity.phone}
+                            </p>
+                          )}
 
                           {hasActiveAlert && (
                             <p className="gis-popup__alert">
@@ -512,6 +627,26 @@ function GisPage() {
                               {activeAlertCount} cảnh báo cần xử lý
                             </p>
                           )}
+
+                          <div className="gis-popup__actions">
+                            <Button
+                              type="primary"
+                              size="small"
+                              icon={<EyeOutlined />}
+                              onClick={() =>
+                                navigation(`/operations/campuses/${campus.id}`)}
+                            >
+                              Chi tiết
+                            </Button>
+
+                            <Button
+                              size="small"
+                              onClick={() =>
+                                markerRefs.current[campus.id]?.closePopup()}
+                            >
+                              Đóng
+                            </Button>
+                          </div>
                         </div>
                       </Popup>
                     </Marker>
@@ -545,7 +680,7 @@ function GisPage() {
 
               {/* CONTEXT BANNER (overview only) */}
 
-              {!selectedWard && (
+              {!selectedWard && !presetCampusMissing && (
                 <div className="gis-map__context">
                   <AimOutlined />
 
@@ -558,6 +693,56 @@ function GisPage() {
                   </span>
                 </div>
               )}
+
+              {/* MISSING CAMPUS BANNER */}
+
+              {presetCampusMissing && (
+                <div className="gis-map__error-banner gis-map__error-banner--center">
+                  <div>
+                    <strong>Không tìm thấy cơ sở.</strong>
+
+                    <span>Cơ sở được yêu cầu không tồn tại trong hệ thống.</span>
+                  </div>
+
+                  <Button
+                    size="small"
+                    onClick={() =>
+                      navigation("/operations/schools?tab=campuses")}
+                  >
+                    Quay lại danh sách
+                  </Button>
+                </div>
+              )}
+
+              {/* MISSING COORDINATES BANNER */}
+
+              {!presetCampusMissing &&
+                selectedCampus &&
+                (() => {
+                  const entity = campusEntityById.get(selectedCampus.id);
+
+                  return entity ? !hasValidCoordinates(entity) : false;
+                })() && (
+                  <div className="gis-map__error-banner gis-map__error-banner--top">
+                    <div>
+                      <strong>
+                        Chưa có tọa độ GIS cho cơ sở này.
+                      </strong>
+
+                      <span>
+                        Vui lòng cập nhật tọa độ để hiển thị trên bản đồ.
+                      </span>
+                    </div>
+
+                    <Button
+                      size="small"
+                      onClick={() =>
+                        navigation(`/operations/campuses/${selectedCampus.id}`)}
+                    >
+                      Cập nhật tọa độ
+                    </Button>
+                  </div>
+                )}
             </div>
           </Card>
         </Col>

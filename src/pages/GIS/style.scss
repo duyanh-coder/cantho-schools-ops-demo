@@ -256,6 +256,125 @@
 }
 
 
+.gis-campus-marker--selected
+.gis-campus-marker__pin {
+    transform: scale(1.14);
+
+    box-shadow:
+        0 0 0 3px #ffffff,
+        0 0 0 6px rgba(8, 145, 178, 0.6),
+        0 8px 18px rgba(15, 23, 42, 0.4);
+}
+
+
+.gis-campus-marker--selected.gis-campus-marker--main
+.gis-campus-marker__pin {
+    box-shadow:
+        0 0 0 3px #ffffff,
+        0 0 0 6px rgba(22, 119, 255, 0.6),
+        0 8px 18px rgba(15, 23, 42, 0.4);
+}
+
+
+/* =========================
+   POPUP
+========================= */
+
+.gis-popup {
+    min-width: 160px;
+
+    strong {
+        display: block;
+
+        margin-bottom: 2px;
+
+        color:
+            rgba(15, 23, 42, 0.9);
+
+        font-size: 13px;
+        line-height: 1.4;
+    }
+
+    span {
+        color:
+            rgba(15, 23, 42, 0.55);
+
+        font-size: 12px;
+    }
+
+    p {
+        margin: 4px 0 0;
+
+        color:
+            rgba(15, 23, 42, 0.6);
+
+        font-size: 12px;
+        line-height: 1.4;
+    }
+}
+
+
+.gis-popup__tag {
+    display: inline-block;
+
+    margin-top: 2px;
+
+    padding:
+        2px 8px;
+
+    border-radius: 999px;
+
+    background:
+        rgba(8, 145, 178, 0.1);
+
+    color:
+        #0e7490 !important;
+
+    font-size: 11px !important;
+    font-weight: 600;
+}
+
+
+.gis-popup__phone {
+    display: flex;
+
+    align-items: center;
+
+    gap: 4px;
+
+    color:
+        rgba(15, 23, 42, 0.72) !important;
+}
+
+
+.gis-popup__phone .anticon {
+    color:
+        #0891b2;
+
+    font-size: 12px;
+}
+
+
+.gis-popup__actions {
+    display: flex;
+
+    align-items: center;
+
+    gap: 6px;
+
+    margin-top: 10px;
+}
+
+
+.gis-popup__alert {
+    .anticon {
+        margin-right: 4px;
+
+        color: #ef4444;
+    }
+}
+
+
 /* =========================
    LEGEND
 ========================= */
@@ -359,53 +478,6 @@
 
 
 /* =========================
-   POPUP
-========================= */
-
-.gis-popup {
-    min-width: 140px;
-
-    strong {
-        display: block;
-
-        margin-bottom: 2px;
-
-        color:
-            rgba(15, 23, 42, 0.9);
-
-        font-size: 13px;
-        line-height: 1.4;
-    }
-
-    span {
-        color:
-            rgba(15, 23, 42, 0.55);
-
-        font-size: 12px;
-    }
-
-    p {
-        margin: 4px 0 0;
-
-        color:
-            rgba(15, 23, 42, 0.6);
-
-        font-size: 12px;
-        line-height: 1.4;
-    }
-}
-
-
-.gis-popup__alert {
-    .anticon {
-        margin-right: 4px;
-
-        color: #ef4444;
-    }
-}
-
-
-/* =========================
    CONTEXT BANNER
 ========================= */
 
@@ -449,6 +521,78 @@
         color:
             #22d3ee;
     }
+}
+
+
+.gis-map__error-banner {
+    position: absolute;
+    z-index: 1100;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 12px;
+
+    max-width:
+        calc(100% - 40px);
+
+    padding: 12px 14px;
+
+    border:
+        1px solid rgba(190, 24, 93, 0.24);
+
+    border-radius:
+        12px;
+
+    background:
+        rgba(255, 241, 245, 0.96);
+
+    box-shadow:
+        0 8px 20px rgba(15, 23, 42, 0.14);
+
+    backdrop-filter:
+        blur(8px);
+
+    strong {
+        display: block;
+
+        color:
+            #9d174d;
+
+        font-size: 13px;
+        line-height: 1.4;
+    }
+
+    span {
+        color:
+            rgba(15, 23, 42, 0.6);
+
+        font-size: 12px;
+        line-height: 1.4;
+    }
+}
+
+
+.gis-map__error-banner--center {
+    top: 50%;
+    left: 50%;
+
+    transform:
+        translate(-50%, -50%);
+
+    flex-direction: column;
+
+    align-items: flex-start;
+
+    min-width:
+        260px;
+}
+
+
+.gis-map__error-banner--top {
+    top: 14px;
+    left: 14px;
 }
 
 

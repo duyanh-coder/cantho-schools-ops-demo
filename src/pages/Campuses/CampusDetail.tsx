@@ -1,23 +1,29 @@
 import {
     AimOutlined,
+    ArrowLeftOutlined,
     EnvironmentOutlined,
     GlobalOutlined,
     HomeOutlined,
     PhoneOutlined,
     ReadOutlined,
+    SafetyCertificateOutlined,
     SwapOutlined,
     TeamOutlined,
     ToolOutlined,
+    UserOutlined,
+    WarningOutlined,
 } from "@ant-design/icons";
 
 import {
-    Alert,
+    Breadcrumb,
     Button,
+    Collapse,
     Descriptions,
+    Empty,
     Form,
     InputNumber,
     Modal,
-    Select,
+    Segmented,
     Space,
     Table,
     Tabs,
@@ -30,9 +36,12 @@ import type {
 } from "antd/es/table";
 
 import {
-    useEffect,
     useMemo,
     useState,
+} from "react";
+
+import type {
+    ReactNode,
 } from "react";
 
 import {
@@ -41,17 +50,6 @@ import {
     useSearchParams,
 } from "react-router-dom";
 
-import L from "leaflet";
-
-import {
-    MapContainer,
-    Marker,
-    Popup,
-    TileLayer,
-} from "react-leaflet";
-
-import "leaflet/dist/leaflet.css";
-
 import StatsCard from "@/components/dashboard/StatCard";
 
 import {
@@ -59,14 +57,14 @@ import {
 } from "@/mock";
 
 import {
-    periodTimes,
     subjects,
 } from "@/mock/common";
 
 import type {
-    CampusHistoryEntry,
     CampusStatus,
     Personnel,
+    SchoolClass,
+    SchoolRoom,
 } from "@/mock/common/types";
 
 import {
@@ -89,6 +87,14 @@ import {
     useRooms,
 } from "@/store/useRooms";
 
+import {
+    useTimetables,
+} from "@/store/useTimetables";
+
+import {
+    summarizeCampus,
+} from "@/utils/campusSummary";
+
 import "./style.scss";
 
 
@@ -102,20 +108,12 @@ const SUBJECT_NAME = new Map<string, string>(
     subjects.map((subject) => [subject.id, subject.name] as [string, string]),
 );
 
-const GRADE_OPTIONS = [6, 7, 8, 9].map((grade) => ({
-    value: grade,
-    label: `Khối ${grade}`,
-}));
-
 const TAB_KEYS = [
     "overview",
-    "gis",
-    "classes",
     "staff",
-    "students",
+    "classes",
     "facilities",
     "timetable",
-    "history",
 ] as const;
 
 type TabKey = (typeof TAB_KEYS)[number];
@@ -126,52 +124,30 @@ const PAGINATION = {
         `${range[0]}–${range[1]} / ${total}`,
 };
 
-const GradeFilter = ({
-    value,
-    onChange,
-    placeholder = "Lọc theo khối",
-}: {
-    value?: number;
-
-    onChange: (value: number | undefined) => void;
-
-    placeholder?: string;
-}) => (
-    <Select
-        allowClear
-        placeholder={placeholder}
-        options={GRADE_OPTIONS}
-        value={value}
-        onChange={onChange}
-        size="small"
-        style={{ width: 130 }}
-    />
-);
-
-const COMPUTE_MARKER_SIZE = (campusName: string): string => {
-    return `Trụ sở: ${campusName}`;
+const ROOM_CATEGORY_LABEL: Record<string, string> = {
+    classroom: "Phòng học",
+    function_room: "Phòng chức năng",
 };
 
-const toManagerName = (
-    managerId: string | undefined,
-): string => {
-    if (!managerId) {
-        return "Chưa phân công";
-    }
-
-    const manager = canThoMockData.users.find(
-        (user) => user.id === managerId,
-    );
-
-    if (manager) {
-        return manager.fullName;
-    }
-
-    return canThoMockData.personnel.find(
-        (item) => item.id === managerId,
-    )?.fullName
-        ?? "Chưa phân công";
+const ROOM_CONDITION_LABEL: Record<string, string> = {
+    good: "Tốt",
+    normal: "Bình thường",
+    repair: "Cần sửa chữa",
 };
+
+const ROOM_CONDITION_TONE: Record<string, string> = {
+    good: "green",
+    normal: "blue",
+    repair: "orange",
+};
+
+const TKB_VIEW_OPTIONS: { label: string; value: TkbView }[] = [
+    { label: "Theo lớp", value: "class" },
+    { label: "Theo giáo viên", value: "teacher" },
+    { label: "Theo phòng", value: "room" },
+];
+
+type TkbView = "class" | "teacher" | "room";
 
 const toWardName = (
     wardId: string,
@@ -197,41 +173,25 @@ const toSchoolName = (
         ?? schoolId;
 };
 
-const buildStats = (campusId: string, allPersonnel: Personnel[]) => {
-    const classCount = canThoMockData.classes.filter(
-        (item) => item.campusId === campusId,
-    ).length;
+const toManagerName = (
+    managerId: string | undefined,
+): string => {
+    if (!managerId) {
+        return "Chưa phân công";
+    }
 
-    const studentCount = canThoMockData.students.filter(
-        (item) =>
-            item.campusId === campusId &&
-            item.status === "studying",
-    ).length;
-
-    const teacherCount = allPersonnel.filter(
-        (item) =>
-            item.campusIds.includes(campusId) &&
-            item.subjectIds.length > 0,
-    ).length;
-
-    const facilityCount = canThoMockData.facilities.filter(
-        (item) => item.campusId === campusId,
-    ).reduce(
-        (total, item) => total + item.quantity,
-        0,
+    const manager = canThoMockData.users.find(
+        (user) => user.id === managerId,
     );
 
-    const timetableCount = canThoMockData.timetables.filter(
-        (item) => item.campusId === campusId,
-    ).length;
+    if (manager) {
+        return manager.fullName;
+    }
 
-    return {
-        classCount,
-        studentCount,
-        teacherCount,
-        facilityCount,
-        timetableCount,
-    };
+    return canThoMockData.personnel.find(
+        (item) => item.id === managerId,
+    )?.fullName
+        ?? "Chưa phân công";
 };
 
 const CampusDetail = () => {
@@ -249,11 +209,12 @@ const CampusDetail = () => {
 
     const roomsApi = useRooms(campusId);
 
+    const timetablesApi = useTimetables({
+        campusId,
+    });
+
     const campusStatusOptions =
         useCatalogOptions("campus-status");
-
-    const studentStatusOptions =
-        useCatalogOptions("student-status");
 
     const campusTypeOptions =
         useCatalogOptions("campus-type");
@@ -265,15 +226,6 @@ const CampusDetail = () => {
             ),
         ),
         [campusStatusOptions],
-    );
-
-    const studentStatusLabelMap = useMemo(
-        () => new Map<string, string>(
-            studentStatusOptions.map(
-                (option) => [String(option.value), option.label],
-            ),
-        ),
-        [studentStatusOptions],
     );
 
     const typeLabelMap = useMemo(
@@ -301,70 +253,282 @@ const CampusDetail = () => {
 
     const [positionForm] = Form.useForm<{ latitude: number; longitude: number }>();
 
-    const [classGrade, setClassGrade] = useState<number | undefined>();
+    const [tkbView, setTkbView] = useState<TkbView>("class");
 
-    const [studentGrade, setStudentGrade] = useState<number | undefined>();
+    const stats = useMemo(
+        () => campus
+            ? summarizeCampus(campus.id, personnelApi.items)
+            : null,
+        [campus, personnelApi.items],
+    );
 
-    const [timetableGrade, setTimetableGrade] = useState<number | undefined>();
-
-    const gradeByClassId = useMemo(
-        () => new Map<string, number>(
-            canThoMockData.classes.map((item) => [item.id, item.grade]),
+    const sectorNameById = useMemo(
+        () => new Map<string, string>(
+            canThoMockData.sectors.map(
+                (sector) => [sector.id, sector.name],
+            ),
         ),
         [],
     );
 
-    useEffect(() => {
-        if (!campus && campusesApi.items.length > 0) {
-            navigate("/operations/schools?tab=campuses", { replace: true });
-        }
-    }, [campus, campusesApi.items.length, navigate]);
-
-    const stats = useMemo(
-        () => campus ? buildStats(campus.id, personnelApi.items) : null,
-        [campus, personnelApi.items],
+    const classById = useMemo(
+        () => new Map<string, SchoolClass>(
+            canThoMockData.classes.map((classItem) => [classItem.id, classItem]),
+        ),
+        [],
     );
 
+    const campusClasses = useMemo(
+        () => campus
+            ? canThoMockData.classes.filter(
+                (classItem) => classItem.campusId === campus.id,
+            )
+            : [],
+        [campus],
+    );
+
+    const grades = useMemo(
+        () => Array.from(
+            new Set(campusClasses.map((classItem) => classItem.grade)),
+        ).sort((a, b) => a - b),
+        [campusClasses],
+    );
+
+    const studentCountByClass = useMemo(() => {
+        const map = new Map<string, number>();
+
+        for (const student of canThoMockData.students) {
+            if (
+                !student.classId ||
+                student.status !== "studying"
+            ) {
+                continue;
+            }
+
+            map.set(
+                student.classId,
+                (map.get(student.classId) ?? 0) + 1,
+            );
+        }
+
+        return map;
+    }, []);
+
+    const classCountByGrade = useMemo(() => {
+        const map = new Map<number, number>();
+
+        for (const classItem of campusClasses) {
+            map.set(
+                classItem.grade,
+                (map.get(classItem.grade) ?? 0) + 1,
+            );
+        }
+
+        return map;
+    }, [campusClasses]);
+
+    const studentCountByGrade = useMemo(() => {
+        const map = new Map<number, number>();
+
+        for (const classItem of campusClasses) {
+            const count =
+                studentCountByClass.get(classItem.id) ?? 0;
+
+            map.set(
+                classItem.grade,
+                (map.get(classItem.grade) ?? 0) + count,
+            );
+        }
+
+        return map;
+    }, [campusClasses, studentCountByClass]);
+
+    const timetableEntries = timetablesApi.effective;
+
+    const timetableRows = useMemo(() => {
+        const counts = new Map<string, number>();
+
+        for (const entry of timetableEntries) {
+            const key = tkbView === "class"
+                ? entry.classId
+                : tkbView === "teacher"
+                    ? entry.teacherId
+                    : entry.roomId;
+
+            if (!key) {
+                continue;
+            }
+
+            counts.set(key, (counts.get(key) ?? 0) + 1);
+        }
+
+        const labelOf = (key: string): string => {
+            if (tkbView === "class") {
+                return classById.get(key)?.name ?? key;
+            }
+
+            if (tkbView === "teacher") {
+                return personnelApi.byId.get(key)?.fullName ?? key;
+            }
+
+            return roomsApi.byId.get(key)?.code ?? key;
+        };
+
+        return Array.from(counts.entries())
+            .map(([key, count]) => ({
+                key,
+                name: labelOf(key),
+                count,
+            }))
+            .sort((a, b) => b.count - a.count);
+    }, [tkbView, timetableEntries, classById, personnelApi.byId, roomsApi.byId]);
+
     if (!campus || !stats) {
-        return null;
+        return (
+            <div className="campus-detail campus-detail--empty">
+                <div className="campus-detail__empty">
+                    <WarningOutlined />
+
+                    <strong>Không tìm thấy cơ sở.</strong>
+
+                    <span>
+                        Cơ sở được yêu cầu không tồn tại hoặc đã bị xóa.
+                    </span>
+
+                    <Button
+                        type="primary"
+                        icon={<SwapOutlined />}
+                        onClick={() =>
+                            navigate("/operations/schools?tab=campuses")}
+                    >
+                        Quay lại danh sách
+                    </Button>
+                </div>
+            </div>
+        );
     }
 
-    const kpis = [
+    const kpis: {
+        title: string;
+        value: number;
+        icon: ReactNode;
+        tone: "blue" | "green" | "orange" | "purple";
+        note: string;
+        tab: TabKey;
+    }[] = [
+        {
+            title: "Tổng nhân sự",
+            value: stats.totalPersonnel,
+            icon: <TeamOutlined />,
+            tone: "blue",
+            note: "CB-GV-NV trực thuộc cơ sở",
+            tab: "staff",
+        },
+        {
+            title: "Giáo viên",
+            value: stats.teachers,
+            icon: <ReadOutlined />,
+            tone: "orange",
+            note: "giảng dạy tại cơ sở",
+            tab: "staff",
+        },
+        {
+            title: "Cán bộ quản lý",
+            value: stats.managers,
+            icon: <SafetyCertificateOutlined />,
+            tone: "purple",
+            note: "ban giám hiệu / tổ trưởng",
+            tab: "staff",
+        },
         {
             title: "Lớp học",
             value: stats.classCount,
             icon: <HomeOutlined />,
-            tone: "blue" as const,
-            note: "lớp trực thuộc",
-            tab: "classes" as TabKey,
+            tone: "green",
+            note: "lớp trực thuộc cơ sở",
+            tab: "classes",
         },
         {
             title: "Học sinh",
             value: stats.studentCount,
-            icon: <ReadOutlined />,
-            tone: "green" as const,
+            icon: <UserOutlined />,
+            tone: "green",
             note: "đang theo học",
-            tab: "students" as TabKey,
+            tab: "classes",
         },
         {
-            title: "Giáo viên",
-            value: stats.teacherCount,
-            icon: <TeamOutlined />,
-            tone: "orange" as const,
-            note: "giảng dạy tại cơ sở",
-            tab: "staff" as TabKey,
-        },
-        {
-            title: "Hạng mục CSVC",
-            value: stats.facilityCount,
+            title: "Phòng học",
+            value: stats.roomCount,
             icon: <ToolOutlined />,
-            tone: "purple" as const,
-            note: "đơn vị đã kiểm kê",
-            tab: "facilities" as TabKey,
+            tone: "blue",
+            note: "phòng phục vụ dạy học",
+            tab: "facilities",
         },
     ];
 
-    const classColumns: ColumnsType<typeof canThoMockData.classes[number]> = [
+    const personnelColumns: ColumnsType<Personnel> = [
+        {
+            title: "Họ tên",
+            dataIndex: "fullName",
+            render: (value: string, row) => (
+                <Button
+                    type="link"
+                    size="small"
+                    style={{ padding: 0, fontWeight: 600 }}
+                    onClick={() =>
+                        navigate(`/operations/personnel/${row.id}?tab=overview`)}
+                >
+                    {value}
+                </Button>
+            ),
+        },
+        {
+            title: "Vai trò",
+            dataIndex: "roleTitle",
+            width: 220,
+        },
+        {
+            title: "Chuyên môn",
+            dataIndex: "subjectIds",
+            render: (value: string[]) => (
+                <Space size={4} wrap>
+                    {value.map((subjectId) => (
+                        <Tag key={subjectId}>{toSubjectName(subjectId)}</Tag>
+                    ))}
+                </Space>
+            ),
+        },
+        {
+            title: "Tổ bộ môn",
+            dataIndex: "teamId",
+            width: 200,
+            render: (value: string | undefined) => {
+                if (!value) {
+                    return <span className="crud-panel__muted">—</span>;
+                }
+
+                return sectorNameById.get(value) ?? value;
+            },
+        },
+        {
+            title: "Chi tiết",
+            key: "__navigate",
+            width: 90,
+            align: "center",
+            render: (_: unknown, row: Personnel) => (
+                <Button
+                    type="link"
+                    size="small"
+                    onClick={() =>
+                        navigate(`/operations/personnel/${row.id}?tab=overview`)}
+                >
+                    Xem hồ sơ
+                </Button>
+            ),
+        },
+    ];
+
+    const classColumns: ColumnsType<SchoolClass> = [
         {
             title: "Mã lớp",
             dataIndex: "code",
@@ -387,193 +551,47 @@ const CampusDetail = () => {
             ),
         },
         {
-            title: "Khối",
-            dataIndex: "grade",
-            width: 80,
-            render: (value: number) => `Khối ${value}`,
-        },
-        {
             title: "Loại lớp",
             dataIndex: "classType",
-            width: 120,
-            render: (value: string) =>
-                value === "REGULAR"
-                    ? "Lớp đại trà"
-                    : value === "TWO_SESSION"
-                        ? "Lớp 2 buổi"
-                        : value === "BOARDING"
-                            ? "Lớp nội trú"
-                            : value === "SPECIAL"
-                                ? "Lớp chuyên biệt"
-                                : value,
-        },
-        {
-            title: "Năm học",
-            dataIndex: "academicYear",
             width: 130,
-        },
-        {
-            title: "Trạng thái",
-            dataIndex: "status",
-            width: 140,
             render: (value: string) => {
-                const tone: Record<string, string> = {
-                    active: "green",
-                    inactive: "orange",
-                    suspended: "orange",
-                    closed: "red",
+                const map: Record<string, string> = {
+                    REGULAR: "Lớp đại trà",
+                    TWO_SESSION: "Lớp 2 buổi",
+                    BOARDING: "Lớp nội trú",
+                    SPECIAL: "Lớp chuyên biệt",
                 };
 
-                const labelMap: Record<string, string> = {
-                    active: "Đang hoạt động",
-                    inactive: "Ngừng",
-                    suspended: "Tạm đình chỉ",
-                    closed: "Kết thúc",
-                };
-
-                return (
-                    <Tag color={tone[value] ?? "default"}>
-                        {labelMap[value] ?? value}
-                    </Tag>
-                );
+                return map[value] ?? value;
             },
         },
-    ];
-
-    const personnelColumns: ColumnsType<Personnel> = [
         {
-            title: "Mã CB-GV",
-            dataIndex: "code",
-            width: 110,
-            render: (value: string) => <Tag>{value}</Tag>,
+            title: "Giáo viên chủ nhiệm",
+            dataIndex: "homeroomTeacherId",
+            width: 180,
+            render: (value: string | undefined) =>
+                value
+                    ? personnelApi.byId.get(value)?.fullName ?? value
+                    : "—",
         },
         {
-            title: "Họ và tên",
-            dataIndex: "fullName",
-            width: 200,
-        },
-        {
-            title: "Chức danh / Vị trí",
-            dataIndex: "roleTitle",
-            width: 190,
-        },
-        {
-            title: "Môn dạy",
-            dataIndex: "subjectIds",
-            render: (value: string[]) => (
-                <Space size={4} wrap>
-                    {value.map((subjectId) => (
-                        <Tag key={subjectId}>{toSubjectName(subjectId)}</Tag>
-                    ))}
-                </Space>
-            ),
-        },
-        {
-            title: "Trạng thái",
-            dataIndex: "status",
-            width: 120,
-            render: (value: string) => (
-                <Tag color={value === "active" ? "green" : "red"}>
-                    {value === "active" ? "Đang công tác" : "Đã nghỉ"}
-                </Tag>
-            ),
+            title: "Sĩ số",
+            width: 90,
+            render: (_: unknown, row: SchoolClass) =>
+                studentCountByClass.get(row.id) ?? 0,
         },
         {
             title: "",
             key: "__navigate",
-            width: 60,
-            align: "center",
-            render: (_: unknown, row: Personnel) => (
-                <Button
-                    type="link"
-                    size="small"
-                    onClick={() =>
-                        navigate(`/operations/personnel/${row.id}?tab=overview`)}
-                >
-                    Xem
-                </Button>
-            ),
-        },
-    ];
-
-    const studentColumns: ColumnsType<typeof canThoMockData.students[number]> = [
-        {
-            title: "Mã HS",
-            dataIndex: "code",
-            width: 100,
-        },
-        {
-            title: "Họ và tên",
-            dataIndex: "fullName",
-            width: 200,
-            render: (value: string, row) => (
-                <Button
-                    type="link"
-                    size="small"
-                    style={{ padding: 0, fontWeight: 600 }}
-                    onClick={() => navigate(`/operations/students/${row.id}`)}
-                >
-                    {value}
-                </Button>
-            ),
-        },
-        {
-            title: "Lớp",
-            dataIndex: "classId",
-            width: 100,
-            render: (value: string | undefined) => {
-                const classItem =
-                    canThoMockData.classes.find((item) => item.id === value);
-
-                return classItem ? (
-                    <Button
-                        type="link"
-                        size="small"
-                        style={{ padding: 0 }}
-                        onClick={() => navigate(`/operations/classes/${classItem.id}`)}
-                    >
-                        {classItem.name}
-                    </Button>
-                ) : (
-                    value ?? "—"
-                );
-            },
-        },
-        {
-            title: "Khối",
-            dataIndex: "classId",
-            width: 80,
-            render: (value: string | undefined) =>
-                value
-                    ? `Khối ${gradeByClassId.get(value) ?? ""}`
-                    : "—",
-        },
-        {
-            title: "Ngày sinh",
-            dataIndex: "dob",
-            width: 110,
-            render: (value: string) =>
-                new Date(`${value}T00:00:00`).toLocaleDateString("vi-VN"),
-        },
-        {
-            title: "Tình trạng",
-            dataIndex: "status",
-            width: 130,
-            render: (value: string) => (
-                <Tag color={value === "studying" ? "green" : "orange"}>
-                    {studentStatusLabelMap.get(value) ?? value}
-                </Tag>
-            ),
-        },
-        {
-            title: "",
             width: 70,
-            render: (_: unknown, row: typeof canThoMockData.students[number]) => (
+            align: "center",
+            render: (_: unknown, row: SchoolClass) => (
                 <Button
                     type="link"
                     size="small"
                     style={{ padding: 0 }}
-                    onClick={() => navigate(`/operations/students/${row.id}`)}
+                    onClick={() =>
+                        navigate(`/operations/classes/${row.id}`)}
                 >
                     Xem
                 </Button>
@@ -581,170 +599,63 @@ const CampusDetail = () => {
         },
     ];
 
-    const facilityColumns: ColumnsType<typeof canThoMockData.facilities[number]> = [
+    const roomColumns: ColumnsType<SchoolRoom> = [
         {
-            title: "Hạng mục",
-            dataIndex: "name",
-            width: 240,
+            title: "Mã phòng",
+            dataIndex: "code",
+            width: 120,
+            render: (value: string) => <Tag>{value}</Tag>,
         },
         {
-            title: "Loại",
+            title: "Tên phòng",
+            key: "name",
+            render: (_: unknown, row: SchoolRoom) =>
+                `${ROOM_CATEGORY_LABEL[row.category] ?? row.category} ${row.code}`,
+        },
+        {
+            title: "Loại phòng",
             dataIndex: "category",
-            width: 150,
-            render: (value: string) => {
-                const map: Record<string, string> = {
-                    classroom: "Phòng học",
-                    function_room: "Phòng chức năng",
-                    library: "Thư viện",
-                    playground: "Sân chơi",
-                    equipment: "Thiết bị",
-                    kitchen: "Bếp ăn",
-                };
-
-                return map[value] ?? value;
-            },
+            width: 160,
+            render: (value: string) =>
+                ROOM_CATEGORY_LABEL[value] ?? value,
         },
         {
-            title: "Số lượng",
-            dataIndex: "quantity",
+            title: "Sức chứa",
+            dataIndex: "capacity",
             width: 110,
-            render: (value: number, row: typeof canThoMockData.facilities[number]) => (
-                <span>{value} {row.unit}</span>
+            render: (value: number) => `${value} chỗ`,
+        },
+        {
+            title: "Trạng thái sử dụng",
+            dataIndex: "condition",
+            width: 170,
+            render: (value: string) => (
+                <Tag color={ROOM_CONDITION_TONE[value] ?? "default"}>
+                    {ROOM_CONDITION_LABEL[value] ?? value}
+                </Tag>
             ),
         },
-        {
-            title: "Tình trạng",
-            dataIndex: "condition",
-            width: 130,
-            render: (value: string) => {
-                const map: Record<string, string> = {
-                    good: "Tốt",
-                    normal: "Bình thường",
-                    repair: "Cần sửa chữa",
-                };
-
-                const toneMap: Record<string, string> = {
-                    good: "green",
-                    normal: "blue",
-                    repair: "orange",
-                };
-
-                return (
-                    <Tag color={toneMap[value] ?? "default"}>
-                        {map[value] ?? value}
-                    </Tag>
-                );
-            },
-        },
     ];
 
-    const timetableColumns: ColumnsType<typeof canThoMockData.timetables[number]> = [
+    const tkbSummaryColumns: ColumnsType<{
+        key: string;
+        name: string;
+        count: number;
+    }> = [
         {
-            title: "Lớp",
-            dataIndex: "classId",
-            width: 140,
-            render: (value: string) =>
-                canThoMockData.classes.find((item) => item.id === value)?.name
-                ?? value,
+            title: tkbView === "class"
+                ? "Lớp"
+                : tkbView === "teacher"
+                    ? "Giáo viên"
+                    : "Phòng",
+            dataIndex: "name",
         },
         {
-            title: "Môn",
-            dataIndex: "subjectId",
-            render: (value: string) => toSubjectName(value),
-        },
-        {
-            title: "Ngày",
-            dataIndex: "dayOfWeek",
-            width: 130,
-            render: (value: string) => {
-                const map: Record<string, string> = {
-                    monday: "Thứ Hai",
-                    tuesday: "Thứ Ba",
-                    wednesday: "Thứ Tư",
-                    thursday: "Thứ Năm",
-                    friday: "Thứ Sáu",
-                    saturday: "Thứ Bảy",
-                    sunday: "Chủ nhật",
-                };
-
-                return map[value] ?? value;
-            },
-        },
-        {
-            title: "Tiết",
-            dataIndex: "period",
-            width: 80,
-        },
-        {
-            title: "Phòng",
-            dataIndex: "roomId",
+            title: "Số tiết",
+            dataIndex: "count",
             width: 100,
-            render: (value: string) =>
-                roomsApi.byId.get(value)?.code ?? value,
+            align: "right",
         },
-        {
-            title: "Thời gian",
-            width: 160,
-            render: (_: unknown, row: typeof canThoMockData.timetables[number]) => {
-                const time = periodTimes(row.period);
-
-                return <span>{time.startTime} – {time.endTime}</span>;
-            },
-        },
-    ];
-
-    const historyColumns: ColumnsType<CampusHistoryEntry> = [
-        {
-            title: "Loại",
-            dataIndex: "type",
-            width: 150,
-            render: (value: CampusHistoryEntry["type"]) => {
-                const map: Record<string, string> = {
-                    created: "Thành lập",
-                    updated: "Cập nhật",
-                    address_changed: "Địa chỉ",
-                    gis_changed: "Tọa độ GIS",
-                    status_changed: "Trạng thái",
-                    manager_changed: "Cán bộ phụ trách",
-                };
-
-                const toneMap: Record<string, string> = {
-                    created: "green",
-                    updated: "blue",
-                    address_changed: "cyan",
-                    gis_changed: "geekblue",
-                    status_changed: "orange",
-                    manager_changed: "purple",
-                };
-
-                return (
-                    <Tag color={toneMap[value] ?? "default"}>
-                        {map[value] ?? value}
-                    </Tag>
-                );
-            },
-        },
-        {
-            title: "Nội dung",
-            dataIndex: "content",
-        },
-        {
-            title: "Thực hiện bởi",
-            dataIndex: "actor",
-            width: 200,
-        },
-        {
-            title: "Thời điểm",
-            dataIndex: "createdAt",
-            width: 190,
-            render: (value: string) =>
-                new Date(value).toLocaleString("vi-VN"),
-        },
-    ];
-
-    const markerPosition: [number, number] = [
-        campus.latitude,
-        campus.longitude,
     ];
 
     const tabItems = [
@@ -814,9 +725,27 @@ const CampusDetail = () => {
                         </Descriptions.Item>
 
                         <Descriptions.Item label="Tọa độ GIS">
-                            <Space size={4}>
-                                <AimOutlined />
-                                {campus.latitude.toFixed(4)}, {campus.longitude.toFixed(4)}
+                            <Space size={8}>
+                                <Space size={4}>
+                                    <AimOutlined />
+                                    {campus.latitude.toFixed(4)}, {campus.longitude.toFixed(4)}
+                                </Space>
+
+                                <Button
+                                    type="link"
+                                    size="small"
+                                    icon={<GlobalOutlined />}
+                                    onClick={() => {
+                                        setEditPositionOpen(true);
+
+                                        positionForm.setFieldsValue({
+                                            latitude: campus.latitude,
+                                            longitude: campus.longitude,
+                                        });
+                                    }}
+                                >
+                                    Chỉnh vị trí
+                                </Button>
                             </Space>
                         </Descriptions.Item>
 
@@ -834,134 +763,6 @@ const CampusDetail = () => {
                             </Space>
                         </Descriptions.Item>
                     </Descriptions>
-                </div>
-            ),
-        },
-        {
-            key: "gis",
-            label: "Địa chỉ & GIS",
-            children: (
-                <div className="campus-detail__gis">
-                    <div className="campus-detail__gis-meta">
-                        <Alert
-                            type="info"
-                            showIcon
-                            message={COMPUTE_MARKER_SIZE(campus.name)}
-                            description={
-                                `Phường/Xã: ${toWardName(campus.wardId)} · ` +
-                                `Tọa độ: ${campus.latitude.toFixed(4)}, ${campus.longitude.toFixed(4)}`
-                            }
-                        />
-
-                        <p>
-                            Điểm trường được xác định trên nền bản đồ nội thành
-                            TP. Cần Thơ. Kéo thả không hỗ trợ trong demo; bạn có
-                            thể hiệu chỉnh tọa độ bằng nút "Chỉnh vị trí".
-                        </p>
-
-                        <Space wrap>
-                            <Button
-                                type="primary"
-                                icon={<GlobalOutlined />}
-                                onClick={() => {
-                                    setEditPositionOpen(true);
-
-                                    positionForm.setFieldsValue({
-                                        latitude: campus.latitude,
-                                        longitude: campus.longitude,
-                                    });
-                                }}
-                            >
-                                Chỉnh vị trí
-                            </Button>
-
-                            <Button
-                                icon={<EnvironmentOutlined />}
-                                onClick={() =>
-                                    navigate(`/operations/gis?campus=${campus.id}`)}
-                            >
-                                Xem trên bản đồ
-                            </Button>
-                        </Space>
-                    </div>
-
-                    <div className="campus-detail__map">
-                        <MapContainer
-                            center={markerPosition}
-                            zoom={15}
-                            scrollWheelZoom={false}
-                            style={{ height: "100%", width: "100%" }}
-                        >
-                            <TileLayer
-                                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-                            />
-
-                            <Marker
-                                position={markerPosition}
-                                icon={L.divIcon({
-                                    className: "campus-marker",
-                                    html: `<div class="campus-marker__pin"><span></span></div>`,
-                                    iconSize: [24, 34],
-                                    iconAnchor: [12, 34],
-                                    popupAnchor: [0, -30],
-                                })}
-                            >
-                                <Popup>
-                                    <strong>{campus.name}</strong>
-                                    <br />
-                                    {campus.address}
-                                </Popup>
-                            </Marker>
-                        </MapContainer>
-                    </div>
-                </div>
-            ),
-        },
-        {
-            key: "classes",
-            label: "Lớp học",
-            children: (
-                <div className="campus-detail__tab">
-                    <div className="campus-detail__toolbar">
-                        <GradeFilter
-                            value={classGrade}
-                            onChange={setClassGrade}
-                        />
-
-                        <Button
-                            type="link"
-                            size="small"
-                            icon={<ReadOutlined />}
-                            onClick={() =>
-                                navigate(
-                                    `/operations/schools?tab=classes&campusId=${campus.id}`,
-                                )}
-                        >
-                            Mở danh sách lớp theo cơ sở này
-                        </Button>
-                    </div>
-
-                    <Table
-                        rowKey="id"
-                        columns={classColumns}
-                        dataSource={canThoMockData.classes.filter(
-                            (item) =>
-                                item.campusId === campus.id &&
-                                (classGrade === undefined
-                                    || item.grade === classGrade),
-                        )}
-                        pagination={{
-                            ...PAGINATION,
-                            pageSize: 6,
-                        }}
-                        size="small"
-                        scroll={{ x: true }}
-                        onRow={(classItem) => ({
-                            onDoubleClick: () =>
-                                navigate(`/operations/classes/${classItem.id}`),
-                        })}
-                    />
                 </div>
             ),
         },
@@ -985,52 +786,49 @@ const CampusDetail = () => {
             ),
         },
         {
-            key: "students",
-            label: "Học sinh",
+            key: "classes",
+            label: "Khối / Lớp",
             children: (
                 <div className="campus-detail__tab">
-                    <div className="campus-detail__toolbar">
-                        <GradeFilter
-                            value={studentGrade}
-                            onChange={setStudentGrade}
+                    {grades.length === 0 ? (
+                        <Empty description="Cơ sở chưa có lớp học" />
+                    ) : (
+                        <Collapse
+                            defaultActiveKey={[String(grades[0])]}
+                            items={grades.map((grade) => {
+                                const classesOfGrade = campusClasses.filter(
+                                    (classItem) => classItem.grade === grade,
+                                );
+
+                                return {
+                                    key: String(grade),
+                                    label: (
+                                        <Space size={16} wrap>
+                                            <strong>Khối {grade}</strong>
+
+                                            <span className="campus-detail__grade-count">
+                                                {classCountByGrade.get(grade) ?? 0} lớp
+                                            </span>
+
+                                            <span className="campus-detail__grade-count">
+                                                {studentCountByGrade.get(grade) ?? 0} học sinh
+                                            </span>
+                                        </Space>
+                                    ),
+                                    children: (
+                                        <Table
+                                            rowKey="id"
+                                            columns={classColumns}
+                                            dataSource={classesOfGrade}
+                                            pagination={false}
+                                            size="small"
+                                            scroll={{ x: true }}
+                                        />
+                                    ),
+                                };
+                            })}
                         />
-
-                        <Button
-                            icon={<ReadOutlined />}
-                            onClick={() =>
-                                navigate(
-                                    `/operations/schools?tab=students&campusId=${campus.id}`,
-                                )}
-                        >
-                            Xem tất cả học sinh
-                        </Button>
-                    </div>
-
-                    <Table
-                        rowKey="id"
-                        columns={studentColumns}
-                        dataSource={canThoMockData.students.filter(
-                            (item) => {
-                                if (item.campusId !== campus.id) {
-                                    return false;
-                                }
-
-                                if (studentGrade === undefined) {
-                                    return true;
-                                }
-
-                                return item.classId
-                                    ? gradeByClassId.get(item.classId) === studentGrade
-                                    : false;
-                            },
-                        )}
-                        pagination={{
-                            ...PAGINATION,
-                            pageSize: 10,
-                        }}
-                        size="small"
-                        scroll={{ x: true }}
-                    />
+                    )}
                 </div>
             ),
         },
@@ -1040,16 +838,19 @@ const CampusDetail = () => {
             children: (
                 <Table
                     rowKey="id"
-                    columns={facilityColumns}
-                    dataSource={canThoMockData.facilities.filter(
-                        (item) => item.campusId === campus.id,
-                    )}
+                    columns={roomColumns}
+                    dataSource={roomsApi.byCampus}
                     pagination={{
                         ...PAGINATION,
                         pageSize: 8,
                     }}
                     size="small"
                     scroll={{ x: true }}
+                    locale={{
+                        emptyText: (
+                            <Empty description="Cơ sở chưa có dữ liệu phòng học" />
+                        ),
+                    }}
                 />
             ),
         },
@@ -1059,61 +860,83 @@ const CampusDetail = () => {
             children: (
                 <div className="campus-detail__tab">
                     <div className="campus-detail__toolbar">
-                        <GradeFilter
-                            value={timetableGrade}
-                            onChange={setTimetableGrade}
+                        <Segmented
+                            size="small"
+                            options={TKB_VIEW_OPTIONS}
+                            value={tkbView}
+                            onChange={(value) => setTkbView(value as TkbView)}
                         />
+
+                        <Button
+                            type="primary"
+                            size="small"
+                            icon={<ReadOutlined />}
+                            onClick={() => navigate("/operations/timetable")}
+                        >
+                            Mở Thời khóa biểu
+                        </Button>
                     </div>
 
                     <Table
-                        rowKey="id"
-                        columns={timetableColumns}
-                        dataSource={canThoMockData.timetables.filter(
-                            (item) => {
-                                if (item.campusId !== campus.id) {
-                                    return false;
-                                }
-
-                                if (timetableGrade === undefined) {
-                                    return true;
-                                }
-
-                                return gradeByClassId.get(item.classId) === timetableGrade;
-                            },
-                        )}
+                        rowKey="key"
+                        columns={tkbSummaryColumns}
+                        dataSource={timetableRows}
                         pagination={{
                             ...PAGINATION,
                             pageSize: 10,
                         }}
                         size="small"
                         scroll={{ x: true }}
+                        locale={{
+                            emptyText: (
+                                <Empty description="Cơ sở chưa có tiết dạy trong thời khóa biểu" />
+                            ),
+                        }}
                     />
                 </div>
             ),
         },
+    ];
+
+    const breadcrumbItems = [
         {
-            key: "history",
-            label: "Lịch sử",
-            children: (
-                <Table
-                    rowKey="id"
-                    columns={historyColumns}
-                    dataSource={historyApi.byCampus.sort(
-                        (a, b) => b.createdAt.localeCompare(a.createdAt),
-                    )}
-                    pagination={{
-                        ...PAGINATION,
-                        pageSize: 10,
+            title: (
+                <a
+                    href="/operations/schools"
+                    onClick={(event) => {
+                        event.preventDefault();
+                        navigate("/operations/schools");
                     }}
-                    size="small"
-                    scroll={{ x: true }}
-                />
+                >
+                    Trường & Phân hiệu
+                </a>
             ),
+        },
+        {
+            title: (
+                <a
+                    href="/operations/schools?tab=campuses"
+                    onClick={(event) => {
+                        event.preventDefault();
+                        navigate("/operations/schools?tab=campuses");
+                    }}
+                >
+                    Danh sách cơ sở
+                </a>
+            ),
+        },
+        {
+            title: campus.name,
         },
     ];
 
     return (
         <div className="campus-detail">
+            <Breadcrumb
+                className="campus-detail__breadcrumb"
+                items={breadcrumbItems}
+            />
+
             <div className="page-sticky">
                 <header className="page-head">
                     <div className="page-head__title">
@@ -1135,14 +958,27 @@ const CampusDetail = () => {
                             {typeLabelMap.get(campus.type) ?? campus.type}
                         </Tag>
 
+                        {campus.phone && (
+                            <span className="page-head__meta-phone">
+                                <PhoneOutlined /> {campus.phone}
+                            </span>
+                        )}
+
                         <Button
-                            icon={<SwapOutlined />}
+                            icon={<ArrowLeftOutlined />}
                             onClick={() =>
-                                navigate(
-                                    `/operations/schools?tab=campuses&school=${campus.schoolId}`,
-                                )}
+                                navigate("/operations/schools?tab=campuses")}
                         >
-                            Quản lý cơ sở
+                            Quay lại danh sách
+                        </Button>
+
+                        <Button
+                            type="primary"
+                            icon={<EnvironmentOutlined />}
+                            onClick={() =>
+                                navigate(`/operations/gis?campus=${campus.id}`)}
+                        >
+                            Xem trên GIS
                         </Button>
                     </div>
                 </header>

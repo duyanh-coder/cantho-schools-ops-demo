@@ -52,7 +52,216 @@
     &__kpis {
         display: grid;
         grid-template-columns: repeat(4, 1fr);
+        gap: 16px;
+
+        .dashboard-stat-card {
+            align-items: flex-start;
+            flex-direction: column;
+            gap: 12px;
+            padding: 24px;
+            border-radius: 18px;
+
+            .dashboard-stat-card__icon {
+                flex: 0 0 56px;
+                width: 56px;
+                height: 56px;
+                font-size: 26px;
+                border-radius: 16px;
+            }
+
+            .dashboard-stat-card__title {
+                font-size: 15px;
+                font-weight: 700;
+                color: #475569;
+            }
+
+            .dashboard-stat-card__value {
+                margin-top: 6px;
+                font-size: 38px;
+                font-weight: 900;
+                line-height: 1.05;
+            }
+
+            .dashboard-stat-card__heading {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+            }
+
+            .dashboard-stat-card__note {
+                display: flex;
+                flex-direction: column;
+                gap: 6px;
+                margin-top: 12px;
+                font-size: 16px;
+                line-height: 1.5;
+            }
+        }
+    }
+
+    &__gender {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 13px;
+        font-weight: 600;
+        color: #475569;
+        white-space: nowrap;
+
+        span:nth-child(2) {
+            color: #94a3b8;
+            font-weight: 400;
+        }
+    }
+
+    &__kpi-line {
+        color: #334155;
+        font-weight: 600;
+
+        &--muted {
+            color: #64748b;
+            font-size: 14px;
+            font-weight: 500;
+        }
+    }
+
+    &__tree {
+        display: flex;
+        flex-direction: column;
         gap: 12px;
+        width: 100%;
+
+        &-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        &-title {
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 0.6px;
+            text-transform: uppercase;
+            color: #94a3b8;
+        }
+
+        &-branches {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px 10px;
+            row-gap: 14px;
+            position: relative;
+
+            &::before {
+                content: "";
+                position: absolute;
+                top: 0;
+                left: 18px;
+                right: 18px;
+                height: 1px;
+                background: #dbe3ee;
+            }
+
+            &--vertical {
+                flex-direction: column;
+                gap: 8px;
+                row-gap: 8px;
+
+                &::before {
+                    left: 10px;
+                    right: auto;
+                    top: 2px;
+                    bottom: 2px;
+                    width: 1px;
+                    height: auto;
+                }
+            }
+        }
+
+        &-branch {
+            position: relative;
+            padding-top: 11px;
+
+            &::before {
+                content: "";
+                position: absolute;
+                top: 0;
+                left: 50%;
+                width: 1px;
+                height: 10px;
+                background: #dbe3ee;
+            }
+
+            &::after {
+                content: "";
+                position: absolute;
+                top: 0;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                width: 7px;
+                height: 7px;
+                border-radius: 50%;
+                border: 2px solid #fff;
+                box-shadow: 0 0 0 1px #c7d2e0;
+            }
+
+            .school-overview__tree-branches--vertical & {
+                padding: 0 0 0 30px;
+
+                &::before {
+                    left: 12px;
+                    right: auto;
+                    top: 3px;
+                    width: 18px;
+                    height: 1px;
+                }
+
+                &::after {
+                    top: 3px;
+                    left: 12px;
+                }
+            }
+        }
+
+        &-node {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2px;
+            min-width: 72px;
+            padding: 6px 10px;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            background: #f8fafc;
+
+            .school-overview__tree-branches--vertical & {
+                flex-direction: row;
+                align-items: baseline;
+                justify-content: space-between;
+                gap: 8px;
+                width: 100%;
+                min-width: 0;
+                padding: 4px 10px;
+            }
+        }
+
+        &-label {
+            font-size: 12px;
+            color: #64748b;
+            line-height: 1.25;
+            text-align: center;
+
+            .school-overview__tree-branches--vertical & {
+                text-align: left;
+            }
+        }
+
+        &-value {
+            font-size: 17px;
+            font-weight: 800;
+            color: #0f172a;
+            line-height: 1.1;
+        }
     }
 
     &__section {
@@ -75,6 +284,38 @@
             }
         }
     }
+
+    &__campus-scale {
+        min-width: 220px;
+
+        ul {
+            list-style: none;
+            margin: 0 0 8px;
+            padding: 0;
+
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+
+            li {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                gap: 16px;
+
+                font-size: 13px;
+
+                span {
+                    color: #6b7280;
+                }
+
+                strong {
+                    color: #111827;
+                    font-weight: 700;
+                }
+            }
+        }
+    }
 }
 
 @media (
@@ -93,6 +334,14 @@
     .school-overview {
         &__kpis {
             grid-template-columns: 1fr 1fr;
+
+            .dashboard-stat-card {
+                padding: 16px;
+
+                .dashboard-stat-card__value {
+                    font-size: 28px;
+                }
+            }
         }
     }
 }

@@ -65,6 +65,38 @@
     }
 }
 
+.campus-list__scale {
+    min-width: 220px;
+
+    ul {
+        list-style: none;
+        margin: 0 0 8px;
+        padding: 0;
+
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+
+        li {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+
+            font-size: 13px;
+
+            span {
+                color: #6b7280;
+            }
+
+            strong {
+                color: #111827;
+                font-weight: 700;
+            }
+        }
+    }
+}
+
 .campus-form-section {
     .ant-divider-inner-text {
         font-size: 13px;
@@ -77,6 +109,12 @@
     display: flex;
     flex-direction: column;
     gap: 16px;
+
+    &__breadcrumb {
+        .ant-breadcrumb {
+            font-size: 13px;
+        }
+    }
 
     &__tabs {
         .ant-tabs-nav {
@@ -93,7 +131,9 @@
     &__toolbar {
         display: flex;
         align-items: center;
-        justify-content: flex-end;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 8px;
     }
 
     &__overview {
@@ -113,52 +153,44 @@
         }
     }
 
-    &__gis {
-        display: flex;
-        flex-direction: column;
-        gap: 14px;
-
-        &-meta {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-
-            p {
-                margin: 0;
-                font-size: 13px;
-                color: #6b7280;
-            }
-        }
-    }
-
-    &__map {
-        height: 460px;
-        border: 1px solid var(--border-color, #e5e7eb);
-        border-radius: 12px;
-        overflow: hidden;
-
-        .leaflet-container {
-            height: 100%;
-            width: 100%;
-        }
+    &__grade-count {
+        font-size: 12px;
+        color: #6b7280;
     }
 }
 
-.campus-marker__pin {
-    position: relative;
-    width: 24px;
-    height: 34px;
+
+.campus-detail--empty {
+    padding: 40px 0;
+}
+
+
+.campus-detail__empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 360px;
+    padding: 32px;
+    text-align: center;
+
+    .anticon {
+        font-size: 42px;
+        color: #f97316;
+    }
+
+    strong {
+        font-size: 17px;
+        color: #111827;
+    }
 
     span {
-        position: absolute;
-        left: 50%;
-        transform: translateX(-50%);
-        bottom: 0;
-        width: 16px;
-        height: 16px;
-        border-radius: 50%;
-        background: #1677ff;
-        border: 3px solid #fff;
-        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.35);
+        font-size: 13px;
+        color: #6b7280;
+    }
+
+    .ant-btn {
+        margin-top: 8px;
     }
 }

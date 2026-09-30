@@ -48,10 +48,6 @@ import {
 import StatsCard from "@/components/dashboard/StatCard";
 
 import {
-    canThoMockData,
-} from "@/mock";
-
-import {
     subjects,
 } from "@/mock/common";
 
@@ -121,6 +117,10 @@ import {
 import {
     useTranscripts,
 } from "@/store/useTranscripts";
+
+import {
+    useTimetables,
+} from "@/store/useTimetables";
 
 import { MOVEMENT_TYPE_LABEL } from "@/pages/Students/labels";
 
@@ -247,6 +247,10 @@ const StudentDetail = () => {
 
     const student = studentsApi.byId.get(studentId);
 
+    const timetablesApi = useTimetables({
+        classId: student ? student.classId : undefined,
+    });
+
     const classItem = student?.classId
         ? classesById.get(student.classId)
         : undefined;
@@ -281,12 +285,7 @@ const StudentDetail = () => {
 
     const historyEntries = useMemo(() => historyApi.byStudent, [historyApi.byStudent]);
 
-    const timetables = useMemo(
-        () => canThoMockData.timetables.filter(
-            (item) => item.classId === student?.classId,
-        ),
-        [student?.classId],
-    );
+    const timetables = timetablesApi.effective;
 
     const [movementCampus, setMovementCampus] = useState<string | undefined>();
 

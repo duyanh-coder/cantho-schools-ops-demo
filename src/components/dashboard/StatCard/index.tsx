@@ -8,7 +8,8 @@ interface StatCardProps {
   suffix?: ReactNode;
   icon: ReactNode;
   tone: "blue" | "green" | "orange" | "purple";
-  note?: string;
+  note?: ReactNode;
+  titleExtra?: ReactNode;
   onClick?: () => void;
 }
 
@@ -19,6 +20,7 @@ const StatCard = ({
   icon,
   tone,
   note,
+  titleExtra,
   onClick,
 }: StatCardProps) => {
   return (
@@ -47,7 +49,13 @@ const StatCard = ({
       <div className="dashboard-stat-card__icon">{icon}</div>
 
       <div className="dashboard-stat-card__body">
-        <span className="dashboard-stat-card__title">{title}</span>
+        <div className="dashboard-stat-card__heading">
+          <span className="dashboard-stat-card__title">{title}</span>
+
+          {titleExtra && (
+            <span className="dashboard-stat-card__title-extra">{titleExtra}</span>
+          )}
+        </div>
 
         <div className="dashboard-stat-card__value">
           {value}

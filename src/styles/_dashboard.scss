@@ -86,6 +86,16 @@
                 0 6px 16px rgba(15, 23, 42, 0.08);
         }
     }
+
+    .page-head__meta-phone {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+
+        .anticon {
+            color: #0e7490;
+        }
+    }
 }
 
 .page-kpi {

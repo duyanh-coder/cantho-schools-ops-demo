@@ -49,6 +49,7 @@ import {
 } from "@/mock";
 
 import {
+    periodTimes,
     subjects,
 } from "@/mock/common";
 
@@ -60,6 +61,7 @@ import type {
     PersonnelHistoryEntry,
     PersonnelReward,
     PersonnelWorkHistory,
+    TimetableEntry,
 } from "@/mock/common/types";
 
 import {
@@ -95,6 +97,14 @@ import {
     usePersonnelHistory,
 } from "@/store/usePersonnelHistory";
 
+import {
+    useRooms,
+} from "@/store/useRooms";
+
+import {
+    useTimetables,
+} from "@/store/useTimetables";
+
 import "./style.scss";
 
 
@@ -104,6 +114,7 @@ const TAB_KEYS = [
     "professional",
     "work",
     "assignment",
+    "timetable",
     "competition",
     "reward",
     "history",
@@ -209,6 +220,8 @@ const PersonnelDetail = () => {
 
     const campusesApi = useCampuses();
 
+    const roomsApi = useRooms();
+
     const assignmentApi = usePersonnelAssignments(personnelId);
 
     const competitionApi = usePersonnelCompetitions(personnelId);
@@ -218,6 +231,10 @@ const PersonnelDetail = () => {
     const workHistoryApi = usePersonnelWorkHistory(personnelId);
 
     const historyApi = usePersonnelHistory(personnelId);
+
+    const timetablesApi = useTimetables({
+        teacherId: personnelId,
+    });
 
     const genderOptions = useCatalogOptions("gender");
 
@@ -451,6 +468,91 @@ const PersonnelDetail = () => {
                     {value === "active" ? "Đang hiệu lực" : "Hết hiệu lực"}
                 </Tag>
             ),
+        },
+    ];
+
+    const timetableColumns: ColumnsType<TimetableEntry> = [
+        {
+            title: "Ngày",
+            dataIndex: "dayOfWeek",
+            width: 110,
+            render: (value: string) => {
+                const map: Record<string, string> = {
+                    monday: "Thứ Hai",
+                    tuesday: "Thứ Ba",
+                    wednesday: "Thứ Tư",
+                    thursday: "Thứ Năm",
+                    friday: "Thứ Sáu",
+                    saturday: "Thứ Bảy",
+                    sunday: "Chủ nhật",
+                };
+
+                return map[value] ?? value;
+            },
+        },
+        {
+            title: "Tiết",
+            dataIndex: "period",
+            width: 70,
+        },
+        {
+            title: "Lớp",
+            dataIndex: "classId",
+            width: 170,
+            render: (value: string) => (
+                <Button
+                    type="link"
+                    size="small"
+                    style={{ padding: 0 }}
+                    onClick={() =>
+                        navigate(`/operations/classes/${value}`)}
+                >
+                    {className(value)}
+                </Button>
+            ),
+        },
+        {
+            title: "Môn",
+            dataIndex: "subjectId",
+            width: 140,
+            render: (value: string) => <Tag color="blue">{subjectName(value)}</Tag>,
+        },
+        {
+            title: "Phòng",
+            dataIndex: "roomId",
+            width: 100,
+            render: (value: string) =>
+                roomsApi.byId.get(value)?.code
+                ?? value,
+        },
+        {
+            title: "Thời gian",
+            width: 150,
+            render: (_: unknown, row: TimetableEntry) => {
+                const time = periodTimes(row.period);
+
+                return <span>{time.startTime} – {time.endTime}</span>;
+            },
+        },
+        {
+            title: "Trạng thái",
+            dataIndex: "status",
+            width: 130,
+            render: (value: string) => {
+                const toneMap: Record<string, string> = {
+                    PUBLISHED: "green",
+                    APPROVED: "blue",
+                    CONFLICT: "red",
+                    ADJUSTING: "orange",
+                    DRAFT: "default",
+                };
+
+                return (
+                    <Tag color={toneMap[value] ?? "default"}>
+                        {value}
+                    </Tag>
+                );
+            },
         },
     ];
 
@@ -936,6 +1038,43 @@ const PersonnelDetail = () => {
                         />
                     )}
                 </div>
+            ),
+        },
+        {
+            key: "timetable",
+            label: "Thời khóa biểu",
+            children: timetablesApi.effective.length > 0 ? (
+                <div className="operations-tab-panel">
+                    <div className="operations-tab-panel__header">
+                        <div className="operations-tab-panel__title">
+                            <h4>Lịch giảng dạy trong lưới</h4>
+
+                            <p>
+                                Các tiết đang có hiệu lực của giáo viên trong
+                                học kỳ hiện tại.
+                            </p>
+                        </div>
+                    </div>
+
+                    <Table
+                        rowKey="id"
+                        columns={timetableColumns}
+                        dataSource={timetablesApi.effective.slice().sort(
+                            (a, b) =>
+                                a.dayOfWeek.localeCompare(b.dayOfWeek) ||
+                                a.period - b.period,
+                        )}
+                        pagination={paging(8)}
+                        size="small"
+                        scroll={{ x: true }}
+                    />
+                </div>
+            ) : (
+                <Alert
+                    type="info"
+                    showIcon
+                    message="Giáo viên chưa có tiết nào trong thời khóa biểu."
+                />
             ),
         },
         {

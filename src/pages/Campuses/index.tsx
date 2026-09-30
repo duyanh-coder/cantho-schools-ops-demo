@@ -5,9 +5,9 @@ import {
     EditOutlined,
     EnvironmentOutlined,
     EyeOutlined,
-    HistoryOutlined,
     MoreOutlined,
     PlusOutlined,
+    ReadOutlined,
     ReloadOutlined,
     SearchOutlined,
     SwapOutlined,
@@ -23,9 +23,12 @@ import {
     Input,
     InputNumber,
     Modal,
+    Popover,
     Select,
+    Space,
     Table,
     Tag,
+    Tooltip,
     message,
 } from "antd";
 
@@ -76,14 +79,12 @@ import {
     usePersonnel,
 } from "@/store/usePersonnel";
 
+import {
+    buildCampusScale,
+} from "@/utils/campusScale";
+
 import "./style.scss";
 
-
-const STATUS_TONE: Record<CampusStatus, string> = {
-    ACTIVE: "green",
-    SUSPENDED: "orange",
-    INACTIVE: "red",
-};
 
 const HISTORY_EVENT_TO_TYPE: Record<CampusStatus, CampusHistoryEventType> = {
     ACTIVE: "status_changed",
@@ -510,14 +511,14 @@ const CampusesPage = ({
             {
                 title: "STT",
                 key: "__index",
-                width: 48,
+                width: "4%",
                 render: (_: unknown, __: Campus, index: number) =>
                     index + 1,
             },
             {
                 title: "Mã cơ sở",
                 dataIndex: "code",
-                width: 100,
+                width: "9%",
                 render: (value: string) => (
                     <Tag>{value}</Tag>
                 ),
@@ -525,7 +526,7 @@ const CampusesPage = ({
             {
                 title: "Tên cơ sở",
                 dataIndex: "name",
-                width: 200,
+                width: "24%",
                 render: (value: string, campus: Campus) => (
                     <div className="campus-cell">
                         <strong>{value}</strong>
@@ -541,7 +542,7 @@ const CampusesPage = ({
             {
                 title: "Loại",
                 dataIndex: "type",
-                width: 110,
+                width: "10%",
                 render: (value: CampusType) => (
                     value === "HEADQUARTERS" ? (
                         <Tag color="purple">
@@ -557,75 +558,159 @@ const CampusesPage = ({
             {
                 title: "Phường/Xã",
                 dataIndex: "wardId",
-                width: 130,
+                width: "14%",
                 render: (value: string) => WARD_NAME(value),
             },
             {
-                title: "Trạng thái",
-                dataIndex: "status",
-                width: 120,
-                render: (value: CampusStatus) => (
-                    <Tag color={STATUS_TONE[value]}>{labelMaps.status.get(value)}</Tag>
-                ),
+                title: "Quy mô",
+                width: "25%",
+                render: (_, campus: Campus) => {
+                    const scale = buildCampusScale(campus.id);
+
+                    const hasData =
+                        scale.classCount > 0 ||
+                        scale.studentCount > 0 ||
+                        scale.teacherCount > 0;
+
+                    if (!hasData) {
+                        return (
+                            <Tooltip title="Cơ sở chưa có dữ liệu lớp, học sinh, giáo viên">
+                                <span style={{ color: "#9ca3af" }}>
+                                    —
+                                </span>
+                            </Tooltip>
+                        );
+                    }
+
+                    return (
+                        <Popover
+                            trigger="click"
+                            placement="bottomLeft"
+                            title={`${campus.name}: số lượng`}
+                            content={(
+                                <div className="campus-list__scale">
+                                    <ul>
+                                        <li>
+                                            <span>Lớp học</span>
+
+                                            <strong>
+                                                {scale.classCount} lớp
+                                            </strong>
+                                        </li>
+
+                                        <li>
+                                            <span>Học sinh</span>
+
+                                            <strong>
+                                                {scale.studentCount} HS
+                                            </strong>
+                                        </li>
+
+                                        <li>
+                                            <span>CB-GV-NV</span>
+
+                                            <strong>
+                                                {scale.teacherCount} người
+                                            </strong>
+                                        </li>
+                                    </ul>
+
+                                    <Space wrap>
+                                        <Button
+                                            type="link"
+                                            size="small"
+                                            icon={<ReadOutlined />}
+                                            onClick={() =>
+                                                navigate(
+                                                    `/operations/schools?tab=students&campusId=${campus.id}`,
+                                                )}
+                                        >
+                                            Xem học sinh
+                                        </Button>
+
+                                        <Button
+                                            type="link"
+                                            size="small"
+                                            icon={<TeamOutlined />}
+                                            onClick={() =>
+                                                navigate(
+                                                    `/operations/campuses/${campus.id}?tab=staff`,
+                                                )}
+                                        >
+                                            Xem giáo viên
+                                        </Button>
+                                    </Space>
+                                </div>
+                            )}
+                        >
+                            <Button
+                                type="link"
+                                size="small"
+                                style={{ padding: 0 }}
+                            >
+                                {scale.classCount} lớp · {scale.studentCount} HS
+                            </Button>
+                        </Popover>
+                    );
+                },
             },
             {
                 title: "",
                 key: "__actions",
-                width: 56,
+                width: "14%",
                 align: "right",
                 render: (_: unknown, campus: Campus) => (
-                    <Dropdown
-                        trigger={["click"]}
-                        menu={{
-                            items: [
-                                {
-                                    key: "view",
-                                    icon: <EyeOutlined />,
-                                    label: "Xem chi tiết",
-                                    onClick: () =>
-                                        navigate(`/operations/campuses/${campus.id}`),
-                                },
-                                {
-                                    key: "edit",
-                                    icon: <EditOutlined />,
-                                    label: "Chỉnh sửa",
-                                    onClick: () => openEdit(campus),
-                                },
-                                {
-                                    key: "gis",
-                                    icon: <EnvironmentOutlined />,
-                                    label: "Xem GIS",
-                                    onClick: () =>
-                                        navigate(`/operations/gis?campus=${campus.id}`),
-                                },
-                                {
-                                    key: "history",
-                                    icon: <HistoryOutlined />,
-                                    label: "Xem lịch sử",
-                                    onClick: () =>
-                                        navigate(
-                                            `/operations/campuses/${campus.id}?tab=history`,
-                                        ),
-                                },
-                                {
-                                    type: "divider",
-                                },
-                                {
-                                    key: "status",
-                                    icon: <SwapOutlined />,
-                                    label: "Đổi trạng thái hoạt động",
-                                    onClick: () => openStatusChange(campus),
-                                },
-                            ],
-                        }}
-                    >
-                        <Button
-                            type="text"
-                            size="small"
-                            icon={<MoreOutlined />}
-                            title="Thao tác"
-                        />
-                    </Dropdown>
+                    <Space size={2}>
+                        <Tooltip title="Xem chi tiết">
+                            <Button
+                                type="text"
+                                size="small"
+                                icon={<EyeOutlined />}
+                                onClick={() =>
+                                    navigate(`/operations/campuses/${campus.id}`)}
+                            />
+                        </Tooltip>
+
+                        <Tooltip title="Chỉnh sửa">
+                            <Button
+                                type="text"
+                                size="small"
+                                icon={<EditOutlined />}
+                                onClick={() => openEdit(campus)}
+                            />
+                        </Tooltip>
+
+                        <Tooltip title="Xem GIS">
+                            <Button
+                                type="text"
+                                size="small"
+                                icon={<EnvironmentOutlined />}
+                                onClick={() =>
+                                    navigate(`/operations/gis?campus=${campus.id}`)}
+                            />
+                        </Tooltip>
+
+                        <Dropdown
+                            trigger={["click"]}
+                            menu={{
+                                items: [
+                                    {
+                                        key: "status",
+                                        icon: <SwapOutlined />,
+                                        label: "Đổi trạng thái hoạt động",
+                                        onClick: () => openStatusChange(campus),
+                                    },
+                                ],
+                            }}
+                        >
+                            <Button
+                                type="text"
+                                size="small"
+                                icon={<MoreOutlined />}
+                                title="Thao tác"
+                            />
+                        </Dropdown>
+                    </Space>
                 ),
             },
         ];
@@ -780,7 +865,8 @@ const CampusesPage = ({
                         rowKey="id"
                         columns={columns}
                         dataSource={filtered}
-                        scroll={{ x: "max-content" }}
+                        tableLayout="fixed"
+                        scroll={{ x: true }}
                         pagination={{
                             pageSize: 8,
                             showSizeChanger: true,

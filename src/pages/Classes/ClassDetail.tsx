@@ -91,6 +91,10 @@ import {
     useStudents,
 } from "@/store/useStudents";
 
+import {
+    useTimetables,
+} from "@/store/useTimetables";
+
 import StudentList from "@/pages/Students/StudentList";
 
 import "./style.scss";
@@ -182,6 +186,10 @@ const ClassDetail = () => {
 
     const historyApi = useClassHistory(classId);
 
+    const timetablesApi = useTimetables({
+        classId,
+    });
+
     const classTypeOptions = useCatalogOptions("class-type");
 
     const classStatusOptions = useCatalogOptions("class-status");
@@ -228,12 +236,7 @@ const ClassDetail = () => {
         [students],
     );
 
-    const timetables = useMemo(
-        () => canThoMockData.timetables.filter(
-            (item) => item.classId === classId,
-        ),
-        [classId],
-    );
+    const timetables = timetablesApi.effective;
 
     const activities = useMemo(
         () => canThoMockData.teachingAttendance.filter(
@@ -457,9 +460,7 @@ const ClassDetail = () => {
             dataIndex: "timetableId",
             width: 140,
             render: (value: string) => {
-                const timetable = canThoMockData.timetables.find(
-                    (item) => item.id === value,
-                );
+                const timetable = timetablesApi.byId.get(value);
 
                 return timetable
                     ? <Tag color="blue">{SUBJECT_NAME.get(timetable.subjectId) ?? timetable.subjectId}</Tag>

@@ -44,13 +44,6 @@ export type {
     Teacher,
 } from "./teacher";
 
-export type {
-    WeekDay,
-    TimetableEntry,
-    TimetableEntryStatus,
-    TimetablePeriod,
-} from "./timetable";
-
 export {
     PERIOD_TIME,
     DAY_LABELS,
@@ -58,14 +51,32 @@ export {
     STATUS_TONES,
     WEEKDAY_ORDER,
     periodTimes,
+    HISTORY_ACTION_LABELS,
+    HISTORY_ACTION_TONES,
+    CONFLICT_TYPE_LABELS,
+    CONFLICT_TYPE_TONES,
 } from "./timetable";
 
+export type {
+    WeekDay,
+    TimetableEntry,
+    TimetableEntryStatus,
+    TimetablePeriod,
+    TimetableHistoryEntry,
+    TimetableHistoryAction,
+    TimetableConflict,
+    TimetableConflictType,
+    TimetableSuggestion,
+    TimetableQuota,
+    TimetableChangeLog,
+} from "./timetable";
 export type {
     DocumentItem,
 } from "./document";
 
 export type {
     AlertItem,
+    AlertRefType,
 } from "./alert";
 
 export type {

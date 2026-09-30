@@ -1,15 +1,20 @@
 import {
     ApartmentOutlined,
     BankOutlined,
+    EnvironmentOutlined,
+    EyeOutlined,
     ReadOutlined,
     TeamOutlined,
     ToolOutlined,
 } from "@ant-design/icons";
 
 import {
+    Avatar,
     Button,
+    Popover,
+    Space,
     Table,
-    Tag,
+    Tooltip,
 } from "antd";
 
 import type {
@@ -30,14 +35,25 @@ import {
     canThoMockData,
 } from "@/mock";
 
+import {
+    getSchoolOverviewStats,
+} from "@/mock/canTho";
+
+import {
+    subjects,
+} from "@/mock/common";
+
 import type {
     School,
-    SchoolFacility,
 } from "@/mock/common/types";
 
 import {
-    useCatalogOptions,
-} from "@/store/useCatalog";
+    useAcademicYears,
+} from "@/store/useAcademicYears";
+
+import {
+    buildCampusScale,
+} from "@/utils/campusScale";
 
 import "./overview.scss";
 
@@ -49,31 +65,93 @@ const educationLevelLabelMap: Record<string, string> = {
     THCS_THPT: "THCS & THPT",
 };
 
-const facilityCategoryLabelMap: Record<string, string> = {
-    classroom: "Phòng học",
-    function_room: "Phòng chức năng",
-    library: "Thư viện",
-    playground: "Sân chơi",
-    equipment: "Thiết bị",
-    kitchen: "Bếp ăn",
+const campusTypeLabelMap: Record<string, string> = {
+    HEADQUARTERS: "Trụ sở chính",
+    BRANCH: "Phân hiệu",
 };
 
-const conditionLabelMap: Record<string, string> = {
-    good: "Tốt",
-    normal: "Bình thường",
-    repair: "Cần sửa chữa",
+const subjectNameMap = new Map<string, string>(
+    subjects.map((subject) => [subject.id, subject.name] as [string, string]),
+);
+
+const initials = (fullName: string): string => {
+    const parts = fullName.trim().split(/\s+/).filter(Boolean);
+
+    if (parts.length === 0) {
+        return "?";
+    }
+
+    if (parts.length === 1) {
+        return parts[0].slice(0, 2).toUpperCase();
+    }
+
+    return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
 };
 
-const conditionToneMap: Record<string, string> = {
-    good: "green",
-    normal: "blue",
-    repair: "orange",
+const formatVnNumber = (value: number): string => {
+    return value.toLocaleString("vi-VN");
 };
 
-const genderLabelMap: Record<string, string> = {
-    male: "Nam",
-    female: "Nữ",
-};
+interface KpiBranch {
+    label: string;
+
+    value: string;
+}
+
+interface KpiGroup {
+    title?: string;
+
+    branches: KpiBranch[];
+}
+
+const KpiTree = ({
+    groups,
+    vertical = false,
+}: {
+    groups: KpiGroup[];
+
+    vertical?: boolean;
+}) => (
+    <div className="school-overview__tree">
+        {groups.map((group, groupIndex) => (
+            <div
+                className="school-overview__tree-group"
+                key={groupIndex}
+            >
+                {group.title && (
+                    <span className="school-overview__tree-title">
+                        {group.title}
+                    </span>
+                )}
+
+                <div
+                    className={
+                        vertical
+                            ? "school-overview__tree-branches school-overview__tree-branches--vertical"
+                            : "school-overview__tree-branches"
+                    }
+                >
+                    {group.branches.map((branch, branchIndex) => (
+                        <div
+                            className="school-overview__tree-branch"
+                            key={branchIndex}
+                        >
+                            <span className="school-overview__tree-node">
+                                <span className="school-overview__tree-label">
+                                    {branch.label}
+                                </span>
+
+                                <strong className="school-overview__tree-value">
+                                    {branch.value}
+                                </strong>
+                            </span>
+                        </div>
+                    ))}
+                </div>
+            </div>
+        ))}
+    </div>
+);
 
 const campusIdToName = (
     campusId: string,
@@ -81,18 +159,6 @@ const campusIdToName = (
     return canThoMockData.campuses.find(
         (campus) => campus.id === campusId,
     )?.name ?? campusId;
-};
-
-const classIdToName = (
-    classId: string | undefined,
-): string => {
-    if (!classId) {
-        return "";
-    }
-
-    return canThoMockData.classes.find(
-        (classItem) => classItem.id === classId,
-    )?.name ?? classId;
 };
 
 const wardIdToName = (
@@ -112,39 +178,23 @@ const SchoolOverview = ({
     const navigate =
         useNavigate();
 
-    const statusOptions =
-        useCatalogOptions("status");
-
-    const campusStatusOptions =
-        useCatalogOptions("campus-status");
-
-    const statusLabelMap = useMemo(
-        () => new Map<string, string>(
-            statusOptions.map(
-                (option) => [String(option.value), option.label],
-            ),
-        ),
-        [statusOptions],
-    );
-
-    const campusStatusLabelMap = useMemo(
-        () => new Map<string, string>(
-            campusStatusOptions.map(
-                (option) => [String(option.value), option.label],
-            ),
-        ),
-        [campusStatusOptions],
-    );
-
     const schoolId = school?.id;
+
+    const yearsApi =
+        useAcademicYears(schoolId);
+
+    const activeYear = yearsApi.activeYear;
+
+    const stats =
+        schoolId ? getSchoolOverviewStats(schoolId) : undefined;
 
     const scope = useMemo(() => {
         if (!schoolId) {
             return {
                 campuses: [] as typeof canThoMockData.campuses,
                 personnel: [] as typeof canThoMockData.personnel,
+                classes: [] as typeof canThoMockData.classes,
                 students: [] as typeof canThoMockData.students,
-                facilities: [] as SchoolFacility[],
             };
         }
 
@@ -155,10 +205,10 @@ const SchoolOverview = ({
             personnel: canThoMockData.personnel.filter(
                 (item) => item.schoolId === schoolId,
             ),
-            students: canThoMockData.students.filter(
-                (item) => item.schoolId === schoolId,
+            classes: canThoMockData.classes.filter(
+                (classItem) => classItem.schoolId === schoolId,
             ),
-            facilities: canThoMockData.facilities.filter(
+            students: canThoMockData.students.filter(
                 (item) => item.schoolId === schoolId,
             ),
         };
@@ -168,48 +218,144 @@ const SchoolOverview = ({
         return null;
     }
 
+    const personnelTotal =
+        stats?.personnel.total ?? scope.personnel.length;
+
+    const personnelByRole = stats
+        ? [
+            { label: "Giáo viên", value: String(stats.personnel.teachers) },
+            { label: "Cán bộ quản lý", value: String(stats.personnel.managers).padStart(2, "0") },
+            { label: "Nhân viên", value: String(stats.personnel.staff).padStart(2, "0") },
+        ]
+        : [];
+
+    const studentsTotal =
+        stats?.students.total ?? scope.students.filter(
+            (item) => item.status === "studying",
+        ).length;
+
+    const campusTotal =
+        stats?.campuses.total ?? scope.campuses.length;
+
+    const classTotal =
+        stats?.classes.total ?? scope.classes.length;
+
     const campusKpis = [
         {
             title: "Cơ sở",
-            value: scope.campuses.length,
+            value: String(campusTotal).padStart(2, "0"),
             icon: <ApartmentOutlined />,
-            tone: "blue" as const,
-            note: "cơ sở trực thuộc",
+            tone: "orange" as const,
+        },
+        {
+            title: "Lớp học",
+            value: String(classTotal).padStart(2, "0"),
+            icon: <ToolOutlined />,
+            tone: "purple" as const,
+            note: (
+                stats && stats.classes.grades.length > 0
+                    ? (
+                        <KpiTree
+                            vertical
+                            groups={[
+                                {
+                                    branches: stats.classes.grades.map(
+                                        (grade) => ({
+                                            label: `Khối ${grade.grade}`,
+                                            value: `${grade.count} lớp`,
+                                        }),
+                                    ),
+                                },
+                            ]}
+                        />
+                    )
+                    : (
+                        <span className="school-overview__kpi-line">
+                            lớp đang hoạt động
+                        </span>
+                    )
+            ),
         },
         {
             title: "Nhân sự",
-            value: scope.personnel.length,
+            value: formatVnNumber(personnelTotal),
             icon: <TeamOutlined />,
             tone: "green" as const,
-            note: "cán bộ – giáo viên",
+            titleExtra: stats ? (
+                <span className="school-overview__gender">
+                    <span>Nam {stats.personnel.male}</span>
+                    <span>·</span>
+                    <span>Nữ {stats.personnel.female}</span>
+                </span>
+            ) : undefined,
+            note: (
+                <>
+                    {stats ? (
+                        <KpiTree
+                            groups={[
+                                {
+                                    branches: [...personnelByRole],
+                                },
+                            ]}
+                        />
+                    ) : (
+                        <span className="school-overview__kpi-line">
+                            cán bộ – giáo viên – nhân viên
+                        </span>
+                    )}
+                </>
+            ),
         },
         {
             title: "Học sinh",
-            value: scope.students.filter(
-                (item) => item.status === "studying",
-            ).length,
+            value: formatVnNumber(studentsTotal),
             icon: <ReadOutlined />,
-            tone: "orange" as const,
-            note: "đang theo học",
-        },
-        {
-            title: "Cơ sở vật chất",
-            value: scope.facilities.length,
-            icon: <ToolOutlined />,
-            tone: "purple" as const,
-            note: "mục đã kiểm kê",
+            tone: "blue" as const,
+            titleExtra: stats ? (
+                <span className="school-overview__gender">
+                    <span>Nam {formatVnNumber(stats.students.male)}</span>
+                    <span>·</span>
+                    <span>Nữ {formatVnNumber(stats.students.female)}</span>
+                </span>
+            ) : undefined,
+            note: (
+                <>
+                    {stats ? (
+                        <KpiTree
+                            groups={[
+                                {
+                                    branches: stats.students.grades.map(
+                                        (grade) => ({
+                                            label: `Khối ${grade.grade}`,
+                                            value: formatVnNumber(grade.count),
+                                        }),
+                                    ),
+                                },
+                            ]}
+                        />
+                    ) : (
+                        <span className="school-overview__kpi-line">
+                            đang theo học
+                        </span>
+                    )}
+                </>
+            ),
         },
     ];
 
     const campusColumns: ColumnsType<typeof canThoMockData.campuses[number]> = [
         {
-            title: "Mã cơ sở",
-            dataIndex: "code",
-            width: 120,
-        },
-        {
             title: "Tên cơ sở",
             dataIndex: "name",
+            width: 220,
+        },
+        {
+            title: "Loại cơ sở",
+            dataIndex: "type",
+            width: 140,
+            render: (value: string) => (
+                campusTypeLabelMap[value] ?? value
+            ),
         },
         {
             title: "Địa chỉ",
@@ -217,174 +363,218 @@ const SchoolOverview = ({
             responsive: ["md"],
         },
         {
-            title: "Trụ sở chính",
-            dataIndex: "isMainCampus",
-            width: 120,
-            render: (value: boolean) => (
-                value ? (
-                    <Tag color="green">Chính</Tag>
-                ) : (
-                    <Tag>Phân hiệu</Tag>
-                )
+            title: "Quy mô",
+            width: 150,
+            render: (_, row) => {
+                const scale = buildCampusScale(row.id);
+
+                const hasData =
+                    scale.classCount > 0 ||
+                    scale.studentCount > 0 ||
+                    scale.teacherCount > 0;
+
+                if (!hasData) {
+                    return (
+                        <Tooltip title="Cơ sở chưa có dữ liệu lớp, học sinh, giáo viên">
+                            <span style={{ color: "#9ca3af" }}>
+                                —
+                            </span>
+                        </Tooltip>
+                    );
+                }
+
+                return (
+                    <Popover
+                        trigger="click"
+                        placement="bottomLeft"
+                        title={`${row.name}: số lượng`}
+                        content={(
+                            <div className="school-overview__campus-scale">
+                                <ul>
+                                    <li>
+                                        <span>Lớp học</span>
+
+                                        <strong>
+                                            {scale.classCount} lớp
+                                        </strong>
+                                    </li>
+
+                                    <li>
+                                        <span>Học sinh</span>
+
+                                        <strong>
+                                            {scale.studentCount} HS
+                                        </strong>
+                                    </li>
+
+                                    <li>
+                                        <span>CB-GV-NV</span>
+
+                                        <strong>
+                                            {scale.teacherCount} người
+                                        </strong>
+                                    </li>
+                                </ul>
+
+                                <Space wrap>
+                                    <Button
+                                        type="link"
+                                        size="small"
+                                        icon={<ReadOutlined />}
+                                        onClick={() =>
+                                            navigate(
+                                                `/operations/schools?tab=students&campusId=${row.id}`,
+                                            )}
+                                    >
+                                        Xem học sinh
+                                    </Button>
+
+                                    <Button
+                                        type="link"
+                                        size="small"
+                                        icon={<TeamOutlined />}
+                                        onClick={() =>
+                                            navigate(
+                                                `/operations/campuses/${row.id}?tab=staff`,
+                                            )}
+                                    >
+                                        Xem giáo viên
+                                    </Button>
+                                </Space>
+                            </div>
+                        )}
+                    >
+                        <Button
+                            type="link"
+                            size="small"
+                            style={{ padding: 0 }}
+                        >
+                            {scale.classCount} lớp · {scale.studentCount} HS
+                        </Button>
+                    </Popover>
+                );
+            },
+        },
+        {
+            title: "Số điện thoại",
+            dataIndex: "phone",
+            width: 150,
+        },
+        {
+            title: "Chi tiết",
+            width: 90,
+            align: "center",
+            render: (_, row) => (
+                <Tooltip title="Xem chi tiết cơ sở">
+                    <Button
+                        type="text"
+                        size="small"
+                        icon={<EyeOutlined />}
+                        onClick={() =>
+                            navigate(`/operations/campuses/${row.id}`)}
+                    />
+                </Tooltip>
             ),
         },
         {
-            title: "Trạng thái",
-            dataIndex: "status",
-            width: 110,
-            render: (value: string) => (
-                <Tag
-                    color={
-                        value === "ACTIVE"
-                            ? "green"
-                            : value === "SUSPENDED"
-                                ? "orange"
-                                : "red"
-                    }
-                >
-                    {campusStatusLabelMap.get(value) ?? value}
-                </Tag>
+            title: "Bản đồ",
+            width: 90,
+            align: "center",
+            render: (_, row) => (
+                <Tooltip title="Xem vị trí trên bản đồ">
+                    <Button
+                        type="text"
+                        size="small"
+                        icon={<EnvironmentOutlined />}
+                        onClick={() =>
+                            navigate(`/operations/gis?campus=${row.id}`)}
+                    />
+                </Tooltip>
             ),
         },
     ];
 
     const personnelColumns: ColumnsType<typeof canThoMockData.personnel[number]> = [
         {
-            title: "Họ và tên",
-            dataIndex: "fullName",
-            width: 190,
-        },
-        {
-            title: "Chức vụ / Vị trí",
-            dataIndex: "roleTitle",
-        },
-        {
-            title: "Trình độ",
-            dataIndex: "degree",
-            responsive: ["lg"],
-        },
-        {
-            title: "Trạng thái",
-            dataIndex: "status",
-            width: 110,
-            render: (value: string) => (
-                <Tag
-                    color={
-                        value === "active"
-                            ? "green"
-                            : "red"
-                    }
+            title: "",
+            width: 48,
+            render: (_, item) => (
+                <Avatar
+                    size={30}
+                    style={{
+                        backgroundColor: item.gender === "female"
+                            ? "#eb2f96"
+                            : "#1677ff",
+                    }}
                 >
-                    {statusLabelMap.get(value) ?? value}
-                </Tag>
+                    {initials(item.fullName)}
+                </Avatar>
             ),
         },
-    ];
-
-    const studentColumns: ColumnsType<typeof canThoMockData.students[number]> = [
-        {
-            title: "Mã HS",
-            dataIndex: "code",
-            width: 100,
-            render: (value: string) => <Tag>{value}</Tag>,
-        },
         {
             title: "Họ và tên",
             dataIndex: "fullName",
-            width: 180,
-            render: (value: string, row) => (
+            width: 200,
+            render: (value: string, item) => (
                 <Button
                     type="link"
                     size="small"
                     style={{ padding: 0, fontWeight: 600 }}
-                    onClick={() => navigate(`/operations/students/${row.id}`)}
+                    onClick={() => navigate(`/operations/personnel/${item.id}`)}
                 >
                     {value}
                 </Button>
             ),
         },
         {
-            title: "Lớp",
-            dataIndex: "classId",
-            width: 90,
-            render: (value: string | undefined) => {
-                const classItem = canThoMockData.classes.find(
-                    (item) => item.id === value,
-                );
+            title: "Chức vụ / Vai trò",
+            dataIndex: "roleTitle",
+            width: 220,
+        },
+        {
+            title: "Bộ môn / Chuyên môn",
+            dataIndex: "subjectIds",
+            width: 180,
+            render: (value: string[] | undefined) => {
+                if (!value || value.length === 0) {
+                    return (
+                        <span style={{ color: "#9ca3af" }}>
+                            Chưa cập nhật
+                        </span>
+                    );
+                }
 
-                return classItem ? (
-                    <Button
-                        type="link"
-                        size="small"
-                        style={{ padding: 0 }}
-                        onClick={() =>
-                            navigate(`/operations/classes/${classItem.id}`)}
-                    >
-                        {classItem.name}
-                    </Button>
-                ) : (
-                    classIdToName(value)
-                );
+                return value
+                    .map((subjectId) => subjectNameMap.get(subjectId) ?? subjectId)
+                    .join(" · ");
             },
         },
         {
             title: "Cơ sở",
-            dataIndex: "campusId",
-            width: 180,
-            render: (value: string, row) => (
-                <Button
-                    type="link"
-                    size="small"
-                    style={{ padding: 0 }}
-                    onClick={() =>
-                        navigate(`/operations/schools?tab=students&campusId=${row.campusId}`)}
-                >
-                    {campusIdToName(value)}
-                </Button>
-            ),
-        },
-        {
-            title: "Giới tính",
-            dataIndex: "gender",
-            width: 90,
-            render: (value: string) => genderLabelMap[value] ?? value,
-        },
-    ];
+            dataIndex: "campusIds",
+            responsive: ["lg"],
+            render: (value: string[] | undefined) => {
+                if (!value || value.length === 0) {
+                    return "—";
+                }
 
-    const facilityColumns: ColumnsType<SchoolFacility> = [
-        {
-            title: "Cơ sở",
-            dataIndex: "campusId",
-            render: (value: string) => campusIdToName(value),
+                return value.map(campusIdToName).join(", ");
+            },
         },
         {
-            title: "Loại",
-            dataIndex: "category",
-            width: 150,
-            render: (value: string) => facilityCategoryLabelMap[value] ?? value,
-        },
-        {
-            title: "Hạng mục",
-            dataIndex: "name",
-        },
-        {
-            title: "Số lượng",
-            dataIndex: "quantity",
-            width: 110,
-            render: (value: number, row: SchoolFacility) => (
-                <span>
-                    {value} {row.unit}
-                </span>
-            ),
-        },
-        {
-            title: "Tình trạng",
-            dataIndex: "condition",
-            width: 130,
-            render: (value: string) => (
-                <Tag color={conditionToneMap[value] ?? "default"}>
-                    {conditionLabelMap[value] ?? value}
-                </Tag>
+            title: "Chi tiết",
+            width: 90,
+            align: "center",
+            render: (_, item) => (
+                <Tooltip title="Xem hồ sơ cán bộ/giáo viên">
+                    <Button
+                        type="text"
+                        size="small"
+                        icon={<EyeOutlined />}
+                        onClick={() =>
+                            navigate(`/operations/personnel/${item.id}`)}
+                    />
+                </Tooltip>
             ),
         },
     ];
@@ -394,7 +584,7 @@ const SchoolOverview = ({
             <div className="school-overview__head">
                 <div className="school-overview__identity">
                     <span className="school-overview__code">
-                        {school.code}
+                        TỔNG QUAN TRƯỜNG
                     </span>
 
                     <h3>{school.name}</h3>
@@ -404,7 +594,7 @@ const SchoolOverview = ({
                         {" · "}
                         {wardIdToName(school.wardId)}
                         {" · "}
-                        {statusLabelMap.get(school.status) ?? school.status}
+                        {activeYear?.name ?? "Năm học 2026 - 2027"}
                     </p>
                 </div>
 
@@ -446,7 +636,11 @@ const SchoolOverview = ({
                     dataSource={scope.campuses}
                     pagination={false}
                     size="small"
+                    tableLayout="fixed"
                     scroll={{ x: true }}
+                    locale={{
+                        emptyText: "Chưa có dữ liệu cơ sở.",
+                    }}
                 />
             </section>
 
@@ -461,48 +655,6 @@ const SchoolOverview = ({
                     rowKey="id"
                     columns={personnelColumns}
                     dataSource={scope.personnel}
-                    pagination={false}
-                    size="small"
-                    scroll={{ x: true }}
-                />
-            </section>
-
-            <section className="school-overview__section">
-                <header>
-                    <span>HỌC SINH</span>
-
-                    <strong>Học sinh theo lớp & cơ sở</strong>
-
-                    <Button
-                        size="small"
-                        icon={<ReadOutlined />}
-                        onClick={() => navigate("/operations/schools?tab=students")}
-                    >
-                        Xem tất cả
-                    </Button>
-                </header>
-
-                <Table
-                    rowKey="id"
-                    columns={studentColumns}
-                    dataSource={scope.students}
-                    pagination={{ pageSize: 8, showSizeChanger: false }}
-                    size="small"
-                    scroll={{ x: true }}
-                />
-            </section>
-
-            <section className="school-overview__section">
-                <header>
-                    <span>CƠ SỞ VẬT CHẤT</span>
-
-                    <strong>Hạng mục đã kiểm kê theo cơ sở</strong>
-                </header>
-
-                <Table
-                    rowKey="id"
-                    columns={facilityColumns}
-                    dataSource={scope.facilities}
                     pagination={false}
                     size="small"
                     scroll={{ x: true }}
