@@ -69,10 +69,11 @@ import {
 
 import type {
     CampusStatus,
-    Personnel,
     SchoolClass,
     SchoolRoom,
 } from "@/mock/common/types";
+
+import PersonnelPreviewTable from "@/pages/Personnel/PersonnelPreviewTable";
 
 import {
     useCatalogOptions,
@@ -114,10 +115,6 @@ const STATUS_TONE: Record<CampusStatus, string> = {
     SUSPENDED: "orange",
     INACTIVE: "red",
 };
-
-const SUBJECT_NAME = new Map<string, string>(
-    subjects.map((subject) => [subject.id, subject.name] as [string, string]),
-);
 
 const TAB_KEYS = [
     "overview",
@@ -169,12 +166,6 @@ const toWardName = (
         ?? wardId;
 };
 
-const toSubjectName = (
-    subjectId: string,
-): string => {
-    return SUBJECT_NAME.get(subjectId) ?? subjectId;
-};
-
 const toSchoolName = (
     schoolId: string,
 ): string => {
@@ -204,6 +195,7 @@ const toManagerName = (
     )?.fullName
         ?? "Chưa phân công";
 };
+
 
 const CampusDetail = () => {
     const { campusId = "" } = useParams();
@@ -268,20 +260,15 @@ const CampusDetail = () => {
 
     const [tkbView, setTkbView] = useState<TkbView>("class");
 
+    /**
+     * Số liệu cơ sở lấy từ store nhân sự để khớp đúng với danh sách ở
+     * tab Nhân sự, kể cả sau khi đã thêm, sửa hoặc xoá nhân sự.
+     */
     const stats = useMemo(
         () => campus
-            ? buildCampusKpis(campus.id)
+            ? buildCampusKpis(campus.id, personnelApi.items)
             : null,
-        [campus],
-    );
-
-    const sectorNameById = useMemo(
-        () => new Map<string, string>(
-            canThoMockData.sectors.map(
-                (sector) => [sector.id, sector.name],
-            ),
-        ),
-        [],
+        [campus, personnelApi.items],
     );
 
     const classById = useMemo(
@@ -298,6 +285,18 @@ const CampusDetail = () => {
             )
             : [],
         [campus],
+    );
+
+    /**
+     * Nhân sự của riêng cơ sở, đọc từ store để nhận đúng các thay đổi đã lưu.
+     */
+    const campusPersonnel = useMemo(
+        () => campus
+            ? personnelApi.items.filter(
+                (item) => item.campusIds.includes(campus.id),
+            )
+            : [],
+        [campus, personnelApi.items],
     );
 
     const grades = useMemo(
@@ -510,69 +509,6 @@ const CampusDetail = () => {
             tab: "facilities",
         },
     ];
-
-    const personnelColumns: ColumnsType<Personnel> = [
-        {
-            title: "Họ tên",
-            dataIndex: "fullName",
-            render: (value: string, row) => (
-                <Button
-                    type="link"
-                    size="small"
-                    style={{ padding: 0, fontWeight: 600 }}
-                    onClick={() =>
-                        navigate(`/operations/personnel/${row.id}?tab=overview`)}
-                >
-                    {value}
-                </Button>
-            ),
-        },
-        {
-            title: "Vai trò",
-            dataIndex: "roleTitle",
-            width: 220,
-        },
-        {
-            title: "Chuyên môn",
-            dataIndex: "subjectIds",
-            render: (value: string[]) => (
-                <Space size={4} wrap>
-                    {value.map((subjectId) => (
-                        <Tag key={subjectId}>{toSubjectName(subjectId)}</Tag>
-                    ))}
-                </Space>
-            ),
-        },
-        {
-            title: "Tổ bộ môn",
-            dataIndex: "teamId",
-            width: 200,
-            render: (value: string | undefined) => {
-                if (!value) {
-                    return <span className="crud-panel__muted">—</span>;
-                }
-
-                return sectorNameById.get(value) ?? value;
-            },
-        },
-        {
-            title: "Chi tiết",
-            key: "__navigate",
-            width: 90,
-            align: "center",
-            render: (_: unknown, row: Personnel) => (
-                <Button
-                    type="link"
-                    size="small"
-                    onClick={() =>
-                        navigate(`/operations/personnel/${row.id}?tab=overview`)}
-                >
-                    Xem hồ sơ
-                </Button>
-            ),
-        },
-    ];
-
     const classColumns: ColumnsType<SchoolClass> = [
         {
             title: "Mã lớp",
@@ -799,7 +735,7 @@ const CampusDetail = () => {
                                 {campus.phone ? (
                                     <span><PhoneOutlined /> {campus.phone}</span>
                                 ) : (
-                                    <span className="crud-panel__muted">—</span>
+                                    <span className="campus-detail__muted">—</span>
                                 )}
 
                                 {campus.email ? (
@@ -815,19 +751,58 @@ const CampusDetail = () => {
             key: "staff",
             label: "Nhân sự",
             children: (
-                <Table
-                    rowKey="id"
-                    columns={personnelColumns}
-                    dataSource={personnelApi.items.filter(
-                        (item) => item.campusIds.includes(campus.id),
-                    )}
-                    pagination={{
-                        ...PAGINATION,
-                        pageSize: 8,
-                    }}
-                    size="small"
-                    scroll={{ x: true }}
-                />
+                <div className="campus-detail__staff">
+                    <header className="campus-detail__staff-head">
+                        <div>
+                            <span className="campus-detail__staff-eyebrow">
+                                NHÂN SỰ
+                            </span>
+
+                            <strong>
+                                Cán bộ, giáo viên, nhân viên
+                                {" ("}
+                                {stats.totalPersonnel.toLocaleString("vi-VN")}
+                                {")"}
+                            </strong>
+                        </div>
+
+                        <div className="campus-detail__staff-split">
+                            <span>
+                                Giáo viên:
+                                {" "}
+                                <strong>
+                                    {stats.teachers.toLocaleString("vi-VN")}
+                                </strong>
+                            </span>
+
+                            <span>
+                                Cán bộ quản lý:
+                                {" "}
+                                <strong>
+                                    {stats.managers.toLocaleString("vi-VN")}
+                                </strong>
+                            </span>
+
+                            <span>
+                                Nhân viên:
+                                {" "}
+                                <strong>
+                                    {stats.staff.toLocaleString("vi-VN")}
+                                </strong>
+                            </span>
+                        </div>
+                    </header>
+
+                    <PersonnelPreviewTable
+                        items={campusPersonnel}
+                        showTeamColumn
+                        detailTab="overview"
+                        pagination={{
+                            ...PAGINATION,
+                            pageSize: 8,
+                        }}
+                    />
+                </div>
             ),
         },
         {

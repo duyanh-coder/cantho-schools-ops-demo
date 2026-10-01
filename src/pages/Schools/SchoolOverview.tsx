@@ -9,7 +9,6 @@ import {
 } from "@ant-design/icons";
 
 import {
-    Avatar,
     Button,
     Popover,
     Space,
@@ -41,13 +40,14 @@ import {
 
 import {
     groupPersonnel,
-    subjects,
     summarizePersonnel,
 } from "@/mock/common";
 
 import type {
     School,
 } from "@/mock/common/types";
+
+import PersonnelPreviewTable from "@/pages/Personnel/PersonnelPreviewTable";
 
 import {
     useAcademicYears,
@@ -81,24 +81,6 @@ const educationLevelLabelMap: Record<string, string> = {
 const campusTypeLabelMap: Record<string, string> = {
     HEADQUARTERS: "Trụ sở chính",
     BRANCH: "Phân hiệu",
-};
-
-const subjectNameMap = new Map<string, string>(
-    subjects.map((subject) => [subject.id, subject.name] as [string, string]),
-);
-
-const initials = (fullName: string): string => {
-    const parts = fullName.trim().split(/\s+/).filter(Boolean);
-
-    if (parts.length === 0) {
-        return "?";
-    }
-
-    if (parts.length === 1) {
-        return parts[0].slice(0, 2).toUpperCase();
-    }
-
-    return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
 };
 
 const formatVnNumber = (value: number): string => {
@@ -165,14 +147,6 @@ const KpiTree = ({
         ))}
     </div>
 );
-
-const campusIdToName = (
-    campusId: string,
-): string => {
-    return canThoMockData.campuses.find(
-        (campus) => campus.id === campusId,
-    )?.name ?? campusId;
-};
 
 const wardIdToName = (
     wardId: string,
@@ -525,91 +499,6 @@ const SchoolOverview = ({
         },
     ];
 
-    const personnelColumns: ColumnsType<typeof canThoMockData.personnel[number]> = [
-        {
-            title: "",
-            width: 48,
-            render: (_, item) => (
-                <Avatar
-                    size={30}
-                    style={{
-                        backgroundColor: item.gender === "female"
-                            ? "#eb2f96"
-                            : "#1677ff",
-                    }}
-                >
-                    {initials(item.fullName)}
-                </Avatar>
-            ),
-        },
-        {
-            title: "Họ và tên",
-            dataIndex: "fullName",
-            width: 200,
-            render: (value: string, item) => (
-                <Button
-                    type="link"
-                    size="small"
-                    style={{ padding: 0, fontWeight: 600 }}
-                    onClick={() => navigate(`/operations/personnel/${item.id}`)}
-                >
-                    {value}
-                </Button>
-            ),
-        },
-        {
-            title: "Chức vụ / Vai trò",
-            dataIndex: "roleTitle",
-            width: 220,
-        },
-        {
-            title: "Bộ môn / Chuyên môn",
-            dataIndex: "subjectIds",
-            width: 180,
-            render: (value: string[] | undefined) => {
-                if (!value || value.length === 0) {
-                    return (
-                        <span style={{ color: "#9ca3af" }}>
-                            Chưa cập nhật
-                        </span>
-                    );
-                }
-
-                return value
-                    .map((subjectId) => subjectNameMap.get(subjectId) ?? subjectId)
-                    .join(" · ");
-            },
-        },
-        {
-            title: "Cơ sở",
-            dataIndex: "campusIds",
-            responsive: ["lg"],
-            render: (value: string[] | undefined) => {
-                if (!value || value.length === 0) {
-                    return "—";
-                }
-
-                return value.map(campusIdToName).join(", ");
-            },
-        },
-        {
-            title: "Chi tiết",
-            width: 90,
-            align: "center",
-            render: (_, item) => (
-                <Tooltip title="Xem hồ sơ cán bộ/giáo viên">
-                    <Button
-                        type="text"
-                        size="small"
-                        icon={<EyeOutlined />}
-                        onClick={() =>
-                            navigate(`/operations/personnel/${item.id}`)}
-                    />
-                </Tooltip>
-            ),
-        },
-    ];
-
     return (
         <div className="school-overview">
             <div className="school-overview__head">
@@ -687,16 +576,8 @@ const SchoolOverview = ({
                     </strong>
                 </header>
 
-                <Table
-                    rowKey="id"
-                    columns={personnelColumns}
-                    dataSource={scope.personnel.slice(0, PERSONNEL_PREVIEW)}
-                    pagination={false}
-                    size="small"
-                    scroll={{ x: true }}
-                    locale={{
-                        emptyText: "Chưa có dữ liệu nhân sự.",
-                    }}
+                <PersonnelPreviewTable
+                    items={scope.personnel.slice(0, PERSONNEL_PREVIEW)}
                 />
 
                 {personnelTotal > PERSONNEL_PREVIEW && (
