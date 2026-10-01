@@ -239,6 +239,14 @@ const TimetableCalendar = ({
         onWeekChange?.(currentWeek);
     };
 
+    /**
+     * Mặc định bộ lọc là "Cả ngày" nên lưới có cả hai buổi, lúc đó dải tên
+     * buổi chỉ là dòng thừa vì tiết sáng hiện ngay trên tiết chiều. Dải này
+     * chỉ có ý nghĩa khi người dùng lọc theo buổi, lúc đó `model.sessions`
+     * chỉ còn đúng một buổi.
+     */
+    const showSessionLabel = model.sessions.length === 1;
+
     const sessionOptions = useMemo(
         () => [
             { value: "", label: "Cả ngày" },
@@ -497,14 +505,16 @@ const TimetableCalendar = ({
                                 </div>
                             ))}
 
-                            {model.sessions.map((block) => (
-                                <div
-                                    key={block.session}
-                                    className="tt-cal__session"
-                                >
-                                    <span>{block.label}</span>
-                                </div>
-                            ))}
+                            {showSessionLabel && model.sessions.map(
+                                (block) => (
+                                    <div
+                                        key={block.session}
+                                        className="tt-cal__session"
+                                    >
+                                        <span>{block.label}</span>
+                                    </div>
+                                ),
+                            )}
 
                             {model.sessions.flatMap((block) =>
                                 block.periods.map((period) => {
