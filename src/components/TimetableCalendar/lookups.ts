@@ -93,13 +93,46 @@ export const SUBJECT_TONES: Record<string, string> = {
     informatics: "teal",
     technology: "volcano",
     physical_education: "magenta",
-    music: "geekblue",
-    art: "gold",
+    music: "brown",
+    art: "rose",
+};
+
+/**
+ * Màu hiển thị thật của từng tone. Đây là nguồn màu duy nhất: lưới thời
+ * khóa biểu và dải chú giải đều đọc từ đây nên một môn luôn cùng màu ở
+ * mọi nơi. Trước đây lưới lấy màu riêng trong SCSS còn chú giải đưa tên
+ * tone vào `Tag` của antd, khiến hai bên lệch màu (antd còn không có sẵn
+ * preset `pink` và `teal`).
+ */
+export const SUBJECT_TONE_COLORS: Record<string, string> = {
+    blue: "#2563eb",
+    pink: "#db2777",
+    purple: "#7c3aed",
+    geekblue: "#2f54eb",
+    orange: "#ea580c",
+    green: "#16a34a",
+    gold: "#ca8a04",
+    lime: "#65a30d",
+    cyan: "#0891b2",
+    teal: "#0d9488",
+    volcano: "#d4380d",
+    magenta: "#c026d3",
+    brown: "#92400e",
+    rose: "#e11d48",
+    default: "#64748b",
 };
 
 export const subjectTone = (
     subjectId: string,
 ): string => SUBJECT_TONES[subjectId] ?? "default";
+
+/**
+ * Màu của một môn, dùng cho Tag chú giải và viền trái ô lưới. Môn chưa
+ * khai báo tone thì lấy màu xám trung tính.
+ */
+export const subjectToneColor = (
+    subjectId: string,
+): string => SUBJECT_TONE_COLORS[subjectTone(subjectId)];
 
 export const shortTeacher = (
     fullName: string,

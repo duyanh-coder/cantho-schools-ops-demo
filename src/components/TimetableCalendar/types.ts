@@ -220,6 +220,8 @@ export interface TimetableCalendarModel {
         subjectName: string;
 
         tone: string;
+
+        color: string;
     }[];
 }
 

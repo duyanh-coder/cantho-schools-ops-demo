@@ -4,6 +4,10 @@ import {
 } from "@ant-design/icons";
 
 import type {
+    CSSProperties,
+} from "react";
+
+import type {
     TimetableConflictType,
 } from "@/mock/common/types";
 
@@ -17,6 +21,7 @@ import type {
 
 import {
     shortTeacher,
+    subjectToneColor,
 } from "./lookups";
 
 export interface TimetableEventBlockProps {
@@ -72,9 +77,12 @@ const TimetableEventBlock = ({
             type="button"
             className={[
                 "tt-cal-event",
-                `tt-cal-event--${event.colorTone}`,
                 hasConflict ? "tt-cal-event--conflict" : "",
             ].filter(Boolean).join(" ")}
+            // Màu viền trái lấy từ bảng màu chung nên khớp với dải chú giải.
+            style={{
+                "--tt-cal-tone": subjectToneColor(event.subjectId),
+            } as CSSProperties}
             aria-label={describe}
             onClick={(domEvent) => {
                 domEvent.stopPropagation();

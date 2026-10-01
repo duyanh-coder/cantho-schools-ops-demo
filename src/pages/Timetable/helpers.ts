@@ -17,6 +17,8 @@ export {
     buildTimetableLookups as buildLookups,
     shortTeacher,
     SUBJECT_TONES,
+    SUBJECT_TONE_COLORS,
+    subjectToneColor,
 } from "@/components/TimetableCalendar/lookups";
 
 export type {

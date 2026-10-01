@@ -257,7 +257,7 @@ describe("PHASE 06 students live inside the class context", () => {
 
         expect(studentDetailSource).toContain("classSubjectColumns");
 
-        expect(studentDetailSource).toContain("subjectTone(");
+        expect(studentDetailSource).toContain("subjectToneColor(");
 
         // Bảng tiết cũ đã bị thay bằng TimetableCalendar.
         expect(studentDetailSource).not.toContain("timetableColumns");

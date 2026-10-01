@@ -30,6 +30,13 @@ import {
 } from "@/components/TimetableCalendar/lookups";
 
 import {
+    SUBJECT_TONES,
+    SUBJECT_TONE_COLORS,
+    subjectTone,
+    subjectToneColor,
+} from "@/components/TimetableCalendar/lookups";
+
+import {
     CALENDAR_DAYS,
     applyCalendarFilters,
     buildCalendarDays,
@@ -653,5 +660,39 @@ describe("Phát hiện quá tải giáo viên", () => {
         );
 
         expect(types).toContain("workload_strain");
+    });
+});
+
+describe("Bảng màu môn học dùng chung", () => {
+    const tones = Object.values(SUBJECT_TONES);
+
+    it("mọi tone đều có màu hiển thị", () => {
+        tones.forEach((tone) => {
+            expect(SUBJECT_TONE_COLORS[tone]).toMatch(/^#[0-9a-f]{6}$/i);
+        });
+    });
+
+    it("không tone nào trùng màu để phân biệt được môn", () => {
+        const byColor = new Map<string, string[]>();
+
+        tones.forEach((tone) => {
+            const color = SUBJECT_TONE_COLORS[tone].toLowerCase();
+
+            byColor.set(color, [...(byColor.get(color) ?? []), tone]);
+        });
+
+        const duplicated = [...byColor.values()].filter(
+            (group) => group.length > 1,
+        );
+
+        expect(duplicated).toEqual([]);
+    });
+
+    it("môn chưa khai báo tone thì dùng màu xám trung tính", () => {
+        expect(subjectTone("mon-chua-co-trong-bang")).toBe("default");
+
+        expect(subjectToneColor("mon-chua-co-trong-bang")).toBe(
+            SUBJECT_TONE_COLORS.default,
+        );
     });
 });

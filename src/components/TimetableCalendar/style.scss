@@ -47,6 +47,22 @@
 
     gap: 6px;
 }
+
+/**
+ * Ô màu của môn trong dải chú giải, dùng đúng màu viền trái của ô lưới
+ * để người dùng đối chiếu nhanh.
+ */
+.tt-cal__legend-swatch {
+    display: inline-block;
+
+    width: 12px;
+
+    height: 12px;
+
+    border-radius: 3px;
+
+    box-shadow: inset 0 0 0 1px rgba(15, 23, 42, 0.12);
+}
 /* ========================================
    HEADER
    ======================================== */
@@ -530,6 +546,13 @@
 
     border-left-width: 4px;
 
+    /**
+     * Viền trái là dấu hiệu màu của môn, lấy từ bảng màu chung nên khớp
+     * với dải chú giải. Khai báo trước `--conflict` để ô có xung đột vẫn
+     * giữ màu môn ở cạnh trái, các cạnh còn lại mới chuyển đỏ.
+     */
+    border-left-color: var(--tt-cal-tone, #64748b);
+
     border-radius: 8px;
 
     background: #ffffff;
@@ -555,22 +578,10 @@
 
     &--conflict {
         border-color: rgba(239, 68, 68, 0.6);
+
+        border-left-color: var(--tt-cal-tone, #64748b);
     }
 }
-
-.tt-cal-event--blue { border-left-color: #2563eb; }
-.tt-cal-event--pink { border-left-color: #db2777; }
-.tt-cal-event--purple { border-left-color: #7c3aed; }
-.tt-cal-event--geekblue { border-left-color: #0d9488; }
-.tt-cal-event--orange { border-left-color: #ea580c; }
-.tt-cal-event--green { border-left-color: #16a34a; }
-.tt-cal-event--gold { border-left-color: #ca8a04; }
-.tt-cal-event--lime { border-left-color: #65a30d; }
-.tt-cal-event--cyan { border-left-color: #0891b2; }
-.tt-cal-event--teal { border-left-color: #0d9488; }
-.tt-cal-event--volcano { border-left-color: #d4380d; }
-.tt-cal-event--magenta { border-left-color: #c026d3; }
-.tt-cal-event--default { border-left-color: #64748b; }
 
 .tt-cal-event__main {
     display: flex;

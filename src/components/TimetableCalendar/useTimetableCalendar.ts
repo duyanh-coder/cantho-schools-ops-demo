@@ -9,6 +9,7 @@ import type {
 
 import {
     subjectTone,
+    subjectToneColor,
 } from "./lookups";
 
 import type {
@@ -169,6 +170,7 @@ export const useTimetableCalendar = ({
                     subjectId,
                     subjectName: event?.subjectName ?? subjectId,
                     tone: subjectTone(subjectId),
+                    color: subjectToneColor(subjectId),
                 };
             })
             .sort((a, b) => a.subjectName.localeCompare(b.subjectName)),

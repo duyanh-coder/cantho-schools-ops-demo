@@ -438,13 +438,19 @@ const TimetableCalendar = ({
                         </span>
 
                         {model.legend.map((item) => (
-                            <Tag
+                            <span
                                 key={item.subjectId}
-                                color={item.tone}
                                 className="tt-cal__legend-item"
                             >
+                                <span
+                                    className="tt-cal__legend-swatch"
+                                    style={{
+                                        backgroundColor: item.color,
+                                    }}
+                                />
+
                                 {item.subjectName}
-                            </Tag>
+                            </span>
                         ))}
                     </div>
                 )}

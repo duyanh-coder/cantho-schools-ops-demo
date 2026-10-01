@@ -52,7 +52,7 @@ import TimetableCalendar from "@/components/TimetableCalendar";
 
 import {
     buildTimetableLookups,
-    subjectTone,
+    subjectToneColor,
 } from "@/components/TimetableCalendar/lookups";
 
 import {
@@ -501,7 +501,7 @@ const StudentDetail = () => {
             title: "Môn học",
             dataIndex: "subjectName",
             render: (value: string, row) => (
-                <Tag color={subjectTone(row.subjectId)}>{value}</Tag>
+                <Tag color={subjectToneColor(row.subjectId)}>{value}</Tag>
             ),
         },
         {
