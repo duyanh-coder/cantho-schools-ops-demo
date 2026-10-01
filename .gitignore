@@ -27,5 +27,7 @@ pnpm-debug.log*
 
 # Microsoft Office temp files
 ~$*
+# LibreOffice lock files (file he thong tu sinh)
+.~lock.*
 # Backups
 backups/
